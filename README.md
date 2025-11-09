@@ -1,6 +1,12 @@
+<div align="center">
+  <img src="assets/tinkerer.svg" alt="Tinkerer Logo" width="600"/>
+</div>
+
+---
+
 # Tinkerer Workspace
 
-Exploratory CNS (Chiral Narrative Synthesis) research built on **Thinking Machines’ Tinker platform**. Expect rapid iteration; each subdirectory carries its own README for reproducing experiments.
+Exploratory CNS (Chiral Narrative Synthesis) research built on **Thinking Machines' Tinker platform**. Expect rapid iteration; each subdirectory carries its own README for reproducing experiments.
 
 ## Repository Layout
 
