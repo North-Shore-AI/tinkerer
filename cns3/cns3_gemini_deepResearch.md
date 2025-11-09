@@ -307,7 +307,7 @@ We provide a hypothetical synthesis example from the proposed HIST-SCI "Plate Te
       * **Computational Complexity:** While we project $O(N \log N)$ scaling, the constants may be substantial. The proposed KCTS and VeriFact-CoT loops could add significant latency to each synthesis operation, requiring optimization.
   * **Societal Implications:** A system that can *autonomously* generate novel, grounded insights from conflicting public data (e.g., news, scientific papers, social media) represents a profound shift in capability. It could accelerate scientific discovery or, if misused, become a powerful engine for generating high-fidelity, synthesized misinformation. This motivates the sociotechnical framework in Section 8.
 
-## **8. Novel Contributions Beyond CNS 2.0**
+## **8. Novel Contributions Beyond [CNS 2.0](../cns2/ChiralNarrativeSynthesis_20250617.tex)**
 
 CNS 3.0 is a *living framework*. We conclude by defining the next generation of capabilities required to move from static, text-only synthesis to dynamic, multi-modal, and causal reasoning.
 
