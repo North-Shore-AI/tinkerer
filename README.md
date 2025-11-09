@@ -33,3 +33,7 @@ The CNS concept papers are intentionally speculative. If you share or extend thi
 3. Emphasize that the work is experimental and feedback/collaboration are welcome.
 
 Please open an issue or start a thread in the Thinking Machines research channel (Tinker Discord) with links back to the run notes when proposing changes.***
+
+## License
+
+Apache 2.0
