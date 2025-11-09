@@ -45,7 +45,12 @@ Future additions will include:
 ## Evaluation
 
 - Quick spot-check: `python scripts/eval_claim_extractor.py --adapter-name claim-extractor-scifact`
-- Structured SciFact dev sweep: `python scripts/eval_scifact_dev.py --config configs/claim_extractor_scifact.yaml --max-samples 50 --output runs/scifact_dev_eval.jsonl`
+  - Use `--force-c1-text "..."` (or `--force-c1-file`) to normalize `CLAIM[c1]` when you already know the hypothesis you expect to see.
+- Structured SciFact sweep:  
+  `python scripts/eval_scifact_dev.py --config configs/claim_extractor_scifact.yaml --max-samples 50 --include-gold-claim --enforce-gold-claim --output runs/scifact_dev_eval.jsonl`
+  - `--include-gold-claim` injects the gold text into the prompt.
+  - `--enforce-gold-claim` rewrites the decoded output so `CLAIM[c1]` always matches the canonical string.
+  - The JSONL now includes structured claims, semantic match diagnostics, and raw vs enforced metrics. See `notes/claim_extractor.md` for the latest run log.
 
 ## Dataset quickstart (SciFact)
 

@@ -18,6 +18,8 @@ from pathlib import Path
 import tinker
 from tinker import types
 
+from claim_schema import enforce_c1, parse_claim_lines, render_claim_lines
+
 
 def load_prompt(path: Path | None) -> str:
     if not path:
@@ -37,6 +39,12 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=160)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--output", type=Path, help="Optional path to save prompt/completion JSON.")
+    parser.add_argument("--force-c1-text", type=str, help="If set, overwrite CLAIM[c1] with this verbatim text.")
+    parser.add_argument(
+        "--force-c1-file",
+        type=Path,
+        help="Optional file containing the canonical CLAIM[c1] text (overrides --force-c1-text).",
+    )
     args = parser.parse_args()
 
     prompt = load_prompt(args.prompt_file)
@@ -63,6 +71,21 @@ def main() -> None:
     )
     result = future.result()
     decoded = tokenizer.decode(result.sequences[0].tokens)
+    lines = [line.strip() for line in decoded.splitlines() if line.strip()]
+    claim_lines = [line for line in lines if line.startswith("CLAIM[")]
+    relation_lines = [line for line in lines if line.startswith("RELATION")]
+
+    force_text = None
+    if args.force_c1_file and args.force_c1_file.exists():
+        force_text = args.force_c1_file.read_text(encoding="utf-8").strip()
+    elif args.force_c1_text:
+        force_text = args.force_c1_text.strip()
+
+    if force_text:
+        structured = parse_claim_lines(claim_lines)
+        structured = enforce_c1(structured, force_text)
+        claim_lines = render_claim_lines(structured)
+        decoded = "\n".join(claim_lines + relation_lines)
     print("=== Prompt ===")
     print(prompt)
     print("=== Completion ===")

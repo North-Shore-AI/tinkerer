@@ -29,6 +29,9 @@ import tinker
 from tinker import types
 
 
+CLAIM_C1_WEIGHT = float(os.environ.get("CNS_CLAIM_C1_WEIGHT", "5.0"))
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as fh:
@@ -107,13 +110,36 @@ def _scalar(value):
 
 def build_datum(example: Example, tokenizer) -> types.Datum:
     prompt_tokens = tokenizer.encode(example.prompt, add_special_tokens=True)
-    completion_tokens = tokenizer.encode(" " + example.completion, add_special_tokens=False)
+    completion_text = " " + example.completion
+    completion_tokens = tokenizer.encode(completion_text, add_special_tokens=False)
+
+    first_break = example.completion.find("\n")
+    if first_break == -1:
+        first_segment = example.completion
+    else:
+        first_segment = example.completion[: first_break + 1]
+    first_segment_with_prefix = " " + first_segment
+    first_line_token_count = len(
+        tokenizer.encode(first_segment_with_prefix, add_special_tokens=False)
+    )
+    first_line_token_count = min(first_line_token_count, len(completion_tokens))
 
     tokens = prompt_tokens + completion_tokens
     input_tokens = tokens[:-1]
     target_tokens = tokens[1:]
 
-    weights = [1 if (idx + 1) >= len(prompt_tokens) else 0 for idx in range(len(target_tokens))]
+    prompt_len = len(prompt_tokens)
+    weights: List[float] = []
+    for idx in range(len(target_tokens)):
+        token_pos = idx + 1
+        if token_pos < prompt_len:
+            weights.append(0.0)
+            continue
+        completion_rank = token_pos - prompt_len + 1  # 1-indexed within completion span
+        if first_line_token_count and completion_rank <= first_line_token_count:
+            weights.append(CLAIM_C1_WEIGHT)
+        else:
+            weights.append(1.0)
 
     debug_limit = int(os.environ.get("CNS_DEBUG_DATUM", 0) or 0)
     if debug_limit:

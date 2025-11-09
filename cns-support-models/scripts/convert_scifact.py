@@ -126,8 +126,9 @@ def main() -> None:
                 "Passage:\n"
                 f"{build_passage(docs)}\n\n"
                 "Task:\n"
-                "1. List distinct factual claims as CLAIM[c#]: <text>.\n"
-                "2. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.\n\n"
+                "1. Restate the passage's central hypothesis verbatim (or with minimal edits) as CLAIM[c1].\n"
+                "2. Continue listing distinct factual claims as CLAIM[c#]: <text> using precise language from the passage.\n"
+                "3. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.\n\n"
             )
 
             evidence_texts: List[Tuple[str, Sequence[str], str]] = []

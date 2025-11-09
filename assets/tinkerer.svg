@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <!-- Gradient definitions for depth and professionalism -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="accentGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:0.8" />
+    </linearGradient>
+
+    <linearGradient id="accentGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#A855F7;stop-opacity:0.8" />
+    </linearGradient>
+
+    <linearGradient id="accentGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:0.8" />
+    </linearGradient>
+
+    <!-- Glow filter for premium feel -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle shadow for depth -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background with subtle gradient -->
+  <rect width="800" height="600" fill="#FFFFFF"/>
+
+  <!-- Main logo mark - Dialectical Synthesis Symbol -->
+  <g transform="translate(400, 220)">
+
+    <!-- Outer orbital rings representing narrative space -->
+    <circle cx="0" cy="0" r="120" fill="none" stroke="#E5E7EB" stroke-width="1.5" opacity="0.3"/>
+    <circle cx="0" cy="0" r="100" fill="none" stroke="#D1D5DB" stroke-width="1.5" opacity="0.4"/>
+
+    <!-- Three converging narrative paths (Thesis, Antithesis, Context) -->
+    <!-- Path 1 - From top-left (Cyan) -->
+    <g opacity="0.9">
+      <path d="M -85 -85 Q -60 -60 -30 -30"
+            fill="none"
+            stroke="url(#accentGradient1)"
+            stroke-width="8"
+            stroke-linecap="round"
+            filter="url(#glow)"/>
+      <circle cx="-85" cy="-85" r="12" fill="url(#accentGradient1)" filter="url(#shadow)"/>
+      <circle cx="-85" cy="-85" r="6" fill="#FFFFFF" opacity="0.5"/>
+    </g>
+
+    <!-- Path 2 - From top-right (Purple) -->
+    <g opacity="0.9">
+      <path d="M 85 -85 Q 60 -60 30 -30"
+            fill="none"
+            stroke="url(#accentGradient2)"
+            stroke-width="8"
+            stroke-linecap="round"
+            filter="url(#glow)"/>
+      <circle cx="85" cy="-85" r="12" fill="url(#accentGradient2)" filter="url(#shadow)"/>
+      <circle cx="85" cy="-85" r="6" fill="#FFFFFF" opacity="0.5"/>
+    </g>
+
+    <!-- Path 3 - From bottom (Green) -->
+    <g opacity="0.9">
+      <path d="M 0 100 Q 0 70 0 35"
+            fill="none"
+            stroke="url(#accentGradient3)"
+            stroke-width="8"
+            stroke-linecap="round"
+            filter="url(#glow)"/>
+      <circle cx="0" cy="100" r="12" fill="url(#accentGradient3)" filter="url(#shadow)"/>
+      <circle cx="0" cy="100" r="6" fill="#FFFFFF" opacity="0.5"/>
+    </g>
+
+    <!-- Central synthesis hexagon - the converged truth -->
+    <g filter="url(#shadow)">
+      <path d="M 0 -35 L 30 -17.5 L 30 17.5 L 0 35 L -30 17.5 L -30 -17.5 Z"
+            fill="url(#primaryGradient)"
+            stroke="#FFFFFF"
+            stroke-width="3"/>
+
+      <!-- Inner geometric pattern suggesting topological structure -->
+      <path d="M 0 -25 L 21 -12.5 L 21 12.5 L 0 25 L -21 12.5 L -21 -12.5 Z"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="1.5"
+            opacity="0.4"/>
+
+      <path d="M 0 -15 L 13 -7.5 L 13 7.5 L 0 15 L -13 7.5 L -13 -7.5 Z"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="1.5"
+            opacity="0.6"/>
+
+      <!-- Central point - the synthesized truth -->
+      <circle cx="0" cy="0" r="8" fill="#FFFFFF" opacity="0.9"/>
+      <circle cx="0" cy="0" r="4" fill="url(#primaryGradient)"/>
+    </g>
+
+    <!-- Connecting nodes representing distributed computation -->
+    <g opacity="0.3">
+      <circle cx="-60" cy="0" r="3" fill="#6B7280"/>
+      <circle cx="60" cy="0" r="3" fill="#6B7280"/>
+      <circle cx="0" cy="-60" r="3" fill="#6B7280"/>
+      <line x1="-60" y1="0" x2="-30" y2="-17.5" stroke="#6B7280" stroke-width="1"/>
+      <line x1="60" y1="0" x2="30" y2="-17.5" stroke="#6B7280" stroke-width="1"/>
+      <line x1="0" y1="-60" x2="0" y2="-35" stroke="#6B7280" stroke-width="1"/>
+    </g>
+  </g>
+
+  <!-- Typography Section -->
+  <g transform="translate(400, 390)">
+    <!-- Main wordmark -->
+    <text
+      x="0"
+      y="0"
+      font-family="'SF Pro Display', 'Segoe UI', -apple-system, system-ui, sans-serif"
+      font-size="62"
+      font-weight="700"
+      fill="#1F2937"
+      text-anchor="middle"
+      letter-spacing="-1">
+      TINKERER
+    </text>
+
+    <!-- Subtle underline accent -->
+    <rect x="-140" y="10" width="280" height="3" fill="url(#primaryGradient)" opacity="0.6" rx="1.5"/>
+
+    <!-- Tagline -->
+    <text
+      x="0"
+      y="42"
+      font-family="'SF Pro Text', 'Segoe UI', -apple-system, system-ui, sans-serif"
+      font-size="17"
+      font-weight="500"
+      fill="#6B7280"
+      text-anchor="middle"
+      letter-spacing="1.5">
+      CNS 3.0 RESEARCH PLATFORM
+    </text>
+
+    <!-- Powered by indicator -->
+    <text
+      x="0"
+      y="72"
+      font-family="'SF Pro Text', 'Segoe UI', -apple-system, system-ui, sans-serif"
+      font-size="13"
+      font-weight="400"
+      fill="#9CA3AF"
+      text-anchor="middle"
+      letter-spacing="0.5">
+      Powered by Thinking Machines Tinker API
+    </text>
+  </g>
+
+  <!-- Subtle corner accent - top left -->
+  <g opacity="0.15">
+    <path d="M 0 0 L 60 0 L 0 60 Z" fill="url(#accentGradient1)"/>
+  </g>
+
+  <!-- Subtle corner accent - bottom right -->
+  <g opacity="0.15">
+    <path d="M 800 600 L 740 600 L 800 540 Z" fill="url(#accentGradient2)"/>
+  </g>
+
+  <!-- Optional: Fine detail pattern suggesting mathematical rigor -->
+  <g opacity="0.05">
+    <circle cx="150" cy="480" r="2" fill="#4F46E5"/>
+    <circle cx="170" cy="490" r="2" fill="#4F46E5"/>
+    <circle cx="190" cy="485" r="2" fill="#4F46E5"/>
+    <line x1="150" y1="480" x2="170" y2="490" stroke="#4F46E5" stroke-width="0.5"/>
+    <line x1="170" y1="490" x2="190" y2="485" stroke="#4F46E5" stroke-width="0.5"/>
+
+    <circle cx="650" cy="120" r="2" fill="#7C3AED"/>
+    <circle cx="630" cy="110" r="2" fill="#7C3AED"/>
+    <circle cx="610" cy="115" r="2" fill="#7C3AED"/>
+    <line x1="650" y1="120" x2="630" y2="110" stroke="#7C3AED" stroke-width="0.5"/>
+    <line x1="630" y1="110" x2="610" y2="115" stroke="#7C3AED" stroke-width="0.5"/>
+  </g>
+</svg>
