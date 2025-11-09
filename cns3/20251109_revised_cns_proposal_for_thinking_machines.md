@@ -42,13 +42,15 @@ The process is as follows:
 3. A *filtration* of simplicial complexes (e.g., a Vietoris-Rips complex) is constructed from this distance matrix. This process builds a nested series of topological spaces by connecting points that are within a certain distance $\\epsilon$ of each other.9  
 4. As the distance threshold $\\epsilon$ increases, *persistent homology* tracks the "birth" and "death" of topological features. The features that "persist" across a wide range of $\\epsilon$ are considered true structural features of the data, not artifacts of noise.
 
-The output of this process is a set of **Betti numbers** ($\\beta\_i$), which are topological invariants that quantify the "shape" of the semantic space.2 For the purposes of this proposal, these numbers are interpreted as direct, quantitative measures of logical integrity:
+The output of this process is a set of **Betti numbers** ($\\beta\_i$), which are topological invariants that quantify the "shape" of the semantic space.2 This proposal hypothesizes that these topological features correlate with specific properties of argumentative structure:
 
-* **$\\beta\_0$ (Betti 0):** This counts the number of connected components in the topological space.2 In this context, $\\beta\_0$ quantifies the number of distinct, disconnected topics or argumentative threads. A high $\\beta\_0$ for an argument that purports to be singular and coherent indicates *incoherence* or fragmentation.  
-* **$\\beta\_1$ (Betti 1):** This counts the number of one-dimensional "loops" or "holes".2 This is the most critical invariant for this project. It is the direct mathematical formalization of a *circular argument* or a "logical loophole".11 It identifies a semantic path that returns to its starting point without resolution.  
-* **$\\beta\_2$ (Betti 2):** This counts the number of two-dimensional "voids" or "cavities".10 This can be interpreted as a *hollow argument*—one that presents a "surface" of premises and conclusions but lacks the internal "substance" or evidence to support them.
+* **$\\beta\_0$ (Betti 0):** Counts the number of connected components in the topological space.2 We hypothesize that $\\beta\_0$ quantifies argumentative coherence: elevated $\\beta\_0$ in text claiming to present a unified argument may indicate semantic fragmentation or disconnected reasoning chains. Validation requires correlation analysis with human-annotated coherence scores (see Section 2.4).
 
-The central hypothesis of this proposal is that a logically sound, coherent, and well-supported argument will have a simple topological signature, ideally with $\\beta\_1 \\approx 0$ and $\\beta\_2 \\approx 0$. The CNS-TGM system will be trained, via a novel custom loss function, to *enforce* this topological simplicity, thereby compelling the machine to generate logically sound and resolved syntheses.
+* **$\\beta\_1$ (Betti 1):** Counts one-dimensional topological loops.2 This represents the core testable hypothesis: that $\\beta\_1$ in semantic space correlates with circular reasoning patterns in natural language argumentation. Prior work has demonstrated TDA's utility for "finding loop (holes) in logic" in argument mining contexts.11 We propose that persistent $\\beta\_1$ features identify semantic paths that return to their starting point without logical resolution. This interpretation requires empirical validation through correlation with expert-annotated circular arguments.
+
+* **$\\beta\_2$ (Betti 2):** Counts two-dimensional voids.10 We speculate that $\\beta\_2$ may correspond to argumentative structures that present surface-level coherence while lacking internal evidentiary support. This interpretation is the most speculative and represents an exploratory research direction.
+
+**Central Hypothesis:** Logically sound, coherent, and well-supported argumentation exhibits topologically simple structure, specifically $\\beta\_1 \\approx 0$ and $\\beta\_2 \\approx 0$. By training the CNS-TGM system with a loss function that penalizes topological complexity, we hypothesize the model will learn to generate syntheses that resolve logical contradictions and circular reasoning patterns. Phase 1 validation (Section 2.1) focuses on empirically testing whether (a) $\\beta\_1$ correlates with circular reasoning, and (b) minimizing $\\beta\_1$ during training improves synthesis quality on established benchmarks.
 
 ## **3.0 Novel Representational Primitives for Reasoning**
 
@@ -72,16 +74,21 @@ Where:
 
 The SNO is therefore a computationally legible object that *natively* stores its own logical integrity ($\\tau$) and semantic stability ($\\gamma$). This allows the system to reason *about* the structure of an argument, not just its content.
 
-### **3.2 Narrative Chirality: A Metric for Asymmetry in Semantic Space**
+### **3.2 Narrative Chirality: A Proposed Metric for Semantic Asymmetry**
 
-This proposal introduces a novel metric, **Narrative Chirality**, to quantify argumentative bias. The concept is adapted from chemistry and physics, where "chirality" describes an object that cannot be superposed on its mirror image.16 In computer vision, this has been adapted to measure "visual chirality" as a degree of asymmetry under reflection.17
+This proposal introduces **Narrative Chirality** as an exploratory metric for quantifying argumentative bias through geometric asymmetry in embedding space. The concept adapts the notion of chirality from chemistry and physics—where it describes objects that cannot be superposed on their mirror images 16—to the domain of argumentative structure. Recent work in computer vision has demonstrated analogous "visual chirality" measures based on reflection asymmetry.17
 
-In this framework, a "reflection" in narrative space is defined as the *antithesis*, *negation*, or *counter-argument* to a given claim.18
+**Theoretical Framework:**
+In this formulation, a "reflection" in narrative space corresponds to the *antithesis*, *negation*, or *counter-argument* of a given claim.18 We define:
 
-* An **achiral** narrative is "symmetric." It presents a claim and its reflection (the counter-claim) in a balanced, neutral, or objective manner.  
-* A **chiral** narrative is "asymmetric." The semantic space is warped or biased towards one side of the argument. The "mirror image" (the counter-argument) is either absent, misrepresented, or semantically "distant."
+* **Achiral narrative:** Exhibits semantic symmetry, presenting a claim and its counter-claim with balanced representation in embedding space.
+* **Chiral narrative:** Exhibits semantic asymmetry, where the embedding space is disproportionately weighted toward one argumentative position. The "mirror image" (counter-argument) is either absent, under-represented, or geometrically distant.
 
-This concept provides a quantitative, geometric measure of bias, propaganda, or one-sidedness. Narrative Chirality ($\\chi$) can be computed as a function of the relative volume or density of the semantic space occupied by a claim versus its generated antithesis. A system trained to *minimize* $\\chi$ is a system trained to produce balanced, neutral, and synthesized output.
+**Proposed Computation:**
+Narrative Chirality ($\\chi$) is computed as a function of the relative volume or density of the semantic space occupied by a claim versus its generated antithesis (e.g., via Fisher-Rao volume measures on the statistical manifold). A system trained to minimize $\\chi$ would be incentivized to produce balanced, multi-perspective syntheses.
+
+**Validation Requirements:**
+This metric is speculative and requires empirical validation. Phase 1 experiments will assess whether $\\chi$ correlates with established bias detection methods and human judgments of argumentative balance. The metric's utility depends on the quality of generated antitheses and the stability of geometric asymmetry measures in high-dimensional embedding spaces.
 
 ## **4.0 The CNS Architecture: A Multi-Agent Dialectical System**
 
@@ -111,6 +118,8 @@ The protocol proceeds as follows:
 6. **Resolve (Synthesis):** The Synthesizer agent receives the original SNOs (Thesis) and the Antagonist's output (Antithesis).  
 7. **Generate:** The Synthesizer is trained, via the topological-geometric loss function, to generate a new, higher-level text. This output is a "knowledge synthesis" 26 that logically resolves the contradictions and balances the biases of the input.  
 8. **Output:** The final product is a *resolved*, *unbiased*, and *logically coherent* summary of the conflicting inputs, represented as a new SNO with $\\beta\_1 \\approx 0$ and $\\chi \\approx 0$.
+
+**Training Strategy Note:** The three agents may be trained jointly or in staged sequence. Initial implementation will focus on independently training the Synthesizer with ground-truth SNO pairs while treating Proposer and Antagonist as rule-based systems. Subsequent iterations will explore end-to-end joint training with curriculum learning strategies. Full architectural details are deferred to implementation phase based on Phase 1 validation results.
 
 ## **5.0 Proposed Validation and Milestones**
 
@@ -254,26 +263,29 @@ The proposal's multi-agent, dialectical architecture also constitutes a novel co
 
 This section details the practical implementation plan, with a specific justification for the use of the Thinking Machines Tinker API as the foundational platform.
 
-### **1.1 Justification for Tinker: Custom Loss Functions via Low-Level Primitives**
+### **1.1 Platform Justification: Tinker API for Initial Validation and Distributed Training Infrastructure**
 
-The choice of the Thinking Machines Tinker API is not one of convenience; it is a *strict requirement* for the feasibility of the CNS-TGM project.
+The Thinking Machines Tinker API provides an optimal platform for the initial validation phase of the CNS-TGM project, offering critical advantages for implementing custom loss functions within a production-grade distributed training environment.
 
-Standard, high-level fine-tuning APIs, such as those that rely on a monolithic train() function 54 or a simple Trainer class, are *incapable* of supporting this proposal. The reason lies in the computational complexity of the proposed loss function.
+The total loss for the Synthesizer agent is a composite function requiring non-standard computation:
+$L\_{total} \= L\_{CE} \+ \\lambda\_1 L\_{\\beta\_1} \+ \\lambda\_2 L\_{\\chi}$
+Where $L\_{CE}$ is a standard cross-entropy loss, $L\_{\\beta\_1}$ is the topological loss (derived from the $\\beta\_1$ Betti number), and $L\_{\\chi}$ is the geometric loss (derived from Narrative Chirality).
 
-The total loss for the Synthesizer agent is a composite, multi-part function:  
-$L\_{total} \= L\_{CE} \+ \\lambda\_1 L\_{\\beta\_1} \+ \\lambda\_2 L\_{\\chi}$  
-Where $L\_{CE}$ is a standard cross-entropy loss, $L\_{\\beta\_1}$ is the topological loss (derived from the $\\beta\_1$ Betti number), and $L\_{\\chi}$ is the geometric loss (derived from Narrative Chirality).  
-Calculating $L\_{\\beta\_1}$ is not a simple, differentiable operation. It is an *algorithmic process* that must be executed *within* the training loop:
+Computing $L\_{\\beta\_1}$ requires a multi-stage algorithmic process within the training loop:
 
-1. Run a forward\_backward pass on the model for a batch of SNOs to obtain the gradients and output distributions $p(x|\\theta)$.31  
-2. Use these gradients to *construct* the Fisher Information Metric (FIM) $g\_{\\mu\\nu}$ for the items in the batch.7  
-3. Use the FIM to compute the pairwise Fisher-Rao distance matrix $D\_{FR}$.  
-4. Use $D\_{FR}$ to build a Vietoris-Rips filtration.9  
-5. Compute the persistent homology of this filtration to get the Betti number $\\beta\_1$.  
-6. This $\\beta\_1$ value (which is non-differentiable and must be treated as a reward, akin to Reinforcement Learning) then forms the $L\_{\\beta\_1}$ term.  
-7. Finally, call optim\_step 33 to update the model weights.
+1. Execute forward\_backward pass on the model for a batch of SNOs to obtain gradients and output distributions $p(x|\\theta)$.31
+2. Construct the Fisher Information Metric (FIM) $g\_{\\mu\\nu}$ from these gradients.7
+3. Compute the pairwise Fisher-Rao distance matrix $D\_{FR}$ from the FIM.
+4. Build a Vietoris-Rips filtration from $D\_{FR}$.9
+5. Compute persistent homology to extract the Betti number $\\beta\_1$.
+6. Incorporate the $\\beta\_1$ value (treated as a non-differentiable reward signal, analogous to RL objectives) into $L\_{\\beta\_1}$.
+7. Call optim\_step to update model weights.33
 
-This complex, multi-stage, computationally intensive loss calculation cannot be implemented in a high-level framework. The Tinker API is explicitly designed for this exact scenario. It "gives you full control over the training loop and all the algorithmic details" 31 by "expos\[ing\] low-level primitives" (forward\_backward, optim\_step, sample).33 Tinker "shields you from the complexity of distributed training" (e.g., managing a multi-GPU cluster, handling hardware failures) 31 while preserving the full algorithmic control necessary to compute this novel topological-geometric loss.
+While this workflow is implementable in standard frameworks (PyTorch, JAX), Tinker significantly reduces implementation complexity by exposing low-level primitives (forward\_backward, optim\_step, sample) 33 while abstracting distributed training infrastructure (multi-GPU coordination, fault tolerance, checkpointing).31 This allows research focus to remain on the novel topological-geometric methodology rather than distributed systems engineering.
+
+**Phased Platform Strategy:**
+- **Phase 1 (Initial Validation):** Tinker API with LoRA fine-tuning for rapid hypothesis testing and SNO framework validation
+- **Phase 2 (Scale-Up):** Migration to bespoke self-hosted infrastructure for full fine-tuning experiments, enabling exploration beyond LoRA's capacity constraints on large datasets
 
 ### **1.2 Base Model Selection and Configuration**
 
@@ -304,6 +316,74 @@ The Tinker platform exclusively implements LoRA fine-tuning, not full fine-tunin
      * **Alpha ($\\alpha$):** 32 (to achieve a stabilizing $\\alpha/r \= 2$) 34  
      * **Target Modules:** *All* linear layers, including attention blocks (q\_proj, v\_proj), MLP layers, and, in the case of Qwen, the MoE gates. Attention-only LoRA will be explicitly avoided.
 
+### **1.4 Training Strategy for Non-Differentiable Loss Components**
+
+The topological loss term $L\_{\\beta\_1}$ is non-differentiable, as Betti numbers are discrete topological invariants computed via combinatorial algorithms (persistent homology). This section outlines the training methodology for optimizing against such reward signals.
+
+**Gradient Flow Architecture:**
+The composite loss function
+$L\_{total} \= L\_{CE} \+ \\lambda\_1 L\_{\\beta\_1} \+ \\lambda\_2 L\_{\\chi}$
+combines differentiable ($L\_{CE}$, $L\_{\\chi}$) and non-differentiable ($L\_{\\beta\_1}$) components. Training proceeds via:
+
+1. **Differentiable Components:** Standard backpropagation through $L\_{CE}$ (cross-entropy on synthesis quality) and $L\_{\\chi}$ (continuous geometric measures of semantic asymmetry).
+
+2. **Non-Differentiable Reward Signal:** $\\beta\_1$ is treated as a scalar reward in an RL-style framework. Gradient estimation uses REINFORCE-style policy gradients or proximal policy optimization (PPO) adapted for language generation. Specifically:
+   * At each training step, compute $\\beta\_1$ for the generated synthesis SNO
+   * Use $\\beta\_1$ as a reward signal: $r \= \-\\beta\_1$ (negative since we minimize loops)
+   * Estimate policy gradients: $\\nabla\_{\\theta} J \\approx E\\left\[r \\cdot \\nabla\_{\\theta} \\log p\_{\\theta}(y|x)\\right\]$
+   * Apply baseline subtraction for variance reduction
+
+3. **Hybrid Training Loop:**
+   ```
+   for batch in dataset:
+       # Forward pass
+       outputs = model.forward_backward(batch)
+
+       # Compute differentiable losses
+       loss_ce = cross_entropy(outputs, targets)
+       loss_chi = compute_chirality(outputs)  # differentiable
+
+       # Compute topological features (expensive, done periodically)
+       if step % topo_freq == 0:
+           fim = construct_FIM(model, outputs)
+           distances = fisher_rao_distances(fim)
+           betti_1 = persistent_homology(distances)
+           reward = -betti_1
+           loss_topo = reward * log_probs.detach()  # REINFORCE
+
+       # Combined loss
+       loss = loss_ce + lambda_chi * loss_chi + lambda_topo * loss_topo
+       model.optim_step(loss)
+   ```
+
+**Computational Efficiency:** Persistent homology is computed at reduced frequency (`topo_freq = 10-100` steps) rather than every batch, as the topological signature changes slowly during training. FIM computation can be approximated using subset sampling or Kronecker-factored estimates for feasibility.
+
+**Convergence Properties:** The RL-style optimization of $\\beta\_1$ benefits from LoRA's demonstrated equivalence to full fine-tuning on RL tasks,32 providing theoretical justification for this training approach on the Tinker platform.
+
+### **1.5 Computational Cost and Feasibility Analysis**
+
+The CNS-TGM training loop involves computationally intensive operations beyond standard LLM fine-tuning. This section provides cost estimates and mitigation strategies.
+
+**Per-Batch Cost Breakdown:**
+| Operation | Complexity | Time Estimate (N=32 SNOs) | Mitigation Strategy |
+|-----------|------------|---------------------------|---------------------|
+| Forward/Backward Pass | O(d·k) | 100-500ms (standard) | Standard distributed training |
+| FIM Construction | O(N·V·d²) | 1-5s | Subset sampling, Kronecker-factored approximation |
+| Fisher-Rao Distances | O(N²·d) | 0.5-2s | Pairwise batch computation, GPU optimization |
+| Vietoris-Rips Complex | O(N³) | 0.1-1s | Sparse complex construction, distance thresholding |
+| Persistent Homology | O(N³) | 0.5-2s | Optimized libraries (GUDHI, Ripser), dimension reduction |
+| **Total Overhead** | - | **2-10s per batch** | **Compute every 10-100 steps** |
+
+**Estimated Training Cost:**
+- **Baseline (no TDA/FIM):** ~10-20 hours on 8xH100 for LoRA fine-tuning on SciFact (1.4K examples, 3 epochs)
+- **With TDA/FIM (freq=10):** ~15-30 hours (1.5-2× overhead)
+- **Cost increase:** 50-100% in wall-clock time, acceptable for research validation phase
+
+**Scalability Strategy:**
+1. **Phase 1 (LoRA):** Accept 2× training overhead for hypothesis validation on SciFact
+2. **Optimization:** Implement approximations (sampled FIM, reduced-rank persistent homology)
+3. **Phase 2 (Full FT):** Leverage bespoke infrastructure with dedicated topological computation nodes
+
 ## **2.0 Benchmarking and Validation Protocol**
 
 The CNS-TGM system must be validated against SOTA benchmarks for its sub-tasks, primarily contradiction detection and, ultimately, fact verification.
@@ -312,17 +392,25 @@ The CNS-TGM system must be validated against SOTA benchmarks for its sub-tasks, 
 
 The Proposer and Antagonist agents' ability to identify contradictory claims will be tested on two primary datasets:
 
-* **SciFact:** A dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts.28 It is a small, domain-specific, and challenging dataset.60  
+* **SciFact:** A dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts.28 It is a small, domain-specific, and challenging dataset.60
 * **FEVER:** A large-scale dataset of 185,445 claims generated from Wikipedia, classified as Supported, Refuted, or NotEnoughInfo.30
 
-Identified Project Risk & Mitigation Strategy:  
-This dual-dataset strategy exposes a critical, non-trivial project risk. The research on LoRA's performance (which is mandated by the Tinker platform) is clear:
+**Strategic Advantages of LoRA for Initial Validation:**
+This dual-dataset strategy leverages LoRA's empirically-validated strengths for the initial hypothesis testing phase:
 
-* LoRA performance is **equivalent** to full fine-tuning on **small-to-medium** datasets (like SciFact).32  
-* LoRA performance **can underperform** full fine-tuning on **large** datasets (like FEVER).32
+1. **Optimal Task-Dataset Alignment:** The core innovation—SNO framework validation and topological-geometric loss function development—can be rigorously evaluated on SciFact, where LoRA performance is equivalent to full fine-tuning.32 SciFact's expert-curated, domain-specific nature makes it the ideal testbed for demonstrating that topological structure ($\\beta\_1$) and geometric fragility (FIM) capture meaningful properties of scientific argumentation.
 
-This creates a "LoRA capacity" bottleneck.32  
-Mitigation: The validation will be phased. The system is expected to achieve SOTA-equivalent performance on SciFact, as its small size is a good fit for LoRA. If the system underperforms a fully fine-tuned baseline on FEVER, this will be analyzed. The primary defense will be to attribute this gap to the known LoRA capacity bottleneck on large SL datasets, not as a flaw in the TDA/FIM methodology itself. Furthermore, the argument will be made that the true task (synthesis) is RL-like, where LoRA is SOTA-equivalent 32, and that performance on a large, simple SL task like FEVER is not fully representative of the framework's power.
+2. **RL-Style Optimization Match:** The non-differentiable topological loss component ($L\_{\\beta\_1}$) frames this task as structurally analogous to reinforcement learning, where the model optimizes against scalar reward signals. Tinker's own research demonstrates that "LoRA performs equivalently to FullFT for reinforcement learning even with small ranks".32 This architectural alignment positions LoRA as the methodologically appropriate approach for initial development.
+
+3. **Rapid Iteration for Novel Methodology:** LoRA's parameter efficiency enables rapid experimentation with the complex multi-stage loss computation (FIM construction, Fisher-Rao distances, persistent homology). This accelerates the critical early-phase work of validating that (a) topological signatures correlate with logical flaws, and (b) the multi-agent dialectical system generates meaningful syntheses.
+
+4. **Phased Scale-Up Strategy:** FEVER provides a complementary large-scale validation target. Initial LoRA-based experiments will establish baseline performance and identify whether any performance gap on large supervised learning tasks stems from LoRA capacity constraints (a known phenomenon on large SL datasets 32) versus fundamental methodology issues. This diagnostic information directly informs Phase 2 architecture decisions: if SciFact results validate the approach while FEVER shows capacity limits, migration to full fine-tuning on bespoke infrastructure becomes the natural next step.
+
+**Success Criteria for Phase 1 (LoRA-based validation):**
+- SOTA-competitive performance on SciFact (primary validation target)
+- Empirical demonstration that $\\beta\_1$ correlates with circular reasoning
+- Successful training convergence with composite topological-geometric loss
+- Characterization of LoRA performance envelope on FEVER for Phase 2 planning
 
 ### **2.2 SOTA Baselines for Comparison**
 
@@ -344,30 +432,159 @@ The goal is to demonstrate that the CNS-TGM system, powered by its novel topolog
 | MultiVerS (SOTA) 62 | SciFact | F1 (Label) | 77.8 |
 | Thorne et al. (2018) (Baseline) 30 | FEVER | Accuracy | 71.6 |
 | SOTA (2024) 71 | FEVER | Accuracy | \>90.0 (est.) |
-| **CNS-TGM (Ours)** | **SciFact** | **F1 (Label)** | **\>78.0 (Target)** |
-| **CNS-TGM (Ours)** | **FEVER** | **Accuracy** | **\>90.0 (Target, pending LoRA risk)** |
+| **CNS-TGM (Ours)** | **SciFact** | **F1 (Label)** | **75.0-79.0 (Target Range)** |
+| **CNS-TGM (Ours)** | **FEVER** | **Accuracy** | **85.0-92.0 (Target Range, diagnostic)** |
 
-## **3.0 Executive Summary (Simplified High-Level Overview)**
+**Performance Expectations:** SciFact F1 > 75.0 constitutes successful validation of the core methodology. FEVER performance establishes LoRA capacity baseline for Phase 2 planning. Target ranges reflect uncertainty in novel methodology performance and LoRA scaling behavior on large datasets.
 
-**Project:** Contradiction and Narrative Synthesis via Topological-Geometric Manifolds (CNS-TGM)
+### **2.3 Validation of Core Assumptions**
 
-**Objective:** To build an advanced AI system that can read, understand, and synthesize large volumes of conflicting or contradictory text (e.g., scientific papers, intelligence reports) 26 and produce a single, reliable, and logically coherent summary.
+The CNS-TGM framework rests on three testable hypotheses that require empirical validation before full-scale deployment. Phase 1 experiments will systematically evaluate these assumptions.
 
-Core Methodology: A "Dialectical Debate" Between AIs  
-The system is not a single AI. It is a "multi-agent" system 19 designed to conduct a dialectical debate 23 to find the truth, structured after the classical thesis-antithesis-synthesis process 18:
+**Hypothesis 1: Topological Structure Correlates with Logical Flaws**
+* **Claim:** $\\beta\_1$ (topological loops) in semantic space correlates with circular reasoning in natural language arguments
+* **Validation Method:**
+  - Collect 200-500 expert-annotated examples of circular vs. non-circular arguments from philosophical/scientific literature
+  - Compute $\\beta\_1$ for each example's SNO representation
+  - Measure Pearson/Spearman correlation between $\\beta\_1$ and human annotations
+  - **Success Criterion:** Correlation coefficient $r \> 0.4$ with $p \< 0.01$
+* **Alternative Explanation:** If correlation is weak ($r \< 0.3$), $\\beta\_1$ may reflect narrative complexity or topic structure rather than logical circularity
 
-1. **The Proposer (Thesis):** Reads all the documents and makes a set of claims.  
-2. **The Antagonist (Antithesis):** Reads the claims and actively tries to find flaws, contradictions, and biases.  
-3. **The Synthesizer (Synthesis):** Listens to both sides and writes a new, high-level summary that *resolves the conflict* and presents a balanced, truthful account.
+**Hypothesis 2: Geometric Fragility Identifies Semantic Instability**
+* **Claim:** High FIM eigenvalues (curvature) correspond to semantically fragile regions where small perturbations cause large meaning shifts
+* **Validation Method:**
+  - Select high-curvature vs. low-curvature sentence pairs based on FIM computation
+  - Apply controlled perturbations (synonym substitution, negation insertion)
+  - Measure semantic shift via cosine distance in embedding space and model prediction changes
+  - **Success Criterion:** High-curvature regions show 2-3× larger semantic shifts than low-curvature regions
+* **Baseline Comparison:** Compare against simple heuristics (sentence length, syntactic complexity)
 
-The "Secret Sauce": Novel Mathematics to Guide the Debate  
-To ensure this debate produces truth and not just more noise, the project introduces two new mathematical tools to act as the "referee" and guide the AI's training:
+**Hypothesis 3: Narrative Chirality Quantifies Argumentative Bias**
+* **Claim:** Geometric asymmetry ($\\chi$) between thesis and antithesis representations correlates with argumentative bias
+* **Validation Method:**
+  - Curate balanced vs. biased argument pairs from political/scientific debates
+  - Compute $\\chi$ for each pair
+  - Compare against established bias detection methods (MBIC, AllSides ratings)
+  - **Success Criterion:** $\\chi$ achieves AUC > 0.65 for bias classification
+* **Exploratory Nature:** This is the most speculative hypothesis; weak correlation ($AUC \< 0.60$) leads to deprioritization in favor of $\\beta\_1$-focused training
 
-1. **A "Logical Loophole" Detector:** Using a branch of advanced mathematics called **Topology** 3, the system can analyze the "shape" of an argument. This allows it to detect *circular reasoning* or "holes" in the logic.11 The AI is then explicitly trained to produce summaries with *zero* logical loops ($\\beta\_1 \\approx 0$).  
-2. **A "Bias Meter":** Using a new concept called **"Narrative Chirality"** (adapted from chemistry) 17, the system can measure if an argument is "imbalanced" or "one-sided." The AI is trained to produce a *neutral, synthesized* view (Chirality $\\chi \\approx 0$).
+**Go/No-Go Decision Point:** If Hypotheses 1-2 show weak correlations, the project pivots to conventional multi-task learning with TDA features as auxiliary signals rather than direct loss components.
 
-Implementation Platform: Thinking Machines "Tinker" API  
-This project is only possible on an advanced, low-level training platform. The Tinker API from Thinking Machines 31 is the required platform because it is the only one that provides the deep, granular control over the training loop (specifically, the forward\_backward and optim\_step primitives) 33 needed to implement this complex topological and geometric mathematics, while still handling the heavy lifting of distributed, large-scale model training.
+### **2.4 Baseline Comparisons and Ablation Strategy**
+
+To isolate the value of topological-geometric components, Phase 1 includes systematic ablations against simpler alternatives.
+
+**Baseline 1: Standard Multi-Task Fine-Tuning**
+* **Architecture:** Single model jointly trained on contradiction detection + summarization
+* **Loss:** $L \= L\_{CE}^{detection} \+ L\_{CE}^{summary}$ (no TDA/FIM components)
+* **Purpose:** Establishes whether multi-task learning alone achieves target performance
+
+**Baseline 2: Multi-Agent Debate without Topological Losses**
+* **Architecture:** Proposer-Antagonist-Synthesizer agents with standard cross-entropy training
+* **Loss:** Standard language modeling objectives
+* **Purpose:** Isolates whether multi-agent debate structure contributes independent of TDA/FIM
+
+**Baseline 3: TDA Features as Input Augmentation**
+* **Architecture:** Compute $\\beta\_1$, $\\chi$ offline; concatenate as feature vectors to model input
+* **Loss:** Standard cross-entropy
+* **Purpose:** Tests whether TDA provides value as static features vs. dynamic loss signals
+
+**Ablation Matrix:**
+| Model Variant | TDA Loss | Multi-Agent | Expected SciFact F1 | Diagnostic Value |
+|---------------|----------|-------------|---------------------|------------------|
+| Baseline 1 | ✗ | ✗ | 72-75 | Multi-task ceiling |
+| Baseline 2 | ✗ | ✓ | 74-77 | Debate contribution |
+| Baseline 3 | Feature-only | ✗ | 73-76 | Static TDA value |
+| **CNS-TGM (Full)** | **✓** | **✓** | **75-79** | **Full methodology** |
+
+**Success Metric:** CNS-TGM must outperform all baselines by ≥2 F1 points to justify added complexity.
+
+### **2.5 Risk Assessment and Mitigation Strategies**
+
+**Risk 1: Topological Features Do Not Correlate with Logical Properties**
+* **Probability:** Medium (30-40%)
+* **Impact:** High—invalidates core methodology
+* **Mitigation:**
+  - Comprehensive validation (Section 2.3) before full training investment
+  - Pivot strategy: Use TDA as auxiliary features rather than loss components
+  - Fallback to SOTA multi-task baselines
+* **Decision Point:** After initial correlation studies (~2 weeks)
+
+**Risk 2: Computational Cost Prohibits Iteration**
+* **Probability:** Low-Medium (20-30%)
+* **Impact:** Medium—slows research velocity
+* **Mitigation:**
+  - Implement approximations early (Kronecker-factored FIM, sampled persistent homology)
+  - Reduce computation frequency (Section 1.5: every 10-100 steps)
+  - Use smaller models (Llama 3.1 8B) for initial validation
+* **Decision Point:** If single epoch exceeds 48 hours, implement approximations
+
+**Risk 3: LoRA Capacity Limits Performance on Target Tasks**
+* **Probability:** Low (15-20% for SciFact, 40-50% for FEVER)
+* **Impact:** Medium—requires Phase 2 transition
+* **Mitigation:**
+  - Focus Phase 1 validation on SciFact where LoRA is proven effective
+  - Frame FEVER as diagnostic rather than primary validation
+  - Plan Phase 2 migration to bespoke full-FT infrastructure
+* **Decision Point:** After SciFact results; FEVER underperformance does not block progress
+
+**Risk 4: Multi-Agent Training Instability**
+* **Probability:** Medium (30-40%)
+* **Impact:** Medium—requires architectural adjustments
+* **Mitigation:**
+  - Start with staged training (independent Synthesizer first)
+  - Use curriculum learning (simple examples before complex)
+  - Implement gradient clipping and careful hyperparameter tuning
+* **Decision Point:** If training diverges after 3 attempts, simplify to single-agent architecture
+
+**Risk 5: Hypothesis Validation Requires Extensive Human Annotation**
+* **Probability:** Medium-High (50-60%)
+* **Impact:** Low-Medium—delays timeline by 2-4 weeks
+* **Mitigation:**
+  - Leverage existing annotated datasets (argument mining corpora)
+  - Use GPT-4/Claude for preliminary pseudo-labels validated by expert subset
+  - Recruit domain experts early for efficient annotation protocols
+* **Decision Point:** Budget 200 expert hours for annotation if needed
+
+**Overall Risk Posture:** The phased approach with early validation checkpoints (Section 2.3) and comprehensive baseline comparisons (Section 2.4) provides multiple off-ramps if core hypotheses fail. The project is structured as rigorous scientific inquiry with clear success/failure criteria rather than engineering implementation with assumed validity.
+
+## **3.0 Executive Summary for Technical Stakeholders**
+
+**Project Title:** Contradiction and Narrative Synthesis via Topological-Geometric Manifolds (CNS-TGM)
+
+**Research Objective:** To empirically test whether topological and information-geometric properties of semantic representations can serve as trainable objectives for automated knowledge synthesis from contradictory text corpora. The system targets applications in scientific literature synthesis, fact verification, and intelligence analysis where resolving conflicting claims is critical.
+
+**Core Hypothesis:** Logical soundness and argumentative balance in natural language can be quantified through (1) topological invariants ($\\beta\_1$ Betti numbers measuring semantic circularity) and (2) geometric curvature (Fisher Information Metric measuring semantic fragility). Training language models to minimize these quantities will produce syntheses with improved logical coherence and reduced bias compared to standard fine-tuning approaches.
+
+**Architectural Approach:**
+The CNS-TGM system implements computational dialectical reasoning via a three-agent architecture:
+1. **Proposer Agent:** Extracts claims and evidence from input corpora, generating Structured Narrative Objects (SNOs)
+2. **Antagonist Agent:** Generates counter-arguments and identifies structural flaws to maximize topological complexity
+3. **Synthesizer Agent:** Trained with composite loss function ($L\_{total} \= L\_{CE} \+ \\lambda\_1 L\_{\\beta\_1} \+ \\lambda\_2 L\_{\\chi}$) to generate resolutions that minimize both topological loops ($\\beta\_1$) and narrative chirality ($\\chi$, a novel bias metric)
+
+**Novel Contributions:**
+1. **Topological Loss Functions:** First application of persistent homology-derived Betti numbers as dynamic training objectives (not static features) for LLM fine-tuning
+2. **Information-Geometric Semantic Distance:** Use of Fisher-Rao geodesics on statistical manifolds as the foundational metric for topological analysis, providing invariant, symmetric distance measures superior to KL divergence
+3. **Narrative Chirality Metric:** Novel quantification of argumentative bias through geometric asymmetry between thesis-antithesis pairs in embedding space
+4. **SNO Framework:** New knowledge representation combining causal structure, topological signatures, and geometric properties in a unified computational object
+
+**Validation Strategy:**
+* **Phase 1 (Months 1-3):** Hypothesis validation on SciFact dataset (1.4K examples) using Tinker API with LoRA fine-tuning
+  - Primary: Empirical correlation between $\\beta\_1$ and expert-annotated circular arguments ($r \> 0.4$ target)
+  - Primary: SciFact F1 > 75.0 (vs. SOTA 77.8) demonstrating competitive performance
+  - Secondary: FEVER performance characterization for LoRA capacity assessment
+* **Phase 2 (Months 4-6):** Scale-up to bespoke infrastructure with full fine-tuning if Phase 1 validates core hypotheses
+
+**Implementation Platform:**
+Tinker API provides optimal balance for Phase 1: exposes low-level training primitives (forward\_backward, optim\_step) required for custom topological loss computation while abstracting distributed training complexity. LoRA's proven equivalence to full fine-tuning on RL-style tasks 32 aligns with the non-differentiable reward-based optimization of $\\beta\_1$. Phase 2 migration to self-hosted infrastructure planned for full fine-tuning experiments beyond LoRA capacity constraints.
+
+**Risk-Adjusted Expectations:**
+This is a research proposal testing novel hypotheses, not an engineering implementation of proven methods. Comprehensive validation (Section 2.3), baseline comparisons (Section 2.4), and risk assessment (Section 2.5) provide early decision points. Success is defined as demonstrating that topological-geometric properties (1) correlate with logical structure and (2) provide training signal yielding measurable improvements over multi-task baselines, even if absolute SOTA performance is not achieved in Phase 1.
+
+**Resource Requirements:**
+* Compute: ~30 GPU-hours on 8xH100 for Phase 1 validation (1.5-2× standard LoRA overhead)
+* Timeline: 3 months for hypothesis validation, 6 months total for complete Phase 1
+* Personnel: 1 senior researcher + 1 ML engineer + annotation support (200 expert hours budgeted)
 
 #### **Works cited**
 
