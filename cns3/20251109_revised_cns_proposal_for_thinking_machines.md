@@ -2,12 +2,12 @@
 
 ## **1.0 Abstract and Core Scientific Contribution**
 
-This proposal outlines a novel framework, "Contradiction and Narrative Synthesis via Topological-Geometric Manifolds" (CNS-TGM), for the development of advanced reasoning machines. The project moves beyond conventional, localized, and pairwise textual entailment or contradiction detection, which typically struggles with structural, complex, or latent logical flaws.1
+This proposal outlines a novel framework, "Contradiction and Narrative Synthesis via Topological-Geometric Manifolds" (CNS-TGM), for the development of advanced reasoning machines. The project moves beyond conventional, localized, and pairwise textual entailment or contradiction detection, which typically struggles with structural, complex, or latent logical flaws [1]
 
 The core scientific contribution is a new paradigm that assesses the logical and semantic integrity of a text corpus by modeling it as a unified *geometric* and *topological* object. The central thesis is twofold:
 
-1. **Logical integrity can be quantified by its topological invariants.** The logical soundness of a body of text (e.E., its freedom from circular reasoning or incoherence) is encoded in the *shape* of its semantic representation. This can be measured using persistent homology, specifically via its Betti numbers.2  
-2. **Semantic stability can be quantified by its geometric curvature.** The "fragility" or ambiguity of an argument is encoded in the *local geometry* of its underlying statistical manifold. This can be measured using the Fisher Information Metric (FIM) as the canonical Riemannian metric.4
+1. **Logical integrity can be quantified by its topological invariants.** The logical soundness of a body of text (e.E., its freedom from circular reasoning or incoherence) is encoded in the *shape* of its semantic representation. This can be measured using persistent homology, specifically via its Betti numbers [2]  
+2. **Semantic stability can be quantified by its geometric curvature.** The "fragility" or ambiguity of an argument is encoded in the *local geometry* of its underlying statistical manifold. This can be measured using the Fisher Information Metric (FIM) as the canonical Riemannian metric [4]
 
 This topological-geometric approach allows for a global, structural understanding of contradiction, synthesis, and argumentative bias. Instead of merely identifying pairwise contradictions (e.E., "A" vs. "not A"), the CNS-TGM framework is designed to detect high-level structural flaws—such as circular arguments, unresolved logical "voids," and systemic bias—and, furthermore, to train a system to *resolve* these flaws through a process of automated knowledge synthesis. This document presents the theoretical framework, the novel representational primitives, the multi-agent architecture for implementing this system, and the proposed validation strategy.
 
@@ -19,17 +19,17 @@ The foundation of the CNS-TGM system rests on a fundamental shift in how text is
 
 Traditional Natural Language Processing (NLP) often represents text as static vectors in a high-dimensional Euclidean space. This proposal adopts a more sophisticated model rooted in information geometry. Any given text (a claim, sentence, or document) is not a static point, but a representation of a *parameterized probability distribution*.5
 
-A Large Language Model (LLM) can be conceptualized as a mapping $g$ from the manifold of input sentences, $X$, to the statistical manifold $Z$ of output probability distributions.4 Each point on this manifold $Z$ corresponds to a unique probability distribution $p(x|\\theta)$, where $\\theta$ represents the parameters (or, in this context, the high-level semantic features) that define that specific text representation.
+A Large Language Model (LLM) can be conceptualized as a mapping $g$ from the manifold of input sentences, $X$, to the statistical manifold $Z$ of output probability distributions [4] Each point on this manifold $Z$ corresponds to a unique probability distribution $p(x|\\theta)$, where $\\theta$ represents the parameters (or, in this context, the high-level semantic features) that define that specific text representation.
 
 This re-framing is the essential prerequisite for the proposed methodology. By treating text representations as probability distributions, it becomes possible to use the rigorous tools of information geometry to define a *metric* on this space, moving beyond the limitations of simplistic measures like cosine similarity.
 
 ### **2.2 The Canonical Metric: Fisher-Rao Distance for Semantic Fidelity**
 
-Once text is represented on a statistical manifold $Z$, a natural and powerful "ruler" is required to measure the distance—or "distinguishability"—between points. The CNS-TGM framework adopts the **Fisher Information Metric (FIM)** as the canonical Riemannian metric $g\_{\\mu\\nu}$ that defines the geometry of this manifold.4
+Once text is represented on a statistical manifold $Z$, a natural and powerful "ruler" is required to measure the distance—or "distinguishability"—between points. The CNS-TGM framework adopts the **Fisher Information Metric (FIM)** as the canonical Riemannian metric $g\_{\\mu\\nu}$ that defines the geometry of this manifold [4]
 
-The Fisher-Rao distance, which is the geodesic (shortest path) between two points under the FIM, provides a true measure of the distinguishability between two text representations.7 This metric is superior to other statistical distances (such as Kullback-Leibler divergence) because it is a true, symmetric Riemannian metric.
+The Fisher-Rao distance, which is the geodesic (shortest path) between two points under the FIM, provides a true measure of the distinguishability between two text representations [7] This metric is superior to other statistical distances (such as Kullback-Leibler divergence) because it is a true, symmetric Riemannian metric.
 
-Crucially, the FIM allows for the quantification of semantic "fragility".4 Regions of the manifold with high local curvature, identifiable by large eigenvalues of the FIM, correspond to points of high semantic ambiguity. In these "fragile" regions, an infinitesimally small perturbation to the input text (e.g., changing a single semantically charged word, such as "full" to "empty") 1 can result in a disproportionately large, non-linear change in the model's output distribution.4 This geometric property provides a powerful tool for identifying the most sensitive and critical components of an argument.
+Crucially, the FIM allows for the quantification of semantic "fragility".4 Regions of the manifold with high local curvature, identifiable by large eigenvalues of the FIM, correspond to points of high semantic ambiguity. In these "fragile" regions, an infinitesimally small perturbation to the input text (e.g., changing a single semantically charged word, such as "full" to "empty") 1 can result in a disproportionately large, non-linear change in the model's output distribution [4] This geometric property provides a powerful tool for identifying the most sensitive and critical components of an argument.
 
 ### **2.3 The Topological Signature: Betti Numbers as Logical Invariants**
 
@@ -39,16 +39,16 @@ The process is as follows:
 
 1. A point cloud is formed from the semantic representations (e.g., SNOs, see Section 3.1) of the text.  
 2. The Fisher-Rao distance is computed between all pairs of points, yielding a robust, geometrically-aware distance matrix.  
-3. A *filtration* of simplicial complexes (e.g., a Vietoris-Rips complex) is constructed from this distance matrix. This process builds a nested series of topological spaces by connecting points that are within a certain distance $\\epsilon$ of each other.9  
+3. A *filtration* of simplicial complexes (e.g., a Vietoris-Rips complex) is constructed from this distance matrix. This process builds a nested series of topological spaces by connecting points that are within a certain distance $\\epsilon$ of each other [9]  
 4. As the distance threshold $\\epsilon$ increases, *persistent homology* tracks the "birth" and "death" of topological features. The features that "persist" across a wide range of $\\epsilon$ are considered true structural features of the data, not artifacts of noise.
 
-The output of this process is a set of **Betti numbers** ($\\beta\_i$), which are topological invariants that quantify the "shape" of the semantic space.2 This proposal hypothesizes that these topological features correlate with specific properties of argumentative structure:
+The output of this process is a set of **Betti numbers** ($\\beta\_i$), which are topological invariants that quantify the "shape" of the semantic space [2] This proposal hypothesizes that these topological features correlate with specific properties of argumentative structure:
 
-* **$\\beta\_0$ (Betti 0):** Counts the number of connected components in the topological space.2 We hypothesize that $\\beta\_0$ quantifies argumentative coherence: elevated $\\beta\_0$ in text claiming to present a unified argument may indicate semantic fragmentation or disconnected reasoning chains. Validation requires correlation analysis with human-annotated coherence scores (see Section 2.4).
+* **$\\beta\_0$ (Betti 0):** Counts the number of connected components in the topological space [2] We hypothesize that $\\beta\_0$ quantifies argumentative coherence: elevated $\\beta\_0$ in text claiming to present a unified argument may indicate semantic fragmentation or disconnected reasoning chains. Validation requires correlation analysis with human-annotated coherence scores (see Section 2.4).
 
-* **$\\beta\_1$ (Betti 1):** Counts one-dimensional topological loops.2 This represents the core testable hypothesis: that $\\beta\_1$ in semantic space correlates with circular reasoning patterns in natural language argumentation. Prior work has demonstrated TDA's utility for "finding loop (holes) in logic" in argument mining contexts.11 We propose that persistent $\\beta\_1$ features identify semantic paths that return to their starting point without logical resolution. This interpretation requires empirical validation through correlation with expert-annotated circular arguments.
+* **$\\beta\_1$ (Betti 1):** Counts one-dimensional topological loops [2] This represents the core testable hypothesis: that $\\beta\_1$ in semantic space correlates with circular reasoning patterns in natural language argumentation. Prior work has demonstrated TDA's utility for "finding loop (holes) in logic" in argument mining contexts [11] We propose that persistent $\\beta\_1$ features identify semantic paths that return to their starting point without logical resolution. This interpretation requires empirical validation through correlation with expert-annotated circular arguments.
 
-* **$\\beta\_2$ (Betti 2):** Counts two-dimensional voids.10 We speculate that $\\beta\_2$ may correspond to argumentative structures that present surface-level coherence while lacking internal evidentiary support. This interpretation is the most speculative and represents an exploratory research direction.
+* **$\\beta\_2$ (Betti 2):** Counts two-dimensional voids [10] We speculate that $\\beta\_2$ may correspond to argumentative structures that present surface-level coherence while lacking internal evidentiary support. This interpretation is the most speculative and represents an exploratory research direction.
 
 **Central Hypothesis:** Logically sound, coherent, and well-supported argumentation exhibits topologically simple structure, specifically $\\beta\_1 \\approx 0$ and $\\beta\_2 \\approx 0$. By training the CNS-TGM system with a loss function that penalizes topological complexity, we hypothesize the model will learn to generate syntheses that resolve logical contradictions and circular reasoning patterns. Phase 1 validation (Section 2.1) focuses on empirically testing whether (a) $\\beta\_1$ correlates with circular reasoning, and (b) minimizing $\\beta\_1$ during training improves synthesis quality on established benchmarks.
 
@@ -58,7 +58,7 @@ To operationalize this topological-geometric framework, new data structures are 
 
 ### **3.1 Structured Narrative Objects (SNOs): A Causal-Topological Knowledge Framework**
 
-This project introduces a novel knowledge representation (KR) formalism, the **Structured Narrative Object (SNO)**. Traditional knowledge representation, such as static knowledge graphs, is insufficient for modeling the dynamic, and often conflicting, nature of argumentation.12 Drawing from narrative theory, which posits that comprehension requires moving beyond surface features to model events, schemas, and relationships 13, an SNO is designed to be a dynamic data structure.
+This project introduces a novel knowledge representation (KR) formalism, the **Structured Narrative Object (SNO)**. Traditional knowledge representation, such as static knowledge graphs, is insufficient for modeling the dynamic, and often conflicting, nature of argumentation [12] Drawing from narrative theory, which posits that comprehension requires moving beyond surface features to model events, schemas, and relationships 13, an SNO is designed to be a dynamic data structure.
 
 Inspired by models of narrative that emphasize *transformation, conflict, and unactualized events* 15, an SNO is a data structure that explicitly binds the textual content to its underlying mathematical signatures. An SNO is defined as a tuple:
 
@@ -67,7 +67,7 @@ $SNO \= (E, L, \\tau, \\gamma, \\chi)$
 Where:
 
 * $E$ is the set of **Events** (e.g., text components, claims, evidence).  
-* $L$ is the set of **CausalLinks** (dependencies between events, representing the narrative or logical flow).14  
+* $L$ is the set of **CausalLinks** (dependencies between events, representing the narrative or logical flow) [14]  
 * $\\tau$ is the **TopologicalSignature** (the set of persistent Betti numbers $\\{\\beta\_0, \\beta\_1, \\beta\_2\\}$ for the event cluster).  
 * $\\gamma$ is the **GeometricSignature** (the set of FIM eigenvalues for key "fragile" events).  
 * $\\chi$ is the **Narrative Chirality** (a metric for argumentative bias, see Section 3.2).
@@ -76,10 +76,10 @@ The SNO is therefore a computationally legible object that *natively* stores its
 
 ### **3.2 Narrative Chirality: A Proposed Metric for Semantic Asymmetry**
 
-This proposal introduces **Narrative Chirality** as an exploratory metric for quantifying argumentative bias through geometric asymmetry in embedding space. The concept adapts the notion of chirality from chemistry and physics—where it describes objects that cannot be superposed on their mirror images 16—to the domain of argumentative structure. Recent work in computer vision has demonstrated analogous "visual chirality" measures based on reflection asymmetry.17
+This proposal introduces **Narrative Chirality** as an exploratory metric for quantifying argumentative bias through geometric asymmetry in embedding space. The concept adapts the notion of chirality from chemistry and physics—where it describes objects that cannot be superposed on their mirror images 16—to the domain of argumentative structure. Recent work in computer vision has demonstrated analogous "visual chirality" measures based on reflection asymmetry [17]
 
 **Theoretical Framework:**
-In this formulation, a "reflection" in narrative space corresponds to the *antithesis*, *negation*, or *counter-argument* of a given claim.18 We define:
+In this formulation, a "reflection" in narrative space corresponds to the *antithesis*, *negation*, or *counter-argument* of a given claim [18] We define:
 
 * **Achiral narrative:** Exhibits semantic symmetry, presenting a claim and its counter-claim with balanced representation in embedding space.
 * **Chiral narrative:** Exhibits semantic asymmetry, where the embedding space is disproportionately weighted toward one argumentative position. The "mirror image" (counter-argument) is either absent, under-represented, or geometrically distant.
@@ -92,7 +92,7 @@ This metric is speculative and requires empirical validation. Phase 1 experiment
 
 ## **4.0 The CNS Architecture: A Multi-Agent Dialectical System**
 
-The CNS-TGM framework is not a single, monolithic model. It is a multi-agent system (MAS) 19 designed to operationalize *dialectical reasoning*.18 A dialectical process is, by definition, an exchange of opposing ideas to arrive at a higher-level truth.21 This structure is implemented via three distinct agents, reflecting a computational version of the Hegelian dialectic.18
+The CNS-TGM framework is not a single, monolithic model. It is a multi-agent system (MAS) 19 designed to operationalize *dialectical reasoning*.18 A dialectical process is, by definition, an exchange of opposing ideas to arrive at a higher-level truth [21] This structure is implemented via three distinct agents, reflecting a computational version of the Hegelian dialectic [18]
 
 ### **4.1 System Components: Proposer, Antagonist, and Synthesizer Agents**
 
@@ -106,7 +106,7 @@ This multi-agent debate structure 23 is essential for forcing the system to move
 
 ### **4.2 The Dialectical Reasoning Protocol**
 
-The full system workflow constitutes a "computational dialectical reasoning" process.25 This protocol is explicitly a *truth-seeking* mechanism 21, not a competitive debate where one agent "wins".18 The goal is the generation of a final, *synthesized* body of knowledge.26
+The full system workflow constitutes a "computational dialectical reasoning" process [25] This protocol is explicitly a *truth-seeking* mechanism 21, not a competitive debate where one agent "wins".18 The goal is the generation of a final, *synthesized* body of knowledge [26]
 
 The protocol proceeds as follows:
 
@@ -139,7 +139,7 @@ This section provides a rigorous review of the core mathematical formuli propose
 
 ### **1.1 Parameter-Efficient Training: The Final LoRA Equation**
 
-The project will be implemented on the Thinking Machines Tinker API, which utilizes Low-Rank Adaptation (LoRA) for parameter-efficient fine-tuning.31 A corrupted representation of the LoRA equation appears in the platform's documentation 33; this section clarifies and finalizes the *correct* formulation.
+The project will be implemented on the Thinking Machines Tinker API, which utilizes Low-Rank Adaptation (LoRA) for parameter-efficient fine-tuning [31] A corrupted representation of the LoRA equation appears in the platform's documentation 33; this section clarifies and finalizes the *correct* formulation.
 
 Standard LoRA Formulation:  
 For a pre-trained weight matrix $W\_0 \\in \\mathbb{R}^{d \\times k}$, the LoRA update is represented by a low-rank approximation $\\Delta W \= BA$, where $B \\in \\mathbb{R}^{d \\times r}$ and $A \\in \\mathbb{R}^{r \\times k}$, with the rank $r \\ll \\min(d, k)$. The modified forward pass $h$ for an input $x$ is:  
@@ -149,7 +149,7 @@ Final, Scaled LoRA Equation:
 A critical, and often overlooked, component of LoRA is a scaling factor $\\alpha$.34 This scalar hyperparameter modulates the influence of the LoRA adapter output before it is added back to the original model's output. The final, "perfected" equation to be used in this project, which incorporates this scaling, is:  
 $$h \= W\_0x \+ \\frac{\\alpha}{r} B(A(x))$$  
 Justification:  
-The $\\alpha$ parameter is essential for training stability.35 The ratio $\\frac{\\alpha}{r}$ is the key. If this scaling factor is too small, the initial updates from the randomly-initialized LoRA adapter will be negligible, stalling training. If it is too large, it can destabilize the model. A common and effective heuristic, which will be adopted as the baseline for this project, is to set $\\alpha$ to be equal to or twice the rank $r$ (e.g., $r=16, \\alpha=32$).34 This practice, sometimes associated with "Rank-Stabilized LoRA" (rsLoRA) 35, ensures the scaling factor $\\frac{\\alpha}{r}$ is $\\approx 1$ or $2$, providing a stable and effective contribution from the adapter from the first training steps. This is the final equation that will be implemented.
+The $\\alpha$ parameter is essential for training stability [35] The ratio $\\frac{\\alpha}{r}$ is the key. If this scaling factor is too small, the initial updates from the randomly-initialized LoRA adapter will be negligible, stalling training. If it is too large, it can destabilize the model. A common and effective heuristic, which will be adopted as the baseline for this project, is to set $\\alpha$ to be equal to or twice the rank $r$ (e.g., $r=16, \\alpha=32$) [34] This practice, sometimes associated with "Rank-Stabilized LoRA" (rsLoRA) 35, ensures the scaling factor $\\frac{\\alpha}{r}$ is $\\approx 1$ or $2$, providing a stable and effective contribution from the adapter from the first training steps. This is the final equation that will be implemented.
 
 ### **1.2 Information Geometry: Derivation and Justification of the Fisher-Rao Metric**
 
@@ -161,15 +161,15 @@ $$g\_{\\mu\\nu}(\\theta) \= E\\left\[\\frac{\\partial \\log p(x|\\theta)}{\\part
 In the context of discrete output distributions (e.g., an LLM's vocabulary), this is computed as a sum:
 
 $$g\_{\\mu\\nu}(\\theta) \= \\sum\_x p(x|\\theta) \\frac{\\partial \\log p(x|\\theta)}{\\partial \\theta\_\\mu} \\frac{\\partial \\log p(x|\\theta)}{\\partial \\theta\_\\nu}$$  
-This matrix $g\_{\\mu\\nu}(\\theta)$ defines the local geometry at every point $\\theta$ on the text manifold.4 The distance (geodesic) computed using this metric is the Fisher-Rao distance.
+This matrix $g\_{\\mu\\nu}(\\theta)$ defines the local geometry at every point $\\theta$ on the text manifold [4] The distance (geodesic) computed using this metric is the Fisher-Rao distance.
 
 Justification (FIM vs. Kullback-Leibler Divergence):  
-A simpler alternative might be the Kullback-Leibler (KL) Divergence.37 However, KLD is insufficient for the rigorous demands of this project for several reasons:
+A simpler alternative might be the Kullback-Leibler (KL) Divergence [37] However, KLD is insufficient for the rigorous demands of this project for several reasons:
 
-1. **Asymmetry:** KLD is not a true distance metric. It is asymmetric ($D\_{KL}(P||Q) \\neq D\_{KL}(Q||P)$) and violates the triangle inequality.37 This makes it unsuitable for building a simplicial complex, which requires a symmetric distance matrix.  
-2. **Local vs. Global:** KLD is a global measure of divergence, whereas FIM is a local metric. Research comparing the two shows that KLD often concentrates many distinct distance values near zero, effectively "hiding" or "masking" subtle differences between distributions.38 The Fisher-Rao distance, by contrast, provides a more linearly distributed and meaningful measure of *local distinguishability*.7  
-3. **Mathematical Relationship:** The FIM is, in fact, the *Hessian* (second-order Taylor approximation) of the KL Divergence.40 By using the FIM, the framework is, in effect, using the proper, local, Riemannian geometric structure that KLD only approximates.  
-4. **Invariance:** The FIM is the *only* Riemannian metric (up to a constant) that is invariant to reparameterization of the data.40 This is a profound and critical property. It means that the "ruler" used to measure semantic distance does not change, even if the underlying model architecture or parameterization is altered.4
+1. **Asymmetry:** KLD is not a true distance metric. It is asymmetric ($D\_{KL}(P||Q) \\neq D\_{KL}(Q||P)$) and violates the triangle inequality [37] This makes it unsuitable for building a simplicial complex, which requires a symmetric distance matrix.  
+2. **Local vs. Global:** KLD is a global measure of divergence, whereas FIM is a local metric. Research comparing the two shows that KLD often concentrates many distinct distance values near zero, effectively "hiding" or "masking" subtle differences between distributions [38] The Fisher-Rao distance, by contrast, provides a more linearly distributed and meaningful measure of *local distinguishability*.7  
+3. **Mathematical Relationship:** The FIM is, in fact, the *Hessian* (second-order Taylor approximation) of the KL Divergence [40] By using the FIM, the framework is, in effect, using the proper, local, Riemannian geometric structure that KLD only approximates.  
+4. **Invariance:** The FIM is the *only* Riemannian metric (up to a constant) that is invariant to reparameterization of the data [40] This is a profound and critical property. It means that the "ruler" used to measure semantic distance does not change, even if the underlying model architecture or parameterization is altered [4]
 
 For a system that must detect subtle semantic "fragility" 4 and serve as a loss function, the rigorous, symmetric, and invariant properties of the FIM are not optional; they are a core requirement.
 
@@ -199,16 +199,16 @@ This review surveys the state-of-the-art in related fields to establish the scie
 
 ### **2.1 State-of-the-Art: TDA in Computational Linguistics**
 
-The application of Topological Data Analysis (TDA) to NLP is a niche but rapidly emerging field.43 The central promise is that TDA can extract structural features from high-dimensional, noisy text data that other methods miss.45
+The application of Topological Data Analysis (TDA) to NLP is a niche but rapidly emerging field [43] The central promise is that TDA can extract structural features from high-dimensional, noisy text data that other methods miss [45]
 
 Current research has successfully used TDA for:
 
 * **Argument Mining:** Explicitly "finding loop (holes) in logic".11  
-* **Text Classification:** Enhancing classifiers by providing topological features. Studies have shown that adding TDA-derived features (e.g., from attention graphs) to a BERT model can improve performance.46  
-* **Contradiction Detection:** A key 2022 study demonstrated that concatenating topological feature vectors (derived from embeddings) to BERT and other models (CBOW, ESIM) improves performance on contradiction detection tasks.3  
-* **Novelty Detection:** TDA has also been applied to detect fraudulent scientific papers 10 and analyze word sense.11
+* **Text Classification:** Enhancing classifiers by providing topological features. Studies have shown that adding TDA-derived features (e.g., from attention graphs) to a BERT model can improve performance [46]  
+* **Contradiction Detection:** A key 2022 study demonstrated that concatenating topological feature vectors (derived from embeddings) to BERT and other models (CBOW, ESIM) improves performance on contradiction detection tasks [3]  
+* **Novelty Detection:** TDA has also been applied to detect fraudulent scientific papers 10 and analyze word sense [11]
 
-**Validation of Novelty:** The existing literature *validates* the core premise of the CNS-TGM proposal: TDA features are useful for finding contradictions.3 However, the current art uses TDA as a *pre-processing or feature engineering step*. The topological features are computed *once*, vectorized, and then "bolted on" to a standard deep learning model.
+**Validation of Novelty:** The existing literature *validates* the core premise of the CNS-TGM proposal: TDA features are useful for finding contradictions [3] However, the current art uses TDA as a *pre-processing or feature engineering step*. The topological features are computed *once*, vectorized, and then "bolted on" to a standard deep learning model.
 
 The CNS-TGM proposal is *more fundamental and novel*. It does not use TDA for static feature engineering. Instead, it proposes to use the topological invariants (specifically $\\beta\_1$) *directly within the training loop as a dynamic loss function*. This is a significant methodological leap. The system will not just *see* the topological features; it will be *trained* to actively *manipulate* and *minimize* them, forcing it to learn a representation of logical coherence itself.
 
@@ -216,9 +216,9 @@ The CNS-TGM proposal is *more fundamental and novel*. It does not use TDA for st
 
 The use of information geometry and the FIM in machine learning is more established, though its application to NLP is still advanced. Current applications include:
 
-* **Model Analysis:** Using the FIM to analyze the "fragility" of neural networks, identifying how local perturbations affect output distributions.4  
-* **Generative Models:** The FIM and statistical manifolds are foundational to new classes of generative models, such as Statistical Flow Matching (SFM), which operate on the manifold of categorical distributions.5  
-* **Metric Learning:** The FIM has been proposed as a distance metric for text documents 48 and for analyzing complex, non-linear data relationships in fields like medicine.8
+* **Model Analysis:** Using the FIM to analyze the "fragility" of neural networks, identifying how local perturbations affect output distributions [4]  
+* **Generative Models:** The FIM and statistical manifolds are foundational to new classes of generative models, such as Statistical Flow Matching (SFM), which operate on the manifold of categorical distributions [5]  
+* **Metric Learning:** The FIM has been proposed as a distance metric for text documents 48 and for analyzing complex, non-linear data relationships in fields like medicine [8]
 
 **Validation of Novelty:** The literature confirms the FIM is a powerful and appropriate tool for "discover\[ing\] high fragility regions in the statistical manifold".4 However, these applications typically use FIM to *analyze* existing models or to *build* specific types of generative models.
 
@@ -228,12 +228,12 @@ The novelty of the CNS-TGM proposal lies in the *unification* of information geo
 
 A valid question is whether the complexity of TDA is necessary, or if a simpler graph-based approach (e.g., using Graph Neural Networks) could achieve the same goal of "cycle detection."
 
-* **Graph-Based Methods (GNNs):** GNNs and other graph-based learning methods 45 are excellent at modeling explicit relationships. A GNN could, for example, be trained on a knowledge graph to detect explicit logical cycles (e.g., A $\\rightarrow$ B, B $\\rightarrow$ C, C $\\rightarrow$ A).49  
+* **Graph-Based Methods (GNNs):** GNNs and other graph-based learning methods 45 are excellent at modeling explicit relationships. A GNN could, for example, be trained on a knowledge graph to detect explicit logical cycles (e.g., A $\\rightarrow$ B, B $\\rightarrow$ C, C $\\rightarrow$ A) [49]  
 * **TDA-Based Methods (Persistent Homology):** TDA operates at a more abstract and global level.
 
 The analysis concludes that TDA is superior for this specific task for a critical reason:  
 A GNN finds explicit, local cycles. It is brittle and requires a well-formed graph representation. It can only find contradictions that are explicitly coded as a graph cycle.  
-TDA, by computing persistent homology (Betti numbers) 46, finds *global, abstract topological features*. A $\\beta\_1$ loop 50 is a far more general and powerful concept. It can detect that a set of arguments *as a whole* forms a high-dimensional "loop" *even if no explicit, local A $\\rightarrow$ A cycle exists*. It detects *thematic* or *semantic* circularity, not just explicit graph-based cycles. Furthermore, TDA is known to be more robust to noise and outliers, a significant advantage in messy, real-world text data.51
+TDA, by computing persistent homology (Betti numbers) 46, finds *global, abstract topological features*. A $\\beta\_1$ loop 50 is a far more general and powerful concept. It can detect that a set of arguments *as a whole* forms a high-dimensional "loop" *even if no explicit, local A $\\rightarrow$ A cycle exists*. It detects *thematic* or *semantic* circularity, not just explicit graph-based cycles. Furthermore, TDA is known to be more robust to noise and outliers, a significant advantage in messy, real-world text data [51]
 
 The table below summarizes this comparison.
 
@@ -241,15 +241,15 @@ The table below summarizes this comparison.
 
 | Method | What It Detects | Pros | Cons |
 | :---- | :---- | :---- | :---- |
-| **Graph Neural Networks (GNNs)** | Explicit graph cycles (local). Detects contradictions of the form $A \\rightarrow B \\rightarrow A$. | Fast; effective for reasoning on explicit knowledge graphs.49 | Brittle; requires a well-defined graph schema; misses *implicit* or *semantic* circularity. |
-| **Topological Data Analysis (TDA)** | Persistent topological features (global), e.g., $\\beta\_1$ loops.50 | Robust to noise 51; detects global, *semantic* circularity 11; parameter-light.51 | Computationally intensive; conceptually more complex than standard graph methods.52 |
+| **Graph Neural Networks (GNNs)** | Explicit graph cycles (local). Detects contradictions of the form $A \\rightarrow B \\rightarrow A$. | Fast; effective for reasoning on explicit knowledge graphs [49] | Brittle; requires a well-defined graph schema; misses *implicit* or *semantic* circularity. |
+| **Topological Data Analysis (TDA)** | Persistent topological features (global), e.g., $\\beta\_1$ loops [50] | Robust to noise 51; detects global, *semantic* circularity 11; parameter-light [51] | Computationally intensive; conceptually more complex than standard graph methods [52] |
 
 ### **2.4 State-of-the-Art: Knowledge Synthesis and Multi-Agent Systems**
 
 The proposal's multi-agent, dialectical architecture also constitutes a novel contribution.
 
-* **Knowledge Synthesis:** The term "knowledge synthesis" is most prevalent in medicine and public health, where it refers to a *formal, human-driven methodology* for creating systematic reviews from conflicting bodies of evidence.26 It is a protocol for humans, not an automated AI task.  
-* **Multi-Agent Systems (MAS):** In AI, multi-agent "debate" systems are a recent and active area of research.19 These systems are primarily used to improve reasoning, solve complex tasks, or detect hallucinations in LLMs.24 Agents in these systems typically "debate" to reach a simple consensus or expose a factual error.23
+* **Knowledge Synthesis:** The term "knowledge synthesis" is most prevalent in medicine and public health, where it refers to a *formal, human-driven methodology* for creating systematic reviews from conflicting bodies of evidence [26] It is a protocol for humans, not an automated AI task.  
+* **Multi-Agent Systems (MAS):** In AI, multi-agent "debate" systems are a recent and active area of research [19] These systems are primarily used to improve reasoning, solve complex tasks, or detect hallucinations in LLMs [24] Agents in these systems typically "debate" to reach a simple consensus or expose a factual error [23]
 
 **Validation of Novelty:** The CNS-TGM proposal *unifies* these two fields. It is, to our knowledge, the first attempt to *automate* the rigorous, structured process of *dialectical knowledge synthesis*. Current MAS "debates" 20 lack the formal, mathematical objective that this proposal introduces. By giving the agents the explicit goal of *minimizing topological "holes" ($\\beta\_1$) and geometric "bias" ($\\chi$)*, the system moves beyond simple consensus to true, structured, and defensible synthesis.
 
@@ -274,14 +274,14 @@ Where $L\_{CE}$ is a standard cross-entropy loss, $L\_{\\beta\_1}$ is the topolo
 Computing $L\_{\\beta\_1}$ requires a multi-stage algorithmic process within the training loop:
 
 1. Execute forward\_backward pass on the model for a batch of SNOs to obtain gradients and output distributions $p(x|\\theta)$.31
-2. Construct the Fisher Information Metric (FIM) $g\_{\\mu\\nu}$ from these gradients.7
+2. Construct the Fisher Information Metric (FIM) $g\_{\\mu\\nu}$ from these gradients [7]
 3. Compute the pairwise Fisher-Rao distance matrix $D\_{FR}$ from the FIM.
 4. Build a Vietoris-Rips filtration from $D\_{FR}$.9
 5. Compute persistent homology to extract the Betti number $\\beta\_1$.
 6. Incorporate the $\\beta\_1$ value (treated as a non-differentiable reward signal, analogous to RL objectives) into $L\_{\\beta\_1}$.
-7. Call optim\_step to update model weights.33
+7. Call optim\_step to update model weights [33]
 
-While this workflow is implementable in standard frameworks (PyTorch, JAX), Tinker significantly reduces implementation complexity by exposing low-level primitives (forward\_backward, optim\_step, sample) 33 while abstracting distributed training infrastructure (multi-GPU coordination, fault tolerance, checkpointing).31 This allows research focus to remain on the novel topological-geometric methodology rather than distributed systems engineering.
+While this workflow is implementable in standard frameworks (PyTorch, JAX), Tinker significantly reduces implementation complexity by exposing low-level primitives (forward\_backward, optim\_step, sample) 33 while abstracting distributed training infrastructure (multi-GPU coordination, fault tolerance, checkpointing) [31] This allows research focus to remain on the novel topological-geometric methodology rather than distributed systems engineering.
 
 **Phased Platform Strategy:**
 - **Phase 1 (Initial Validation):** Tinker API with LoRA fine-tuning for rapid hypothesis testing and SNO framework validation
@@ -289,14 +289,14 @@ While this workflow is implementable in standard frameworks (PyTorch, JAX), Tink
 
 ### **1.2 Base Model Selection and Configuration**
 
-All experimentation will be conducted using models supported by the Tinker API.33 A two-model strategy will be employed: one for rapid development and one for production-level performance.
+All experimentation will be conducted using models supported by the Tinker API [33] A two-model strategy will be employed: one for rapid development and one for production-level performance.
 
-* **Development Model: Llama 3.1 8B Instruct:** For initial prototyping and debugging the complex loss function, a fast and capable model is required. The Llama 3.1 8B Instruct model is the ideal choice from Tinker's list.33 While Mistral 7B is also available and cheaper 56, Llama 3.1 8B offers significant advantages crucial for this reasoning task:  
-  * **Context Window:** 128,000 tokens, versus 8,192 for Mistral 7B.57 This is essential for processing the large, multi-document contexts required for synthesis.  
-  * **Tokenizer:** Llama 3's tokenizer is more efficient, yielding up to 15% fewer tokens for the same text.58  
-  * Reasoning: Llama 3 8B generally outperforms Mistral 7B on reasoning and instruction-following benchmarks.56  
+* **Development Model: Llama 3.1 8B Instruct:** For initial prototyping and debugging the complex loss function, a fast and capable model is required. The Llama 3.1 8B Instruct model is the ideal choice from Tinker's list [33] While Mistral 7B is also available and cheaper 56, Llama 3.1 8B offers significant advantages crucial for this reasoning task:  
+  * **Context Window:** 128,000 tokens, versus 8,192 for Mistral 7B [57] This is essential for processing the large, multi-document contexts required for synthesis.  
+  * **Tokenizer:** Llama 3's tokenizer is more efficient, yielding up to 15% fewer tokens for the same text [58]  
+  * Reasoning: Llama 3 8B generally outperforms Mistral 7B on reasoning and instruction-following benchmarks [56]  
     These benefits justify the modest increase in cost over Mistral 7B.  
-* **Production Model: Qwen3-235B-A22B-Instruct:** For final, SOTA-level performance, the system will be scaled to a large Mixture-of-Experts (MoE) model. The Qwen3-235B model is explicitly supported by Tinker.31 Its MoE architecture is an excellent philosophical and practical match for the proposed multi-agent system, as the distinct "experts" within the model may be implicitly activated by the different objectives of the Proposer, Antagonist, and Synthesizer agents.
+* **Production Model: Qwen3-235B-A22B-Instruct:** For final, SOTA-level performance, the system will be scaled to a large Mixture-of-Experts (MoE) model. The Qwen3-235B model is explicitly supported by Tinker [31] Its MoE architecture is an excellent philosophical and practical match for the proposed multi-agent system, as the distinct "experts" within the model may be implicitly activated by the different objectives of the Proposer, Antagonist, and Synthesizer agents.
 
 **Table 3.1.1: Base Model Selection Matrix**
 
@@ -307,7 +307,7 @@ All experimentation will be conducted using models supported by the Tinker API.3
 
 ### **1.3 LoRA Configuration Strategy**
 
-The Tinker platform exclusively implements LoRA fine-tuning, not full fine-tuning.31 This dictates a specific configuration strategy informed by Tinker's own research.32
+The Tinker platform exclusively implements LoRA fine-tuning, not full fine-tuning [31] This dictates a specific configuration strategy informed by Tinker's own research [32]
 
 1. **Task-Type Justification:** The complex, non-differentiable nature of the topological loss function ($L\_{\\beta\_1}$) means this task is structurally identical to Reinforcement Learning (RL), where the model is optimized against a scalar "reward" (the Betti number). This is advantageous, as Tinker's own analysis states that "LoRA performs equivalently to FullFT for reinforcement learning even with small ranks".32 This suggests the LoRA-only constraint will not be a performance bottleneck, *provided* the task is correctly framed as an RL-style optimization.  
 2. **Configuration Details:** The same research 32 provides a critical warning: "LoRA performs better when applied to all weight matrices, especially MLP and MoE layers. Attention-only LoRA underperforms".32  
@@ -392,13 +392,13 @@ The CNS-TGM system must be validated against SOTA benchmarks for its sub-tasks, 
 
 The Proposer and Antagonist agents' ability to identify contradictory claims will be tested on two primary datasets:
 
-* **SciFact:** A dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts.28 It is a small, domain-specific, and challenging dataset.60
-* **FEVER:** A large-scale dataset of 185,445 claims generated from Wikipedia, classified as Supported, Refuted, or NotEnoughInfo.30
+* **SciFact:** A dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts [28] It is a small, domain-specific, and challenging dataset [60]
+* **FEVER:** A large-scale dataset of 185,445 claims generated from Wikipedia, classified as Supported, Refuted, or NotEnoughInfo [30]
 
 **Strategic Advantages of LoRA for Initial Validation:**
 This dual-dataset strategy leverages LoRA's empirically-validated strengths for the initial hypothesis testing phase:
 
-1. **Optimal Task-Dataset Alignment:** The core innovation—SNO framework validation and topological-geometric loss function development—can be rigorously evaluated on SciFact, where LoRA performance is equivalent to full fine-tuning.32 SciFact's expert-curated, domain-specific nature makes it the ideal testbed for demonstrating that topological structure ($\\beta\_1$) and geometric fragility (FIM) capture meaningful properties of scientific argumentation.
+1. **Optimal Task-Dataset Alignment:** The core innovation—SNO framework validation and topological-geometric loss function development—can be rigorously evaluated on SciFact, where LoRA performance is equivalent to full fine-tuning [32] SciFact's expert-curated, domain-specific nature makes it the ideal testbed for demonstrating that topological structure ($\\beta\_1$) and geometric fragility (FIM) capture meaningful properties of scientific argumentation.
 
 2. **RL-Style Optimization Match:** The non-differentiable topological loss component ($L\_{\\beta\_1}$) frames this task as structurally analogous to reinforcement learning, where the model optimizes against scalar reward signals. Tinker's own research demonstrates that "LoRA performs equivalently to FullFT for reinforcement learning even with small ranks".32 This architectural alignment positions LoRA as the methodologically appropriate approach for initial development.
 
@@ -414,13 +414,13 @@ This dual-dataset strategy leverages LoRA's empirically-validated strengths for 
 
 ### **2.2 SOTA Baselines for Comparison**
 
-The CNS-TGM framework will not be competing against simple BERT models. The current (2024-2025) SOTA in claim extraction and verification involves advanced, multi-stage pipelines and new, specialized evaluation frameworks.67
+The CNS-TGM framework will not be competing against simple BERT models. The current (2024-2025) SOTA in claim extraction and verification involves advanced, multi-stage pipelines and new, specialized evaluation frameworks [67]
 
 The baselines to beat include:
 
-* **MultiVerS:** The SOTA on SciFact as of May 2022, a multi-stage pipeline.62  
-* **Claimify:** A 2025 LLM-based method from Microsoft Research for high-quality claim extraction.69  
-* **SOTA LLMs:** Other large vision-language and text models noted for document understanding, such as GLM-4.5V.70
+* **MultiVerS:** The SOTA on SciFact as of May 2022, a multi-stage pipeline [62]  
+* **Claimify:** A 2025 LLM-based method from Microsoft Research for high-quality claim extraction [69]  
+* **SOTA LLMs:** Other large vision-language and text models noted for document understanding, such as GLM-4.5V [70]
 
 The goal is to demonstrate that the CNS-TGM system, powered by its novel topological-geometric loss function, can outperform these SOTA baselines on the contradiction F1 and accuracy metrics.
 
