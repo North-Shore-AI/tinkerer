@@ -1,0 +1,9 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "ignore": {
+    "customPatterns": [
+      "cns/**",
+      "thinking-machines-labs/**"
+    ]
+  }
+}

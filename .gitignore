@@ -1,2 +1,48 @@
 tinker-docs/
 thinking-machines-labs/
+.gitignore
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+
+# Packaging / build outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+.envrc
+
+# Jupyter + scientific workflow cruft
+.ipynb_checkpoints/
+.mypy_cache/
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# Data + experiment outputs
+data/
+data_raw/
+outputs/
+results/
+figures/
+logs/
+*.h5
+*.hdf
+*.hdf5
+*.nc
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+repomix*.xml
+
