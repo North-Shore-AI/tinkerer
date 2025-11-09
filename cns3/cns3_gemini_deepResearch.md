@@ -81,21 +81,31 @@ We reformulate the SNO as a topological and geometric object.
 
 We present three theoretical results that establish formal foundations for dialectical synthesis. Full formal proofs are provided in the Appendix; proof sketches are presented here.
 
-  * **Theorem 3.1 (Dialectical Convergence):** *Under conditions of (1) Lipschitz-continuous critic functions, (2) a synthesis operator $\mathcal{S}$ that is a contraction mapping with respect to the hypothesis manifold's geodesic distance, and (3) a finite or slowly-growing evidence pool, the iterative synthesis process $S_{k+1} = \mathcal{S}(\text{select}(S_k, S'_k))$ converges to a unique, stable fixed-point (a stable knowledge state).*
+  * **Theorem 3.1 (Dialectical Convergence):** Under conditions of (1) Lipschitz-continuous critic functions, (2) a synthesis operator $\mathcal{S}$ that is a contraction mapping with respect to the hypothesis manifold's geodesic distance, and (3) a finite or slowly-growing evidence pool, the iterative synthesis process
+
+  $$S_{k+1} = \mathcal{S}(\text{select}(S_k, S'_k))$$
+
+  converges to a unique, stable fixed-point (a stable knowledge state).
       * **Proof Sketch:**
         1.  We model the population of SNOs $P_k = \{S_i\}$ at iteration $k$ as a multi-agent system [[14](#ref-14)]. The selection and synthesis operation $S_{k+1} = \mathcal{S}(S_a, S_b)$ is an *iterative learning* strategy [[13](#ref-13)].
         2.  The goal of the system is to find a population $P^*$ that minimizes a global potential function $L(P)$, which is a sum of the critic scores (incoherence, ungroundedness, redundancy).
         3.  We prove that $\mathcal{S}$ is a contraction mapping by showing that the synthesis operation *provably* reduces topological incoherence (e.g., $\beta_1(S_{k+1}) < \beta_1(S_a \cup S_b)$) and minimizes the joint KL divergence.
         4.  Drawing from contraction mapping principles in multi-agent learning [[13](#ref-13)], we show that a contraction mapping on a complete metric space (our hypothesis manifold) has a unique fixed point.
         5.  Convergence is thus guaranteed. The stability is analyzed via the non-stationarity of the environment [[14](#ref-14)]; if new evidence arrives faster than the convergence rate, the system will *track* the evolving ground truth rather than converging.
-  * **Theorem 3.2 (Information Preservation):** *The SNO synthesis operation $\mathcal{S}$, when defined as the minimization of the KL divergence from the synthesis $S_{\text{new}}$ to the input narratives $S_1, S_2$, preserves the Fisher Information (FI) from the input narratives, i.e., $FI(S_{\text{new}}) \ge \max(FI(S_1), FI(S_2))$.*
+  * **Theorem 3.2 (Information Preservation):** The SNO synthesis operation $\mathcal{S}$, when defined as the minimization of the KL divergence from the synthesis $S_{\text{new}}$ to the input narratives $S_1, S_2$, preserves the Fisher Information (FI) from the input narratives:
+
+  $$FI(S_{\text{new}}) \ge \max(FI(S_1), FI(S_2))$$
       * **Proof Sketch:**
         1.  We model $S_1$ and $S_2$ as statistical models $p_{\theta_1}$ and $p_{\theta_2}$ on the manifold $\mathcal{M}$ [[10](#ref-10)]. Their information content is their Fisher Information Matrix (FIM), $G(\theta_1)$ and $G(\theta_2)$ [[11](#ref-11)].
         2.  The synthesis operation is a form of general Bayesian updating [[15](#ref-15)], which seeks to find a posterior $p_{\theta_{\text{new}}}$ that combines the information (evidence) from both inputs.
         3.  Chentsov's theorem states that the FIM is the *only* Riemannian metric (up to scaling) that is invariant under sufficient statistics [[10](#ref-10)].
         4.  We define the synthesis operation $\mathcal{S}$ as producing a *sufficient statistic* for the combined evidence sets $E_1 \cup E_2$.
         5.  By the properties of sufficient statistics and the invariance of the FIM, the FIM of the synthesis $G(\theta_{\text{new}})$ must be greater than or equal to the FIM of any individual input (in the matrix partial order). This proves that no information is lost; in fact, information is *gained* by resolving the conflict.
-  * **Theorem 3.3 (Bias Amplification Bounds):** *The bias amplification factor $\mathcal{A}$ of the GNN-based Logic Critic is bounded by $\mathcal{A} \le f(\lambda_1, \mathcal{H})$, where $\lambda_1$ is the principal eigenvalue of the SNO reasoning graph's adjacency matrix and $\mathcal{H}$ is the graph's community homophily (the tendency of biased claims to link to other biased claims).*
+  * **Theorem 3.3 (Bias Amplification Bounds):** The bias amplification factor $\mathcal{A}$ of the GNN-based Logic Critic is bounded by
+
+  $$\mathcal{A} \le f(\lambda_1, \mathcal{H})$$
+
+  where $\lambda_1$ is the principal eigenvalue of the SNO reasoning graph's adjacency matrix and $\mathcal{H}$ is the graph's community homophily (the tendency of biased claims to link to other biased claims).
       * **Proof Sketch:**
         1.  We model the Logic Critic as a GNN performing node (claim) classification [[17](#ref-17)].
         2.  Systematic bias (e.g., gender, race) present in the input narratives manifests as *community bias* in the reasoning graph $\mathcal{G}$ [[17](#ref-17)]. For example, claims from a biased source may form a tightly-knit "community" within the graph.
