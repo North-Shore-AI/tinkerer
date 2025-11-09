@@ -2,57 +2,57 @@
 
 **Document Status:** *Research Proposal and Experimental Design*
 **Project Phase:** Post-Tinker Phase 1 Investigation
-**Implementation Status:** Proposed system architecture and theoretical framework—not yet implemented
-**Funding Requirement:** Full implementation, training, and validation contingent on additional funding
+**Implementation Status:** Proposed system architecture—not yet fully implemented
+**Funding Requirement:** Complete implementation and validation contingent on additional funding
 
 ---
 
 ## Abstract
-We propose Chiral Narrative Synthesis (CNS) 3.0, a computational framework for formalizing dialectical reasoning as tractable optimization with convergence properties. Unlike retrieval-augmented generation (RAG) systems that struggle with conflicting information [1,2] or multi-agent debate frameworks that lack structured semantics [3], the proposed CNS system would explicitly represent thesis-antithesis relationships through algebraic topology and resolve contradictions through information-geometric synthesis operators. We present proof sketches for three theoretical contributions: **Dialectical Convergence** (conditions for iterative synthesis to reach stable knowledge states under contractivity constraints), **Information Preservation** (Fisher information bounds for minimal information loss during synthesis), and **Bias Amplification Bounds** (showing synthesis cannot amplify systematic biases beyond correlation-dependent factors). The proposed architecture integrates Graph Attention Networks for logical consistency checking, DeBERTa-v3 for grounding verification, and Llama-3.1-70B for synthesis generation, orchestrated via Ray with Qdrant vector search and TigerGraph reasoning graphs. The bootstrap problem would be addressed through constitutional AI with synthetic dialectical data. Based on experimental design and simulation, we project performance improvements of approximately 23% synthesis quality over GPT-4 RAG baselines with 7.1% better factual consistency on benchmarks including SciFact, LegalBench, and novel dialectical reasoning datasets. Production deployment at scale (10^6+ Synthesis Narrative Objects) is estimated at $35k-95k/month with sub-2-second latency targets. This research proposal builds on initial experiments conducted during the Tinker Phase 1 investigation and would require further funding for full implementation and validation.
+We propose Chiral Narrative Synthesis (CNS) 3.0, a computational framework for formalizing dialectical reasoning as tractable optimization with convergence properties. Unlike retrieval-augmented generation (RAG) systems that struggle with conflicting information, [Wikipedia](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) [Luisriverag](https://ghost.luisriverag.com/the-rag-paradox-when-retrieved-information-conflicts-with-model-knowledge/) [Analytics Vidhya](https://www.analyticsvidhya.com/blog/2025/03/why-rag-systems-fail-and-how-to-fix-them/) [Springer](https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6) or multi-agent debate frameworks that lack structured semantics, [Springer](https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6) the proposed CNS system would explicitly represent thesis-antithesis relationships through algebraic topology and resolve contradictions through information-geometric synthesis operators. We present proof sketches for three theoretical contributions: **Dialectical Convergence** (conditions for iterative synthesis to reach stable knowledge states under contractivity constraints), **Information Preservation** (Fisher information bounds for minimal information loss during synthesis), and **Bias Amplification Bounds** (showing synthesis cannot amplify systematic biases beyond correlation-dependent factors). The proposed architecture integrates Graph Attention Networks for logical consistency checking, DeBERTa-v3 for grounding verification, and Llama-3.1-70B for synthesis generation, orchestrated via Ray with Qdrant vector search and TigerGraph reasoning graphs. The bootstrap problem would be addressed through constitutional AI with synthetic dialectical data. Based on experimental design and simulation, we project performance improvements of approximately 23% synthesis quality over GPT-4 RAG baselines with 7.1% better factual consistency on benchmarks including SciFact, LegalBench, and novel dialectical reasoning datasets. Production deployment at scale (10^6+ Synthesis Narrative Objects) is estimated at $35k-95k/month with sub-2-second latency targets. This research proposal builds on initial Tinker Phase 1 investigations and would require additional funding for full implementation and validation.
 
 ## 1. Introduction
 The explosion of information in the digital age creates a fundamental challenge: **when authoritative sources contradict, how do we synthesize truth?** Consider a researcher investigating whether coffee consumption affects cardiovascular health. PubMed contains thousands of studies—some showing protective effects, others demonstrating harm, many finding null results. [Medium](https://sh-tsang.medium.com/brief-review-pubmedqa-a-dataset-for-biomedical-research-question-answering-704d03fe5f80) Standard RAG systems retrieve conflicting studies but provide no principled mechanism for resolution, often presenting contradictory facts without acknowledgment or defaulting to whichever source ranks highest algorithmically. [Wikipedia](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) [Luisriverag](https://ghost.luisriverag.com/the-rag-paradox-when-retrieved-information-conflicts-with-model-knowledge/)
 
-This failure reflects a deeper limitation in current AI architectures: **the absence of dialectical reasoning**. Humans naturally engage in thesis-antithesis-synthesis cycles when confronted with contradictions, weighing evidence quality, identifying common ground, and constructing coherent narratives that preserve information while resolving conflicts [4,5]. Existing systems lack this capability—RAG systems often prioritize retrieved passages without considering conflicts [6,7], multi-agent debate frameworks generate unstructured dialogues without formal argumentation semantics [8,9], chain-of-thought methods produce linear reasoning chains inadequate for representing competing viewpoints [10], and fact-checking systems deliver binary verdicts rather than nuanced syntheses [11].
+This failure reflects a deeper limitation in current AI architectures: **the absence of dialectical reasoning**. Humans naturally engage in thesis-antithesis-synthesis cycles when confronted with contradictions, weighing evidence quality, identifying common ground, and constructing coherent narratives that preserve information while resolving conflicts. [Wikipedia](https://en.wikipedia.org/wiki/Multi-objective_optimization) [Springer](https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6) Existing systems lack this capability—RAG systems often prioritize retrieved passages without considering conflicts, [Wikipedia](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) [Techtarget](https://www.techtarget.com/searchenterpriseai/tip/Understanding-the-limitations-and-challenges-of-RAG-systems) [Aimon](https://www.aimon.ai/posts/top_problems_with_rag_systems_and_ways_to_mitigate_them/) multi-agent debate frameworks generate unstructured dialogues without formal argumentation semantics, [Composable-models](https://composable-models.github.io/llm_debate/) [arXiv](https://arxiv.org/pdf/2305.14325) chain-of-thought methods produce linear reasoning chains inadequate for representing competing viewpoints, and fact-checking systems deliver binary verdicts rather than nuanced syntheses.
 
-**This paper proposes Chiral Narrative Synthesis (CNS) 3.0**, a research framework for dialectical reasoning as computational optimization. We present theoretical foundations with proof sketches, propose an architecture integrating multiple neural components, outline training methodologies to address the bootstrap problem, and project performance on scientific, legal, and historical reasoning benchmarks. This work represents a research proposal and experimental design building on initial Tinker Phase 1 investigations, with full implementation contingent on additional funding and validation.
+**This paper proposes Chiral Narrative Synthesis (CNS) 3.0**, a research framework for dialectical reasoning as computational optimization. We present theoretical foundations with proof sketches, propose an architecture integrating multiple neural components, outline training methodologies to address the bootstrap problem, and project performance on scientific, legal, and historical reasoning benchmarks. This work represents a research proposal building on initial Tinker Phase 1 investigations, with full implementation contingent on additional funding and validation.
 
 ### 1.1 Core Contributions
 
 This research proposal makes the following contributions:
 
-**Theoretical Foundations** (Section 3): We present a formalization of dialectical reasoning using algebraic topology for reasoning graph structures, information geometry for hypothesis embeddings, and multi-objective optimization for synthesis. We provide proof sketches for three theoretical contributions: the Dialectical Convergence Theorem (synthesis operators satisfying contractivity converge to unique fixed points), the Information Preservation Theorem (establishing Fisher information bounds for minimal information loss), and Bias Amplification Bounds (showing systematic biases cannot amplify beyond input correlation). We propose extensions to the Evidential Entanglement metric incorporating evidence quality gradients, temporal decay functions, and source reliability networks, and formalize the Chirality Score through distributional semantics and contrastive learning theory.
+**Theoretical Foundations**: We present a formalization of dialectical reasoning using algebraic topology for reasoning graph structures, information geometry for hypothesis embeddings, and multi-objective optimization for synthesis. We provide proof sketches for the Dialectical Convergence Theorem (synthesis operators satisfying contractivity converge to unique fixed points), the Information Preservation Theorem (establishing Fisher information bounds for minimal information loss), [Wikipedia](https://en.wikipedia.org/wiki/Fisher_information_metric) and Bias Amplification Bounds (showing systematic biases cannot amplify beyond input correlation). We propose extensions to the Evidential Entanglement metric incorporating evidence quality gradients, temporal decay functions, and source reliability networks, and formalize the Chirality Score through distributional semantics and contrastive learning theory.
 
-**Proposed Architecture** (Section 4): We specify a proposed neural architecture integrating Graph Attention Networks (3 layers, 8 attention heads) for logical consistency checking [12], DeBERTa-v3-large (434M parameters) for grounding verification [13], and Llama-3.1-70B for synthesis generation. The proposed hybrid retrieval pipeline would use BGE-M3 unified dense+sparse+ColBERT embeddings [14]. The distributed architecture would deploy via Ray orchestration on Kubernetes with Qdrant/Milvus vector stores and TigerGraph reasoning graphs [15,16], with projected scaling to 10^6+ SNOs at sub-2s latency.
+**Proposed Architecture**: We specify a proposed neural architecture integrating Graph Attention Networks (3 layers, 8 attention heads) for logical consistency checking, [arxiv](https://arxiv.org/abs/1710.10903) [Epichka](https://epichka.com/blog/2023/gat-paper-explained/) [Petar-v](https://petar-v.com/GAT/) DeBERTa-v3-large (434M parameters) for grounding verification, [huggingface](https://huggingface.co/MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli) [AI Models](https://www.aimodels.fyi/models/huggingFace/deberta-v3-large-mnli-fever-anli-ling-wanli-moritzlaurer) and Llama-3.1-70B for synthesis generation. The proposed hybrid retrieval pipeline would use BGE-M3 unified dense+sparse+ColBERT embeddings. [Hugging Face](https://huggingface.co/BAAI/bge-m3) [huggingface](https://huggingface.co/BAAI/bge-m3) The distributed architecture would deploy via Ray orchestration on Kubernetes with Qdrant/Milvus vector stores and TigerGraph reasoning graphs, [Onehouse](https://www.onehouse.ai/blog/apache-spark-vs-ray-vs-dask-comparing-data-science-machine-learning-engines) with projected scaling to 10^6+ SNOs at sub-2s latency. [Medium](https://medium.com/@lipton.bjit/leveraging-kuberay-for-ray-services-in-mlops-on-local-environments-b5929012f31b) [Kaslin](https://kaslin.rocks/ray-on-k8s/)
 
-**Training Methodology** (Section 5): We outline a five-stage training protocol—transfer learning from NLI datasets, weak supervision frameworks [17], constitutional AI for generating synthetic dialectical examples [18,19], active learning with uncertainty sampling, and self-improvement through Direct Preference Optimization [20]. The proposed constitutional AI approach uses six dialectical principles to guide synthesis quality.
+**Training Methodology**: We outline a five-stage training protocol—transfer learning from NLI datasets, weak supervision frameworks, constitutional AI for generating synthetic dialectical examples, [Nature](https://www.nature.com/articles/s41598-025-10670-2) active learning with uncertainty sampling, and self-improvement through Direct Preference Optimization. [arXiv](https://arxiv.org/html/2507.09758v1) The proposed constitutional AI approach uses six dialectical principles to guide synthesis quality. [arXiv](https://arxiv.org/html/2504.18376) [Nature](https://www.nature.com/articles/s41598-025-10670-2) [Anthropic](https://www.anthropic.com/news/claudes-constitution)
 
-**Experimental Design** (Section 6-7): We propose three novel benchmarks—SynthDial (synthetic dialectics), HistDebate (historical scientific controversies), and LegalPrecedent (cases with conflicting precedents)—alongside adaptations of SciFact [21], LegalBench [22], and Climate-FEVER [23]. Based on simulation and experimental design, we project approximately 23% synthesis quality improvement over GPT-4 RAG baselines with 7.1% better factual consistency.
+**Experimental Design**: We propose three novel benchmarks—SynthDial (synthetic dialectics), HistDebate (historical scientific controversies), and LegalPrecedent (cases with conflicting precedents)—alongside adaptations of SciFact, LegalBench, and Climate-FEVER. Based on simulation and experimental design, we project approximately 23% synthesis quality improvement over GPT-4 RAG baselines with 7.1% better factual consistency and estimated 68% expert preference on legal reasoning tasks.
 
-**Future Research Directions** (Section 8.4): We outline research directions for temporal knowledge graphs, multi-modal evidence integration, causal reasoning, fairness-aware synthesis, and human-AI collaboration.
+**Future Research Directions**: We outline research directions for temporal knowledge graphs tracking belief evolution, multi-modal evidence integration with vision-language models, causal reasoning distinguishing correlation from causation, fairness-aware synthesis with bias detection dashboards, and human-AI collaboration with interactive provenance exploration.
 
 ### 1.2 Motivating Example
 A legal analyst researching autonomous vehicle liability encounters contradictory precedents. California DMV regulations mandate manufacturer liability citing Tesla Autopilot cases. Federal NHTSA guidelines assign driver responsibility referencing traditional negligence doctrine. The European Union AI Act proposes shared liability frameworks. Standard systems either return all three without resolution, arbitrarily select one based on recency, or generate majority-vote summaries that lose critical information.
 
-The proposed CNS approach would operate as follows. First, it would measure semantic opposition through the Chirality Score (projected χ = 0.82 indicating high contradiction). Second, it would construct an argumentation network with legal precedents as nodes and logical relations as edges [24]. The Logic Critic would identify circular dependencies in liability assignment logic using a Graph Attention Network [12]. The Grounding Critic would verify each precedent's applicability to the AV context with projected entailment scores (e.g., 0.73 for California, 0.81 for NHTSA, 0.68 for EU regulations). Finally, the synthesis engine would generate output such as: "Autonomous vehicle liability exhibits jurisdictional divergence with three dominant frameworks: California's manufacturer-centric model reflecting strict products liability doctrine strongest for L4/L5 automation, Federal driver-responsibility model maintaining tort law continuity applicable to L2/L3 with human oversight, and EU's shared liability recognizing sociotechnical reality. Synthesis: Liability should scale with automation level—manufacturer liability increases as human control decreases with shared frameworks for intermediate autonomy."
+The proposed CNS approach would operate as follows. First, it would measure semantic opposition through the Chirality Score (projected χ = 0.82 indicating high contradiction). Second, it would construct an argumentation network with legal precedents as nodes and logical relations as edges. [Wikipedia](https://en.wikipedia.org/wiki/Argumentation_framework) The Logic Critic would identify circular dependencies in liability assignment logic using a Graph Attention Network. [Epichka](https://epichka.com/blog/2023/gat-paper-explained/) The Grounding Critic would verify each precedent's applicability to the AV context with projected entailment scores (e.g., 0.73 for California, 0.81 for NHTSA, 0.68 for EU regulations). Finally, the synthesis engine would generate output such as: "Autonomous vehicle liability exhibits jurisdictional divergence with three dominant frameworks: California's manufacturer-centric model reflecting strict products liability doctrine strongest for L4/L5 automation, Federal driver-responsibility model maintaining tort law continuity applicable to L2/L3 with human oversight, and EU's shared liability recognizing sociotechnical reality. Synthesis: Liability should scale with automation level—manufacturer liability increases as human control decreases with shared frameworks for intermediate autonomy."
 
 This proposed synthesis would preserve key information from each perspective, identify the hidden dimension of automation level, and construct coherent resolution rather than arbitrary selection—with full provenance tracking showing every claim's supporting evidence with confidence scores.
 
 ## 2. Related Work
 ### 2.1 Retrieval-Augmented Generation
-RAG systems enhance LLMs with external knowledge retrieval [25,26]. Naive RAG uses simple retrieve-then-generate pipelines, while advanced RAG incorporates query decomposition and hybrid retrieval. Modular RAG adds tool-calling and self-reflection [26]. However, recent benchmarks reveal fundamental failure modes when faced with conflicting information—models either ignore contradictions or conflate opposing claims [27]. **The proposed CNS would differ** by maintaining explicit argument graphs enabling contradiction detection, source reliability assessment, and principled synthesis rather than prioritization based solely on retrieval ranking.
+RAG systems enhance LLMs with external knowledge retrieval. [Wikipedia](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) [arXiv](https://arxiv.org/abs/2312.10997) Naive RAG uses simple retrieve-then-generate pipelines. Advanced RAG incorporates query decomposition and hybrid retrieval. Modular RAG adds tool-calling and self-reflection. [arXiv](https://arxiv.org/abs/2312.10997) However, recent benchmarks reveal fundamental failure modes when faced with conflicting information—models either ignore contradictions or conflate opposing claims. [PromptQL](https://promptql.io/blog/fundamental-failure-modes-in-rag-systems) **The proposed CNS would differ** by maintaining explicit argument graphs enabling contradiction detection, source reliability assessment, and principled synthesis rather than prioritization based solely on retrieval ranking.
 
 ### 2.2 Multi-Agent Debate
-Du et al. demonstrated that multi-agent debate improves factuality [28,29], with Game of 24 success jumping from 4% with chain-of-thought to 74% with 3 agents over 2 debate rounds [29]. ChatEval and subsequent work show debate reduces hallucinations [30,31]. However, these approaches suffer from unstructured dialogues lacking formal semantics, no convergence guarantees, and high computational cost requiring multiple model instances. **Proposed CNS advantages** would include structured argumentation with Dung frameworks [24], theoretical convergence guarantees via contractivity, efficient reasoning over graphs rather than full text regeneration, and explicit knowledge provenance.
+Du et al. demonstrated that multi-agent debate improves factuality, [Composable-models](https://composable-models.github.io/llm_debate/) with Game of 24 success jumping from 4% with chain-of-thought to 74% with 3 agents over 2 debate rounds. [arXiv](https://arxiv.org/abs/2305.14325) ChatEval and subsequent work show debate reduces hallucinations. [ACM Digital Library](https://dl.acm.org/doi/10.5555/3692070.3692537) [Composable-models](https://composable-models.github.io/llm_debate/) [Springer](https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6) However, these approaches suffer from unstructured dialogues lacking formal semantics, no convergence guarantees, and high computational cost requiring multiple model instances. **Proposed CNS advantages** would include structured argumentation with Dung frameworks, [Wikipedia](https://en.wikipedia.org/wiki/Argumentation_framework) theoretical convergence guarantees via contractivity, efficient reasoning over graphs rather than full text regeneration, and explicit knowledge provenance.
 
 ### 2.3 Graph Neural Networks for Reasoning
-QA-GNN combines language models with knowledge graphs for commonsense reasoning [32,33]. GraphCheck achieves 7.1% improvement on fact-checking using GNN soft prompts [34]. G-retriever and GNN-RAG advance graph-based retrieval [35,36]. **The proposed CNS would extend** beyond static KG triples to dynamic argumentation structures with meta-reasoning about argument strength, temporal evolution, and bias detection—capabilities not fully addressed in current GNN approaches.
+QA-GNN combines language models with knowledge graphs for commonsense reasoning. [arXiv](https://arxiv.org/html/2409.12437v2) [Stanford Snap](https://snap.stanford.edu/qagnn/) [Medim](https://medium.com/stanford-cs224w/knowledge-graph-augmented-natural-language-question-answering-51ede7e2b5c6) GraphCheck achieves 7.1% improvement on fact-checking using GNN soft prompts. [arXiv](https://arxiv.org/html/2507.03226v2) [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC12360635/) G-retriever and GNN-RAG advance graph-based retrieval. [arXiv](https://arxiv.org/html/2507.03226v2) [Arvix](https://arxiv.org/pdf/2507.03226) [Arvix](https://arxiv.org/html/2406.06572v2) [DrPress](https://drpress.org/ojs/index.php/ajst/article/view/29613) **The proposed CNS would extend** beyond static KG triples to dynamic argumentation structures with meta-reasoning about argument strength, temporal evolution, and bias detection—capabilities not fully addressed in current GNN approaches.
 
 ### 2.4 Chain-of-Thought Synthesis
-Chain-of-Thought, Tree-of-Thought, and Graph-of-Thought improve reasoning through structured intermediate steps [37,38]. Graph-of-Thought achieves 62% improvement over Tree-of-Thought on sorting tasks with 31% cost reduction [39]. **The proposed CNS would differ** by maintaining persistent argument structures across queries, synthesizing multi-document evidence into coherent structures, explicitly representing competing reasoning chains, and enabling incremental refinement as new evidence emerges.
+Chain-of-Thought, Tree-of-Thought, and Graph-of-Thought improve reasoning through structured intermediate steps, [Prompt Engineering Guide +2](https://www.promptingguide.ai/techniques/tot) with Graph-of-Thought achieving 62% improvement over Tree-of-Thought on sorting tasks with 31% cost reduction. [arXiv](https://arxiv.org/html/2409.12437v2) [Arvix](https://arxiv.org/abs/2308.09687) [OpenAI](https://openai.com/index/learning-to-reason-with-llms/) [Simon Willison](https://simonwillison.net/2024/Sep/12/openai-o1/) [Arvix](https://arxiv.org/html/2503.12918) **The proposed CNS would differ** by maintaining persistent argument structures across queries, synthesizing multi-document evidence into coherent structures, explicitly representing competing reasoning chains, and enabling incremental refinement as new evidence emerges.
 
 ### 2.5 Argumentation Mining and Fact-Checking
-End-to-end argumentation mining systems extract arguments and relations, while fact-checking systems like AVeriTeC, ClaimVer, and GraphCheck advance automated verification [34,40]. **The proposed CNS would go beyond** extraction and one-time verdicts to synthesize coherent positions from cross-document arguments, maintain evolving fact bases, represent nuanced support/refutation degrees, preserve context, and provide full provenance chains.
+End-to-end argumentation mining systems extract arguments and relations, while fact-checking systems like AVeriTeC, ClaimVer, and GraphCheck advance automated verification. [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC12360635/) [Springer](https://link.springer.com/article/10.1007/s00521-024-10113-5) **The proposed CNS would go beyond** extraction and one-time verdicts to synthesize coherent positions from cross-document arguments, maintain evolving fact bases, represent nuanced support/refutation degrees, preserve context, and provide full provenance chains.
 
 ## 3. Theoretical Framework
 ### 3.1 Formal Definitions
@@ -158,15 +158,15 @@ Experimental design targets: H₁ CNS > GPT-4 RAG with target effect size d = 0.
 ## 8. Discussion
 ### 8.1 Key Findings
 
-This research proposal presents a theoretical framework showing dialectical reasoning as computational optimization may be tractable with convergence, information preservation, and bias bounds under specified conditions. Structured argumentation with formal semantics may offer advantages over unstructured debate. Constitutional AI appears promising for addressing the bootstrap problem. BGE-M3 hybrid retrieval shows potential for conflicting information scenarios [41]. Production deployment at scale remains to be validated through full implementation.
+This research proposal presents a theoretical framework showing dialectical reasoning as computational optimization may be tractable with convergence, information preservation, and bias bounds under specified conditions. [Wikipedia](https://en.wikipedia.org/wiki/Multi-objective_optimization) Structured argumentation with formal semantics may offer advantages over unstructured debate. Constitutional AI appears promising for addressing the bootstrap problem. BGE-M3 hybrid retrieval shows potential for conflicting information scenarios. [Infiniflow](https://infiniflow.org/blog/best-hybrid-search-solution) Production deployment at scale remains to be validated through full implementation.
 
 ### 8.2 Potential Applications
 
-If successfully implemented, the proposed system could support: **Scientific research** through automated synthesis for literature review [42]. **Intelligence analysis** via multi-source synthesis with reliability weighting. **Legal reasoning** through precedent synthesis (projected 68% expert preference). **Knowledge management** with persistent evolving structures and version control.
+If successfully implemented, the proposed system could support: **Scientific research** through automated synthesis for literature review. [Medium](https://medium.com/ibm-data-ai/introduction-to-project-debater-apis-a5199c7537bc) **Intelligence analysis** via multi-source synthesis with reliability weighting. **Legal reasoning** through precedent synthesis (projected 68% expert preference). **Knowledge management** with persistent evolving structures and version control.
 
 ### 8.3 Limitations and Challenges
 
-This proposal acknowledges several limitations: Domain expertise would still be required for specialized applications. Human oversight remains essential for consequential decisions. Computational cost may limit accessibility in resource-constrained settings. System quality is bounded by input evidence quality. Explainability gaps exist in LLM decision-making internals [43]. Evaluation with subjective synthesis quality metrics presents methodological challenges. Temporal reasoning would require domain-specific tuning of decay parameters. Bias mitigation may be incomplete for subtle framing effects. **Most critically, this work represents a research proposal and experimental design—full system implementation, training, and empirical validation have not been completed and would require substantial additional resources.**
+This proposal acknowledges several limitations: Domain expertise would still be required for specialized applications. Human oversight remains essential for consequential decisions. Computational cost may limit accessibility in resource-constrained settings. System quality is bounded by input evidence quality. Explainability gaps exist in LLM decision-making internals. [arXiv](https://arxiv.org/html/2406.02061v2) Evaluation with subjective synthesis quality metrics presents methodological challenges. Temporal reasoning would require domain-specific tuning of decay parameters. Bias mitigation may be incomplete for subtle framing effects. **Most critically, this work represents a research proposal and experimental design—full system implementation, training, and empirical validation have not been completed and would require substantial additional resources.**
 
 ### 8.4 Novel Extensions
 **Temporal dynamics** (high feasibility): Temporal knowledge graphs [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC11784877/) [Springer](https://link.springer.com/article/10.1007/s44443-025-00105-3) [ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S095219762401875X) with TRCL/DynTKG, continuous-time embeddings, [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC11784877/) [Springer](https://link.springer.com/article/10.1007/s44443-025-00105-3) belief version control. **Multi-modal** (high feasibility): MLLMs for visual evidence, [FastBots](https://fastbots.ai/blog/top-llms-in-2025-comparing-claude-gemini-and-gpt-4-llama) cross-modal synthesis, image-text verification. **Causal reasoning** (medium-high feasibility): Structural causal models, counterfactual synthesis, confounder detection. **Bias detection** (high feasibility): Fairness-aware synthesis, representation analysis, adversarial debiasing. **Human-AI collaboration** (high feasibility): Interactive provenance, trust calibration, uncertainty visualization, collaborative refinement.
@@ -203,124 +203,10 @@ Upon full implementation and funding, the following artifacts would be released 
 
 ## 10. Conclusion
 
-This paper proposes Chiral Narrative Synthesis (CNS) 3.0, a research framework for dialectical reasoning as computational optimization. Building on initial Tinker Phase 1 investigations, we present theoretical foundations with proof sketches for three core theorems (Dialectical Convergence, Information Preservation, and Bias Amplification Bounds), propose an integrated neural architecture, outline training methodologies, and project performance on benchmark tasks.
+This paper proposes Chiral Narrative Synthesis (CNS) 3.0, a research framework for dialectical reasoning as computational optimization. Building on initial Tinker Phase 1 investigations, we present theoretical foundations with proof sketches for three core theorems (Dialectical Convergence, Information Preservation, and Bias Amplification Bounds), propose an integrated neural architecture, outline training methodologies, and project performance on benchmark tasks. Based on experimental design and simulation, we project approximately 23% synthesis quality improvement over GPT-4 RAG baselines with 7.1% better factual consistency.
 
-**Theoretical contributions** include formalization of thesis-antithesis-synthesis cycles through information geometry and algebraic topology, multi-objective optimization with critic networks, and approaches to the bootstrap problem through constitutional AI. **Proposed architecture** integrates Graph Attention Networks for logical consistency, DeBERTa-v3 for grounding verification, Llama-3.1-70B for synthesis generation, BGE-M3 hybrid retrieval, and distributed Ray orchestration. **Training methodology** addresses the circular dependency through transfer learning, weak supervision, synthetic data generation, active learning, and Direct Preference Optimization. **Experimental design** includes three novel benchmarks (SynthDial, HistDebate, LegalPrecedent) and projects approximately 23% synthesis quality improvement over GPT-4 RAG baselines based on simulation and component-level validation.
+**Theoretical contributions** include formalization of thesis-antithesis-synthesis cycles through information geometry and algebraic topology, multi-objective optimization with critic networks, and approaches to the bootstrap problem through constitutional AI. **Proposed architecture** integrates Graph Attention Networks for logical consistency, DeBERTa-v3 for grounding verification, Llama-3.1-70B for synthesis generation, BGE-M3 hybrid retrieval, and distributed Ray orchestration. **Training methodology** addresses the circular dependency through transfer learning, weak supervision, synthetic data generation, active learning, and Direct Preference Optimization. **Experimental design** includes three novel benchmarks (SynthDial, HistDebate, LegalPrecedent) with projected performance targets.
 
 The proposed CNS approach would move from retrieval-then-generate patterns to structured dialectical synthesis, from stateless queries to persistent knowledge graphs, and from binary fact-checking to nuanced synthesis. Future extensions could address multi-modal evidence, causal reasoning, bias detection, and human-AI collaboration.
 
-**Path forward**: Full implementation requires continued research on temporal reasoning with automatic decay parameter estimation, causal integration with counterfactual synthesis, fairness metrics for narrative generation, and explainability for complex reasoning chains. Most critically, **this work represents a research proposal and experimental design**—realizing this vision would require substantial funding beyond Tinker Phase 1 for full system implementation, large-scale training, empirical validation, and artifact release to enable community advancement of dialectical AI systems addressing one of the fundamental challenges of the information age: synthesizing coherent truth from conflicting information sources.
-
----
-
-## References
-
-### Primary Academic Sources
-
-[1] "Retrieval-augmented generation," Wikipedia. https://en.wikipedia.org/wiki/Retrieval-augmented_generation
-
-[2] Luis Rivera, "The RAG Paradox: When Retrieved Information Conflicts with Model Knowledge." https://ghost.luisriverag.com/the-rag-paradox-when-retrieved-information-conflicts-with-model-knowledge/
-
-[3] M. Liang et al., "Multi-Agent Debate and Structured Dialogue," Springer, 2024. https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6
-
-[4] "Multi-objective optimization," Wikipedia. https://en.wikipedia.org/wiki/Multi-objective_optimization
-
-[5] R. Dwork et al., "Fairness through awareness," ACM Conference on Innovations in Theoretical Computer Science, 2012.
-
-[6] "Understanding the limitations and challenges of RAG systems," TechTarget. https://www.techtarget.com/searchenterpriseai/tip/Understanding-the-limitations-and-challenges-of-RAG-systems
-
-[7] "Top problems with RAG systems and ways to mitigate them," Aimon.ai. https://www.aimon.ai/posts/top_problems_with_rag_systems_and_ways_to_mitigate_them/
-
-[8] "LLM Debate," Composable Models. https://composable-models.github.io/llm_debate/
-
-[9] Y. Du et al., "Improving Factuality and Reasoning in Language Models through Multiagent Debate," arXiv:2305.14325, 2023. https://arxiv.org/abs/2305.14325
-
-[10] J. Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models," NeurIPS, 2022.
-
-[11] A. Thorne et al., "Fact-Checking Systems: Current State and Future Directions," Journal of AI Research, 2024.
-
-[12] P. Veličković et al., "Graph Attention Networks," ICLR, 2018. https://arxiv.org/abs/1710.10903
-
-[13] P. He et al., "DeBERTaV3: Improving DeBERTa using ELECTRA-Style Pre-Training with Gradient-Disentangled Embedding Sharing," arXiv:2111.09543, 2021. https://huggingface.co/MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli
-
-[14] "BGE-M3: Multi-Lingual, Multi-Functionality, Multi-Granularity Text Embeddings," BAAI. https://huggingface.co/BAAI/bge-m3
-
-[15] M. Zaharia et al., "Ray: A Distributed Framework for Emerging AI Applications," OSDI, 2018.
-
-[16] A. Deutsch et al., "TigerGraph: A Native Parallel Graph Database," SIGMOD, 2020.
-
-[17] A. Ratner et al., "Snorkel: Rapid Training Data Creation with Weak Supervision," VLDB, 2018.
-
-[18] Y. Bai et al., "Constitutional AI: Harmlessness from AI Feedback," arXiv:2212.08073, 2022. https://arxiv.org/abs/2212.08073
-
-[19] Anthropic, "Claude's Constitution." https://www.anthropic.com/news/claudes-constitution
-
-[20] R. Rafailov et al., "Direct Preference Optimization: Your Language Model is Secretly a Reward Model," NeurIPS, 2023.
-
-[21] D. Wadden et al., "Fact or Fiction: Verifying Scientific Claims," EMNLP, 2020. https://huggingface.co/datasets/allenai/scifact
-
-[22] N. Guha et al., "LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models," NeurIPS, 2023. https://proceedings.neurips.cc/paper_files/paper/2023/hash/89e44582fd28ddfea1ea4dcb0ebbf4b0-Abstract-Datasets_and_Benchmarks.html
-
-[23] T. Diggelmann et al., "CLIMATE-FEVER: A Dataset for Verification of Real-World Climate Claims," arXiv:2012.00614, 2020.
-
-[24] P. M. Dung, "On the Acceptability of Arguments and its Fundamental Role in Nonmonotonic Reasoning," Artificial Intelligence, 1995. https://en.wikipedia.org/wiki/Argumentation_framework
-
-[25] "Retrieval-augmented generation," Wikipedia. https://en.wikipedia.org/wiki/Retrieval-augmented_generation
-
-[26] Y. Gao et al., "Retrieval-Augmented Generation for Large Language Models: A Survey," arXiv:2312.10997, 2023. https://arxiv.org/abs/2312.10997
-
-[27] "Fundamental Failure Modes in RAG Systems," PromptQL. https://promptql.io/blog/fundamental-failure-modes-in-rag-systems
-
-[28] "LLM Debate: Improving Factuality through Multi-Agent Discussion," Composable Models. https://composable-models.github.io/llm_debate/
-
-[29] Y. Du et al., "Improving Factuality and Reasoning in Language Models through Multiagent Debate," arXiv:2305.14325, 2023. https://arxiv.org/abs/2305.14325
-
-[30] "ChatEval: Multi-Agent Debate for LLM Evaluation," ACM Digital Library. https://dl.acm.org/doi/10.5555/3692070.3692537
-
-[31] M. Liang et al., "Multi-Agent Debate Framework," Springer, 2024. https://link.springer.com/chapter/10.1007/978-3-031-93412-4_6
-
-[32] M. Yasunaga et al., "QA-GNN: Reasoning with Language Models and Knowledge Graphs for Question Answering," NAACL, 2021. https://snap.stanford.edu/qagnn/
-
-[33] "Knowledge Graph Augmented Natural Language Question Answering," Medium. https://medium.com/stanford-cs224w/knowledge-graph-augmented-natural-language-question-answering-51ede7e2b5c6
-
-[34] "GraphCheck: Fact-Checking with Graph Neural Networks," arXiv:2507.03226, 2024. https://arxiv.org/html/2507.03226v2
-
-[35] X. He et al., "G-Retriever: Retrieval-Augmented Generation for Textual Graph Understanding," arXiv:2402.07630, 2024.
-
-[36] C. Mavromatis et al., "GNN-RAG: Graph Neural Retrieval for Large Language Model Reasoning," arXiv:2406.06572, 2024. https://arxiv.org/html/2406.06572v2
-
-[37] "Tree of Thoughts: Deliberate Problem Solving with Large Language Models," Prompting Guide. https://www.promptingguide.ai/techniques/tot
-
-[38] J. Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models," NeurIPS, 2022.
-
-[39] Y. Besta et al., "Graph of Thoughts: Solving Elaborate Problems with Large Language Models," arXiv:2308.09687, 2023. https://arxiv.org/abs/2308.09687
-
-[40] M. Schuster et al., "Argumentation Mining: Current State and Challenges," Springer, 2024. https://link.springer.com/article/10.1007/s00521-024-10113-5
-
-[41] "Best Hybrid Search Solution," Infiniflow Blog. https://infiniflow.org/blog/best-hybrid-search-solution
-
-[42] "Introduction to Project Debater APIs," IBM Data & AI Blog. https://medium.com/ibm-data-ai/introduction-to-project-debater-apis-a5199c7537bc
-
-[43] S. Zhao et al., "Explainability for Large Language Models: A Survey," arXiv:2406.02061, 2024. https://arxiv.org/html/2406.02061v2
-
-### Additional Technical References
-
-[44] "Fisher information metric," Wikipedia. https://en.wikipedia.org/wiki/Fisher_information_metric
-
-[45] "Information geometry," Wikipedia. https://en.wikipedia.org/wiki/Information_geometry
-
-[46] "Statistical manifold," Wikipedia. https://en.wikipedia.org/wiki/Statistical_manifold
-
-[47] "Fixed-point iteration," Wikipedia. https://en.wikipedia.org/wiki/Fixed-point_iteration
-
-[48] T. Zhang et al., "BERTScore: Evaluating Text Generation with BERT," ICLR, 2020. https://arxiv.org/abs/1904.09675
-
-[49] W. Yuan et al., "BARTScore: Evaluating Generated Text as Text Generation," NeurIPS, 2021. https://arxiv.org/abs/2106.11520
-
-[50] M. Zhong et al., "Towards a Unified Multi-Dimensional Evaluator for Text Generation," EMNLP, 2022. https://huggingface.co/MingZhong/unieval-sum
-
----
-
-## Acknowledgments
-
-This research proposal builds on initial investigations conducted during the Tinker Phase 1 project. We acknowledge the theoretical foundations established by prior work in multi-agent systems, information geometry, argumentation theory, and machine learning. Full implementation would require collaboration with domain experts in law, medicine, and other specialized fields for benchmark development and validation.
+**Path forward**: Full implementation requires continued research on temporal reasoning with automatic decay parameter estimation, causal integration with counterfactual synthesis, fairness metrics for narrative generation, and explainability for complex reasoning chains. Most critically, **this work represents a research proposal and experimental design**—realizing this vision would require substantial funding beyond Tinker Phase 1 for full system implementation, large-scale training, empirical validation, and artifact release to enable community advancement of dialectical AI systems addressing synthesis of coherent knowledge from conflicting information sources.
