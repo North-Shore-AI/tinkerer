@@ -6,15 +6,26 @@
 
 # Tinkerer Workspace
 
-Exploratory **Chiral Narrative Synthesis (CNS)** research built on **Thinking Machines’ Tinker platform**. Expect rapid iteration; each subdirectory carries its own README for reproducing experiments.
+Exploratory **Chiral Narrative Synthesis (CNS)** research workspace implementing practical components of a formal framework for automated knowledge synthesis from conflicting information sources. This repository bridges theoretical formulations (documented in `cns3/`) with experimental implementations using **Thinking Machines' Tinker platform**.
+
+## Theoretical Foundations
+
+The `cns3/` directory contains **speculative theoretical proposals** establishing the mathematical and conceptual foundations for CNS 3.0:
+
+- **Formal framework**: Structured Narrative Objects (SNOs), dialectical synthesis operators, multi-component critic architectures
+- **Mathematical foundations**: Information geometry (Fisher metrics), algebraic topology (Betti numbers), convergence theorems
+- **Architectural specifications**: Graph-based reasoning, evidence-preservation constraints, bias amplification bounds
+
+These documents serve as **design specifications and research proposals** from which practical implementations are derived. See [`cns3/cns3_gpt5.md`](cns3/cns3_gpt5.md) and [`cns3/cns3_gemini_deepResearch.md`](cns3/cns3_gemini_deepResearch.md) for comprehensive theoretical treatments, with foundations extending from [CNS 2.0](cns2/ChiralNarrativeSynthesis_20250617.tex).
 
 ## Repository Layout
 
 ```
 README.md                # Workspace overview
-cns-support-models/      # Claim-extractor training & evaluation scaffolding
-cns3/                    # CNS 3.0 concept papers, critiques, and proposals
-notes/                   # Research journals (see notes/claim_extractor.md)
+cns2/                    # CNS 2.0 foundational specifications (LaTeX)
+cns3/                    # CNS 3.0 theoretical proposals and research designs
+cns-support-models/      # Practical implementations: claim extractors, critics
+notes/                   # Research journals documenting experimental iterations
 ```
 
 ## Quickstart (2025‑11‑09)
@@ -58,32 +69,49 @@ notes/                   # Research journals (see notes/claim_extractor.md)
 
 `runs/` stays `.gitignore`d—store artifacts locally, log interesting runs in `notes/` or GitHub issues.
 
-## Direction & Tinker Fit
+## Research Strategy: Theory-to-Implementation Pipeline
 
-- **What Tinker is great for (today):**
-  - LoRA-based adapters on Llama-class models (claim extractor, dialectical synthesizer, critics).
-  - Managed training/sampling infrastructure, telemetry, structured evals.
-  - Multi-stage pipelines via scripts (train → sample → feed onward).
-  - Rapid iteration without touching GPU infrastructure.
+This workspace operationalizes a **staged implementation strategy** for the CNS 3.0 framework:
 
-- **Where Tinker stops (tomorrow):**
-  - Custom architectures/manifold math from the CNS 3.0 papers (Betti numbers, Fisher metrics, etc.).
-  - Strict batch-invariant inference (their API doesn’t expose per-row RNG controls—see “Defeating Nondeterminism in LLM Inference” on their blog).
-  - Embedded multi-agent runtimes (everything still goes through training/sampling endpoints).
-  - Non-LoRA losses that require redefining the base model internals.
+### Current Phase: Component Validation
 
-**Plan:** use Tinker to de-risk the LoRA adapters, logging + structured evals as we go. Once we need bespoke statistical manifolds or hard inference guarantees, we’ll need deeper hooks or custom infrastructure built on the learnings here.
+**Tinker-Compatible Components** (present focus):
+  - **Neural critics**: LoRA-adapted language models for claim extraction, grounding verification, and novelty assessment
+  - **Structured evaluation**: Empirical validation of individual pipeline components against benchmark datasets
+  - **Iterative refinement**: Rapid prototyping of prompt templates, loss functions, and constraint enforcement mechanisms
+  - **Instrumentation**: Comprehensive telemetry capturing training dynamics and inference characteristics
 
-## Sharing & Collaboration
+### Future Phases: Full Framework Realization
 
-- Reference the relevant entry in `notes/claim_extractor.md` when opening an issue or asking for feedback (e.g., in the Thinking Machines Discord).
-- Highlight open questions—currently semantic evidence alignment and relation verification.
-- Be explicit that the project is experimental; collaborators are welcome precisely because the hard parts (evidence alignment, multi-agent synthesis) are unsolved.
+**Post-Tinker Requirements** (theoretical specifications from `cns3/`):
+  - **Geometric computation**: Fisher Information Metric calculation on hypothesis manifolds, geodesic distance measurement
+  - **Topological analysis**: Persistent homology computation for reasoning graph coherence (Betti number extraction)
+  - **Graph neural architectures**: GAT-based Logic Critics operating on typed reasoning graphs with typed edge relations
+  - **Synthesis operators**: Evidence-preserving dialectical generation with formal convergence guarantees
+  - **Deterministic inference**: Batch-invariant sampling with explicit RNG control for reproducibility requirements
 
-When posting in the Tinker Discord Projects room, include:
-1. Link to this repo.
-2. Summary of the latest milestone (canonical hypotheses, structured eval).
-3. The blocker you want help with (e.g., only 9% semantic hits).
+**Implementation trajectory:** Current work validates the feasibility of neural components (critics, extractors) using accessible infrastructure. Subsequent phases will require custom implementations of the geometric and topological machinery specified in the theoretical documents, informed by empirical findings from these initial experiments.
+
+## Collaboration & Open Questions
+
+This workspace represents **early-stage exploratory research** implementing components of a broader theoretical framework. Collaboration is particularly valuable given the unsolved challenges at the intersection of formal methods and neural implementations.
+
+### Current Research Questions
+
+1. **Semantic evidence alignment**: Bridging symbolic claim structures with dense retrieval for evidence grounding
+2. **Relation verification**: Validating typed edges in reasoning graphs (entailment, contradiction, support) using neural critics
+3. **Constraint enforcement**: Implementing evidence-preservation guarantees during LLM-based synthesis
+4. **Evaluation methodology**: Developing metrics that capture both local correctness (claim accuracy) and global coherence (reasoning graph topology)
+
+### Engagement Protocol
+
+When seeking feedback or reporting findings:
+- **Context**: Reference theoretical specifications from `cns3/` that inform the implementation approach
+- **Documentation**: Cite relevant entries in `notes/claim_extractor.md` documenting experimental iterations
+- **Specificity**: Frame questions around concrete implementation challenges (e.g., "9% semantic alignment rate on SciFact validation set")
+- **Theoretical grounding**: Connect empirical observations to theoretical desiderata (e.g., information preservation, bias bounds)
+
+For Thinking Machines Discord engagement, provide: (1) repository link, (2) latest milestone summary, (3) specific technical blocker with reference to theoretical requirements.
 
 ## License
 
