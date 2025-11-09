@@ -6,7 +6,7 @@
 
 # Tinkerer Workspace
 
-Exploratory CNS (Chiral Narrative Synthesis) research built on **Thinking Machines' Tinker platform**. Expect rapid iteration; each subdirectory carries its own README for reproducing experiments.
+Exploratory **Chiral Narrative Synthesis (CNS)** research built on **Thinking Machines’ Tinker platform**. Expect rapid iteration; each subdirectory carries its own README for reproducing experiments.
 
 ## Repository Layout
 
