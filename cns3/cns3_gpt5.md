@@ -48,86 +48,84 @@ Reconciling contradictory claims into coherent, actionable knowledge is intrinsi
 ### 3.1 SNO‑3: Temporal, Uncertainty‑Aware Representation
 
 A **Structured Narrative Object (SNO‑3)** is a septuple
-[
-\mathcal{S}=(H,; G,; \mathcal{E},; T,; \mathcal{M},; U,; \Theta_t)
-]
 
-* **Hypothesis embedding** (H\in\mathbb{R}^d) lies on a statistical manifold ((\mathcal{M}_H,g)) with **Fisher metric** (g) (information geometry), obtained by mapping hypotheses to exponential‑family natural parameters; distances reflect distinguishability.
-* **Reasoning graph** (G=(V,E,\rho,\tau)) is a typed DAG: (E\subseteq V\times V\times\mathcal{R}) with relation types (\mathcal{R}={\textsf{supports},\textsf{contradicts},\textsf{implies},\textsf{equivalent},\textsf{refines},\textsf{causes}}). Edge attributes include relation type (\rho) and confidence (\tau\in[0,1]). We lift (G) to a **simplicial complex** (\mathsf{SC}(G)) to analyze higher‑order structures; Betti numbers capture cycles/inconsistencies.
-* **Evidence set** (\mathcal{E}={(e_i, s(e_i), t_i, q_i)}) with persistent IDs, **source** (s(\cdot)), timestamp (t_i), and Bayesian **quality score** (q_i\in[0,1]).
-* **Trust** (T\in[0,1]) is produced by an adaptive critic ensemble (Grounding, Logic, Novelty/Parsimony, Verification, plus optional Causal and Bias critics).
-* **Metadata** (\mathcal{M}): provenance, domain, licensing, method tags.
-* **Uncertainty** (U): calibrated per‑claim confidence and epistemic intervals for synthesized claims.
-* **Temporal process** (\Theta_t): an evolution kernel updating ((G,\mathcal{E},T,U)) as new evidence arrives (discrete time (t)).
+$$\mathcal{S}=(H,\; G,\; \mathcal{E},\; T,\; \mathcal{M},\; U,\; \Theta_t)$$
 
-**Chirality Score (CScore).** Let (H_i,H_j) be embeddings trained with a contrastive objective (InfoNCE) where **positive pairs** are *contradicting* core claims and **negative pairs** are unrelated. Define
-[
-\mathrm{CScore}(\mathcal{S}_i,\mathcal{S}_j)
-=\alpha,(1-\cos_g(H_i,H_j)),(T_iT_j)
-+\beta;\mathrm{GraphConflict}(G_i,G_j)
-]
-where (\cos_g) uses the Fisher metric; (\mathrm{GraphConflict}) is the typed contradiction density between (G_i) and (G_j), computable from (\mathsf{SC}(G)) cycles involving (\textsf{contradicts}).
+* **Hypothesis embedding** $H\in\mathbb{R}^d$ lies on a statistical manifold $(\mathcal{M}_H,g)$ with **Fisher metric** $g$ (information geometry), obtained by mapping hypotheses to exponential‑family natural parameters; distances reflect distinguishability.
+* **Reasoning graph** $G=(V,E,\rho,\tau)$ is a typed DAG: $E\subseteq V\times V\times\mathcal{R}$ with relation types $\mathcal{R}=\{\textsf{supports},\textsf{contradicts},\textsf{implies},\textsf{equivalent},\textsf{refines},\textsf{causes}\}$. Edge attributes include relation type $\rho$ and confidence $\tau\in[0,1]$. We lift $G$ to a **simplicial complex** $\mathsf{SC}(G)$ to analyze higher‑order structures; Betti numbers capture cycles/inconsistencies.
+* **Evidence set** $\mathcal{E}=\{(e_i, s(e_i), t_i, q_i)\}$ with persistent IDs, **source** $s(\cdot)$, timestamp $t_i$, and Bayesian **quality score** $q_i\in[0,1]$.
+* **Trust** $T\in[0,1]$ is produced by an adaptive critic ensemble (Grounding, Logic, Novelty/Parsimony, Verification, plus optional Causal and Bias critics).
+* **Metadata** $\mathcal{M}$: provenance, domain, licensing, method tags.
+* **Uncertainty** $U$: calibrated per‑claim confidence and epistemic intervals for synthesized claims.
+* **Temporal process** $\Theta_t$: an evolution kernel updating $(G,\mathcal{E},T,U)$ as new evidence arrives (discrete time $t$).
 
-**Evidential Entanglement (EScore) with quality, time, and reliability.** Let (R) be a **source‑reliability network** with centrality (c(s)\in[0,1]) (e.g., Bayesian PageRank with uncertainty). With time decay (\exp(-\lambda\Delta t)), define
-[
-w(e)=q_e\cdot c(s(e))\cdot e^{-\lambda (t_{\text{now}}-t_e)},.
-]
+**Chirality Score (CScore).** Let $H_i,H_j$ be embeddings trained with a contrastive objective (InfoNCE) where **positive pairs** are *contradicting* core claims and **negative pairs** are unrelated. Define
+
+$$\mathrm{CScore}(\mathcal{S}_i,\mathcal{S}_j)
+=\alpha\,(1-\cos_g(H_i,H_j))\,(T_iT_j)
++\beta\;\mathrm{GraphConflict}(G_i,G_j)$$
+
+where $\cos_g$ uses the Fisher metric; $\mathrm{GraphConflict}$ is the typed contradiction density between $G_i$ and $G_j$, computable from $\mathsf{SC}(G)$ cycles involving $\textsf{contradicts}$.
+
+**Evidential Entanglement (EScore) with quality, time, and reliability.** Let $R$ be a **source‑reliability network** with centrality $c(s)\in[0,1]$ (e.g., Bayesian PageRank with uncertainty). With time decay $\exp(-\lambda\Delta t)$, define
+
+$$w(e)=q_e\cdot c(s(e))\cdot e^{-\lambda (t_{\text{now}}-t_e)}\,.$$
+
 Then
-[
-\mathrm{EScore}(\mathcal{S}_i,\mathcal{S}*j)=
-\frac{\sum*{e\in\mathcal{E}_i\cap\mathcal{E}*j} w(e)}
-{\sum*{e\in\mathcal{E}_i\cup\mathcal{E}_j} w(e)};.
-]
+
+$$\mathrm{EScore}(\mathcal{S}_i,\mathcal{S}_j)=
+\frac{\sum_{e\in\mathcal{E}_i\cap\mathcal{E}_j} w(e)}
+{\sum_{e\in\mathcal{E}_i\cup\mathcal{E}_j} w(e)}\;.$$
 
 ### 3.2 Dialectical Synthesis Operator
 
-Given (\mathcal{S}_A,\mathcal{S}_B), the synthesis operator (\Phi) produces (\mathcal{S}_C=\Phi(\mathcal{S}_A,\mathcal{S}_B)) subject to **evidence‑preservation** and **consistency** constraints:
+Given $\mathcal{S}_A,\mathcal{S}_B$, the synthesis operator $\Phi$ produces $\mathcal{S}_C=\Phi(\mathcal{S}_A,\mathcal{S}_B)$ subject to **evidence‑preservation** and **consistency** constraints:
 
-1. **Evidence‑preserving:** ( {e:; w(e)>\tau_\mathrm{min}}\cap(\mathcal{E}_A\cup\mathcal{E}_B)\subseteq \mathcal{E}_C).
+1. **Evidence‑preserving:** $\{e:\; w(e)>\tau_\mathrm{min}\}\cap(\mathcal{E}_A\cup\mathcal{E}_B)\subseteq \mathcal{E}_C$.
 2. **Template‑constrained generation:** the LLM must (a) reference evidence IDs inline and (b) satisfy a formal **no‑new‑unsupported‑claims** constraint verified by NLI+theorem checks.
-3. **Graph projection:** (G_C) is the image of a projection (\Pi) onto the **consistent** subspace of reasoning graphs; contradictions resolve via minimal edits that remove contradiction cycles in (\mathsf{SC}(G_A\cup G_B)).
+3. **Graph projection:** $G_C$ is the image of a projection $\Pi$ onto the **consistent** subspace of reasoning graphs; contradictions resolve via minimal edits that remove contradiction cycles in $\mathsf{SC}(G_A\cup G_B)$.
 
 ### 3.3 Key Theorems (sketches)
 
 **Theorem 3.1 (Synthesis Coherence, strengthened).**
-If (i) (G_A,G_B) are individually consistent; (ii) (\mathrm{EScore}(\mathcal{S}*A,\mathcal{S}*B)\ge \kappa) for some (\kappa>0); (iii) the verifier suite has component error rates (\epsilon*{\mathrm{NLI}},\epsilon*{\mathrm{logic}},\epsilon_{\mathrm{verify}}); and (iv) (\Phi) enforces evidence‑preservation and graph projection, then
-[
-\mathbb{P}[\mathcal{S}*C\text{ is coherent}];\ge;1-\epsilon,
+If (i) $G_A,G_B$ are individually consistent; (ii) $\mathrm{EScore}(\mathcal{S}_A,\mathcal{S}_B)\ge \kappa$ for some $\kappa>0$; (iii) the verifier suite has component error rates $\epsilon_{\mathrm{NLI}},\epsilon_{\mathrm{logic}},\epsilon_{\mathrm{verify}}$; and (iv) $\Phi$ enforces evidence‑preservation and graph projection, then
+
+$$\mathbb{P}[\mathcal{S}_C\text{ is coherent}]\;\ge\;1-\epsilon,
 \quad
-\epsilon;\le;\epsilon*{\mathrm{NLI}}+\epsilon_{\mathrm{logic}}+\epsilon_{\mathrm{verify}}-\delta,
-]
-with (\delta\ge 0) capturing overlap (inclusion–exclusion).
-*Sketch.* Coherence failure implies (a) an unsupported claim passed NLI, or (b) a contradiction evaded logic check, or (c) a forged/low‑quality evidence passed verification. Under independence (or weak dependence) of detectors, apply the union bound with an overlap correction. The projection (\Pi) eliminates homology‑1 contradiction cycles in (\mathsf{SC}(G_A\cup G_B)), ensuring acyclicity and typed‑constraint satisfaction. (Generalizes the CNS 2.0 coherence claim with explicit error decomposition.) [CNS 2.0 Ideas Paper; Formal Methods & Causal Inference]
+\epsilon\;\le\;\epsilon_{\mathrm{NLI}}+\epsilon_{\mathrm{logic}}+\epsilon_{\mathrm{verify}}-\delta,$$
+
+with $\delta\ge 0$ capturing overlap (inclusion–exclusion).
+*Sketch.* Coherence failure implies (a) an unsupported claim passed NLI, or (b) a contradiction evaded logic check, or (c) a forged/low‑quality evidence passed verification. Under independence (or weak dependence) of detectors, apply the union bound with an overlap correction. The projection $\Pi$ eliminates homology‑1 contradiction cycles in $\mathsf{SC}(G_A\cup G_B)$, ensuring acyclicity and typed‑constraint satisfaction. (Generalizes the CNS 2.0 coherence claim with explicit error decomposition.) [CNS 2.0 Ideas Paper; Formal Methods & Causal Inference]
 
 **Theorem 3.2 (Dialectical Convergence).**
-Consider iterated synthesis on a population ({\mathcal{S}*t}) with update
-(\mathcal{S}*{t+1}:=\mathrm{Select}\circ \Phi(\mathcal{S}_t,\mathcal{S}^\star_t)), where selection chooses chiral partners with (\mathrm{CScore}\cdot\mathrm{EScore}\ge\eta), and (\Phi) comprises: (i) evidence‑constrained generation; (ii) projection (\Pi); (iii) natural‑gradient re‑centering of (H) on ((\mathcal{M}_H,g)). If the composite operator (\mathcal{T}=\Pi\circ\Phi) is **(\gamma)‑contractive** in the product metric (d=d_H\oplus d_G\oplus d_E) with (\gamma<1), then for any initial state the sequence converges to a unique fixed point (\mathcal{S}^\star).
-*Sketch.* Show (a) natural‑gradient re‑centering is non‑expansive on ((\mathcal{M}_H,g)); (b) graph projection (\Pi) onto the consistent subspace is non‑expansive in graph edit distance; (c) constrained decoding with explicit evidence reduces hypothesis variance. Under calibrated critic thresholds, the product map is contractive; Banach’s fixed‑point theorem gives existence/uniqueness and linear convergence. Sufficient conditions are met when verifier false negative rates are bounded and (\Phi) enforces evidence‑preservation. [Formal Methods & Causal Inference]
+Consider iterated synthesis on a population $\{\mathcal{S}_t\}$ with update
+$\mathcal{S}_{t+1}:=\mathrm{Select}\circ \Phi(\mathcal{S}_t,\mathcal{S}^\star_t)$, where selection chooses chiral partners with $\mathrm{CScore}\cdot\mathrm{EScore}\ge\eta$, and $\Phi$ comprises: (i) evidence‑constrained generation; (ii) projection $\Pi$; (iii) natural‑gradient re‑centering of $H$ on $(\mathcal{M}_H,g)$. If the composite operator $\mathcal{T}=\Pi\circ\Phi$ is **$\gamma$‑contractive** in the product metric $d=d_H\oplus d_G\oplus d_E$ with $\gamma<1$, then for any initial state the sequence converges to a unique fixed point $\mathcal{S}^\star$.
+*Sketch.* Show (a) natural‑gradient re‑centering is non‑expansive on $(\mathcal{M}_H,g)$; (b) graph projection $\Pi$ onto the consistent subspace is non‑expansive in graph edit distance; (c) constrained decoding with explicit evidence reduces hypothesis variance. Under calibrated critic thresholds, the product map is contractive; Banach's fixed‑point theorem gives existence/uniqueness and linear convergence. Sufficient conditions are met when verifier false negative rates are bounded and $\Phi$ enforces evidence‑preservation. [Formal Methods & Causal Inference]
 
 **Theorem 3.3 (Information Preservation).**
-Assume independent evidence items with per‑item observed Fisher information (I_e(\theta)) for shared parameterization of (H). If (\Phi) is evidence‑preserving and (H_C) is obtained by (approximate) MLE (or a natural‑gradient step) on the **union** evidence likelihood, then
-[
-\mathcal{I}*C(\theta)=\sum*{e\in \mathcal{E}_C} w(e),I_e(\theta)
-;\ge; \min{\mathcal{I}_A(\theta),\mathcal{I}_B(\theta)},
-]
-with equality only if one side contributes zero additional information under (w).
-*Sketch.* Additivity of observed information for independent observations and monotonicity under inclusion give the lower bound. The natural gradient ensures parameter updates move along geodesics w.r.t. (g), avoiding information loss due to poor coordinate choice. [CNS 2.0 Ideas Paper]
+Assume independent evidence items with per‑item observed Fisher information $I_e(\theta)$ for shared parameterization of $H$. If $\Phi$ is evidence‑preserving and $H_C$ is obtained by (approximate) MLE (or a natural‑gradient step) on the **union** evidence likelihood, then
+
+$$\mathcal{I}_C(\theta)=\sum_{e\in \mathcal{E}_C} w(e)\,I_e(\theta)
+\;\ge\; \min\{\mathcal{I}_A(\theta),\mathcal{I}_B(\theta)\},$$
+
+with equality only if one side contributes zero additional information under $w$.
+*Sketch.* Additivity of observed information for independent observations and monotonicity under inclusion give the lower bound. The natural gradient ensures parameter updates move along geodesics w.r.t. $g$, avoiding information loss due to poor coordinate choice. [CNS 2.0 Ideas Paper]
 
 **Theorem 3.4 (Bias Amplification Bounds).**
-Let (\mathcal{B}(f;P)=|\mathbb{E}[f(X)\mid A=a]-\mathbb{E}[f(X)\mid A=b]|) be a disparity metric for protected attribute (A). If the synthesized predictor (f_C) decomposes as
-(
-f_C=\alpha f_A+\beta f_B+\Delta
-)
-with (\alpha,\beta\ge0), (\alpha+\beta\le 1), and (\Delta) produced by a (\mathrm{Lip}(L))‑constrained module (constrained decoding + bias critic), then
-[
-\mathcal{B}(f_C;P);\le;\alpha,\mathcal{B}(f_A;P)+\beta,\mathcal{B}(f_B;P)+L,\mathsf{Disc}(P),
-]
-where (\mathsf{Disc}(P)) is a distribution divergence term governed by critic thresholds.
-*Sketch.* Apply triangle inequality and Lipschitz stability; (\Delta) is small when the Bias Critic penalizes disparity and constrained decoding forbids unsupported group‑specific claims. This yields explicit, tunable upper bounds on bias change through synthesis.
+Let $\mathcal{B}(f;P)=|\mathbb{E}[f(X)\mid A=a]-\mathbb{E}[f(X)\mid A=b]|$ be a disparity metric for protected attribute $A$. If the synthesized predictor $f_C$ decomposes as
+
+$$f_C=\alpha f_A+\beta f_B+\Delta$$
+
+with $\alpha,\beta\ge0$, $\alpha+\beta\le 1$, and $\Delta$ produced by a $\mathrm{Lip}(L)$‑constrained module (constrained decoding + bias critic), then
+
+$$\mathcal{B}(f_C;P)\;\le\;\alpha\,\mathcal{B}(f_A;P)+\beta\,\mathcal{B}(f_B;P)+L\,\mathsf{Disc}(P),$$
+
+where $\mathsf{Disc}(P)$ is a distribution divergence term governed by critic thresholds.
+*Sketch.* Apply triangle inequality and Lipschitz stability; $\Delta$ is small when the Bias Critic penalizes disparity and constrained decoding forbids unsupported group‑specific claims. This yields explicit, tunable upper bounds on bias change through synthesis.
 
 ### 3.4 Complexity
 
-With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Graph conflict checks scale with (|V_i||V_j|) (sparse adjacency yields near‑linear practical cost). Logic‑critic GNN inferencing is (O(|V|+|E|)) per graph. Overall CNS 3.0 pipeline scales quasi‑linearly in the SNO population with caching—matching CNS 2.0 projections and enabling (10^3–10^4) SNOs on modest clusters. [CNS 2.0 Ideas Paper]
+With ANN pre‑filtering over $H$ (LSH/IVF), **pairing** costs $O(N\log N)$. Graph conflict checks scale with $|V_i||V_j|$ (sparse adjacency yields near‑linear practical cost). Logic‑critic GNN inferencing is $O(|V|+|E|)$ per graph. Overall CNS 3.0 pipeline scales quasi‑linearly in the SNO population with caching—matching CNS 2.0 projections and enabling $10^3–10^4$ SNOs on modest clusters. [CNS 2.0 Ideas Paper]
 
 ---
 
@@ -136,33 +134,33 @@ With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Gra
 ### 4.1 Component Overview
 
 * **Ingestion & extraction.** Unstructured.io for parsing → claim/argument extraction (LLM+rules) → evidence linking (hybrid BM25 + ColBERTv2/SBERT) → initial SNO‑3 assembly with uncertainty tags.
-* **Indexing.** Qdrant (HNSW) for (H); Neo4j for (G); object store for (\mathcal{E}) with cryptographic provenance.
+* **Indexing.** Qdrant (HNSW) for $H$; Neo4j for $G$; object store for $\mathcal{E}$ with cryptographic provenance.
 * **Critic pipeline.** Four mandatory + three advanced critics:
 
   1. **Grounding Critic (NLI).** *Model:* DeBERTa‑v3‑large (≈304 M params) + 2‑layer MLP head (hidden 768→384→1), input = (claim, evidence span). *Training:* FEVER+MultiFC+bootstrapped SNO pairs; LR 2e‑5, batch 64, 3–5 epochs, focal loss to emphasize hard contradictions.
   2. **Logic Critic (GNN).** *Hybrid GAT–SAGE:* 3 layers; layer1 GATv2 (hidden 256, 8 heads), layer2 GraphSAGE‑mean (hidden 256), layer3 GATv2 (hidden 128, 4 heads). Edge‑type embeddings (dim 32). Global readout with Set2Set; output consistency score in [0,1]. Justification: GAT captures typed, local attention; SAGE scales with neighbor sampling; hybrid balances fidelity and throughput.
   3. **Novelty–Parsimony Critic.** SBERT all‑mpnet‑base‑v2 encoder (110 M) for novelty vs repository, plus complexity penalty (|E|/|V|); 2‑layer regressor for insight score.
-  4. **Evidence Verification Critic.** Cross‑encoder (MiniLM‑L‑12) on source snippets + authority features (venue, h‑index estimates, recency) to produce (q_i); reliability network (R) via Bayesian PageRank.
-  5. **Causal Critic (advanced).** Optional: distinguish causal vs correlational claims; FCI/PC‑style check on tabular evidence; verify causal edges in (G).
+  4. **Evidence Verification Critic.** Cross‑encoder (MiniLM‑L‑12) on source snippets + authority features (venue, h‑index estimates, recency) to produce $q_i$; reliability network $R$ via Bayesian PageRank.
+  5. **Causal Critic (advanced).** Optional: distinguish causal vs correlational claims; FCI/PC‑style check on tabular evidence; verify causal edges in $G$.
   6. **Bias Critic (advanced).** Penalize group‑linked unsupported claims; compute disparity proxies and regularize synthesis (used in sensitive domains).
   7. **Completeness Critic (advanced).** Retrieval‑based “what’s missing?” prompts, penalizing unaddressed counter‑arguments.
 
-*Adaptive weighting.* Trust (T(\mathcal{S})=\mathrm{softmax}(w)^T[\mathrm{Score}_G,\mathrm{Score}_L,\mathrm{Score}_N,\mathrm{Score}_V,\dots]), where (w) is learned with human labels + outcome‑linked supervision.
+*Adaptive weighting.* Trust $T(\mathcal{S})=\mathrm{softmax}(w)^T[\mathrm{Score}_G,\mathrm{Score}_L,\mathrm{Score}_N,\mathrm{Score}_V,\dots]$, where $w$ is learned with human labels + outcome‑linked supervision.
 
 * **Synthesis engine.** Llama‑3.1‑8B‑Instruct (MVA) with **LoRA** adapters (rank 16) fine‑tuned on CNS templates; production upgrades to 70B. **Constrained decoding** requires bracketed evidence IDs for any atomic claim. A **verify–refine** loop re‑prompts on critic failures.
 
 ### 4.2 Narrative Ingestion Pipeline (precise)
 
 1. **Hypothesis extraction.** Three paraphrastic prompts (temp 0.1) → cosine‑consensus; fallback to human review if < 0.8 similarity.
-2. **Graph construction.** LLM‑tagged claims → relation extraction with confidence; cycle removal; construction of typed DAG; confidence (\tau) from agreement across models.
-3. **Evidence linking.** BM25 top‑k (k=50) → dense rerank (ColBERTv2) → span alignment; compute (q_i) via Verification Critic; keep spans with (q_i\ge0.6).
-4. **Formal validation.** SMT‑style checks on small horn‑clause skeletons induced from (G); reject or flag failing SNOs.
-5. **Metadata & uncertainty.** Populate (\mathcal{M}); calibrate per‑claim confidence (Platt scaling using held‑out FEVER‑like data).
+2. **Graph construction.** LLM‑tagged claims → relation extraction with confidence; cycle removal; construction of typed DAG; confidence $\tau$ from agreement across models.
+3. **Evidence linking.** BM25 top‑k (k=50) → dense rerank (ColBERTv2) → span alignment; compute $q_i$ via Verification Critic; keep spans with $q_i\ge0.6$.
+4. **Formal validation.** SMT‑style checks on small horn‑clause skeletons induced from $G$; reject or flag failing SNOs.
+5. **Metadata & uncertainty.** Populate $\mathcal{M}$; calibrate per‑claim confidence (Platt scaling using held‑out FEVER‑like data).
 
 ### 4.3 Relational Mapping & Selection
 
-* Build ANN index on (H) (Qdrant/HNSW, ef=128) → candidate pairs.
-* Compute **CScore** and extended **EScore** (with (w(e))) → select pairs with (\mathrm{CScore}\cdot \mathrm{EScore}\ge \eta) (default 0.2).
+* Build ANN index on $H$ (Qdrant/HNSW, ef=128) → candidate pairs.
+* Compute **CScore** and extended **EScore** (with $w(e)$) → select pairs with $\mathrm{CScore}\cdot \mathrm{EScore}\ge \eta$ (default 0.2).
 
 ### 4.4 Synthesis Protocol (executable template)
 
@@ -180,11 +178,11 @@ With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Gra
 
 **Cold start.** (i) Seed SNOs from curated sources; (ii) use LLM weak labels for critic targets; (iii) collect human ratings on top‑k and bottom‑k; (iv) train critics; (v) iterate (flywheel). [CNS 2.0 Ideas Paper]
 
-**Self‑improvement loop.** **Generate → Score → Select → Fine‑tune.** Positive triples ((A,B)\to C) (high‑scoring) fine‑tune the LoRA adapters; negatives guide DPO/contrastive loss.
+**Self‑improvement loop.** **Generate → Score → Select → Fine‑tune.** Positive triples $(A,B)\to C$ (high‑scoring) fine‑tune the LoRA adapters; negatives guide DPO/contrastive loss.
 
 **Human‑in‑the‑loop.** Active learning by uncertainty and **disagreement** among critics; label budget prioritized for high‑impact failures.
 
-**Optimization notes.** DeBERTa NLI on 1× A100 (40 GB) in < 6 h; GNN critic on CPU/GPU mixed; LoRA fine‑tuning (8B) on 2× A100 within budget. Estimated full‑run compute < $10k for (10^3–10^4) SNOs (details §7.3).
+**Optimization notes.** DeBERTa NLI on 1× A100 (40 GB) in < 6 h; GNN critic on CPU/GPU mixed; LoRA fine‑tuning (8B) on 2× A100 within budget. Estimated full‑run compute < $10k for $10^3–10^4$ SNOs (details §7.3).
 
 ---
 
@@ -192,7 +190,7 @@ With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Gra
 
 ### 6.1 Datasets
 
-1. **SYNTH‑DIAL (controlled).** 1,000 thesis–antithesis–gold triplets across 10 domains; contradiction types: evidential, methodological, theoretical, definitional. Gold syntheses by 3 experts (target (\kappa>0.8)).
+1. **SYNTH‑DIAL (controlled).** 1,000 thesis–antithesis–gold triplets across 10 domains; contradiction types: evidential, methodological, theoretical, definitional. Gold syntheses by 3 experts (target $\kappa>0.8$).
 2. **HIST‑SCI (resolved debates).** Plate tectonics, germ theory, relativity vs alternatives, etc.; include primary sources at decision points; ground truth = modern consensus; evaluate alignment with historical resolution paths.
 3. **INTEL‑SIM (declassified).** Real contradictory reports with verified outcomes; measure synthesis accuracy vs events and decision quality metrics.
    *(Design extends CNS 2.0 and case‑study guidance.)* [CNS 2.0 Ideas Paper; Dialectical Reasoning Mechanisms]
@@ -204,7 +202,7 @@ With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Gra
 * **Novelty/Insight:** embedding distance to inputs (thresholded), expert‑rated insight.
 * **Synthesis quality:** ROUGE‑L/METEOR vs gold, BERTScore (domain‑adapted).
 * **Contradiction detection rate** (lower is better after synthesis).
-* **Human evaluation:** 5‑expert panels (blind), Likert 1–7 on coherence, evidence integration, novel insight, utility, overall; inter‑rater reliability (ICC > 0.75, Krippendorff’s (\alpha)).
+* **Human evaluation:** 5‑expert panels (blind), Likert 1–7 on coherence, evidence integration, novel insight, utility, overall; inter‑rater reliability (ICC > 0.75, Krippendorff's $\alpha$).
 * **Traceability:** % claims with resolvable evidence IDs (goal 100%).
 
 ### 6.3 Baselines
@@ -219,25 +217,25 @@ With ANN pre‑filtering over (H) (LSH/IVF), **pairing** costs (O(N\log N)). Gra
 
 * **Primary:** CNS 3.0 ≥ 20% over best baseline on conflicting‑info tasks with 100% traceability.
 * **H1 (Component necessity):** Ablation of each critic → measurable drop in coherence, accuracy, novelty.
-* **H2 (Scaling law):** Quality scales ~logarithmically with SNO population (N); compute (O(N\log N)).
+* **H2 (Scaling law):** Quality scales ~logarithmically with SNO population $N$; compute $O(N\log N)$.
 * **H3 (Domain transfer):** Train on arXiv; zero‑shot to intelligence/legal retains ≥ 70% of source‑domain performance.
 * **H4 (Entanglement utility):** High‑C/high‑E pairs > high‑C/low‑E by ≥ 15% (experts).
 
 ### 6.5 Statistical Protocol
 
-* **Power analysis:** (n\ge 64) items per condition for (d=0.5) at (\alpha=0.05), power = 0.8.
-* **Tests:** Paired t‑tests on automated metrics (Bonferroni corrected), Wilcoxon for human ratings; report Cohen’s (d) and bootstrap CIs.
+* **Power analysis:** $n\ge 64$ items per condition for $d=0.5$ at $\alpha=0.05$, power = 0.8.
+* **Tests:** Paired t‑tests on automated metrics (Bonferroni corrected), Wilcoxon for human ratings; report Cohen's $d$ and bootstrap CIs.
 * **Pre‑registration:** Freeze prompts, thresholds, and analysis plan before data collection.
 
 ---
 
 ## 7 Results Plan & Validation Pathways
 
-This paper is a **registered‑report style** contribution: it provides proofs, algorithms, and a locked evaluation protocol to ensure falsifiability and reproducibility. CNS 2.0 reported strong controlled‑task performance while maintaining interpretability [CNS 2.0 Ideas Paper]; CNS 3.0 aims to **exceed those results** by (i) evidence‑constrained decoding, (ii) formal projection (\Pi), and (iii) stronger critics.
+This paper is a **registered‑report style** contribution: it provides proofs, algorithms, and a locked evaluation protocol to ensure falsifiability and reproducibility. CNS 2.0 reported strong controlled‑task performance while maintaining interpretability [CNS 2.0 Ideas Paper]; CNS 3.0 aims to **exceed those results** by (i) evidence‑constrained decoding, (ii) formal projection $\Pi$, and (iii) stronger critics.
 
 ### 7.1 What constitutes success?
 
-* Statistically significant improvements (p < 0.05, (d>0.5)) over all baselines on ≥ 2 datasets, with **100% citation traceability** and ICC > 0.75 on human ratings.
+* Statistically significant improvements (p < 0.05, $d>0.5$) over all baselines on ≥ 2 datasets, with **100% citation traceability** and ICC > 0.75 on human ratings.
 * Verified **Dialectical Convergence** in practice (decreasing distances to fixed point across iterations) and **Information Preservation** (no drop in empirical Fisher information proxies when adding evidence).
 
 ### 7.2 Ablations & Diagnostics
@@ -245,13 +243,13 @@ This paper is a **registered‑report style** contribution: it provides proofs, 
 * Remove **Logic Critic** → increased contradiction cycles (measured by Betti‑1).
 * Remove **Grounding Critic** → higher hallucination rate (unsupported claim %).
 * Disable **constrained decoding** → drop in traceability.
-* Vary **EScore** weighting ((\lambda), (c(s))) → sensitivity curves.
+* Vary **EScore** weighting ($\lambda$, $c(s)$) → sensitivity curves.
 
 ### 7.3 Compute & Cost Envelope (feasibility)
 
 * **Critics.** NLI fine‑tuning (304 M) and GNN (< 50 M) on 1–2 GPUs;
 * **Synthesis.** LoRA on 8B with ~200k SNO‑triples: 2–4 GPUs over several days;
-* **Ops.** Ray orchestration, Qdrant/Neo4j on commodity cloud. Aggregate budget target: **<$10k** for (10^3–10^4) SNOs (excluding annotation costs).
+* **Ops.** Ray orchestration, Qdrant/Neo4j on commodity cloud. Aggregate budget target: **<$10k** for $10^3–10^4$ SNOs (excluding annotation costs).
 
 ---
 
@@ -284,16 +282,16 @@ CNS 3.0 converts the CNS vision into a **testable system** with concrete archi
 
 ### A. Proof Details (sketch extensions)
 
-* **Coherence:** formal inclusion–exclusion on detector error sets; homology‑based contradiction elimination proof via cycle cutting in (\mathsf{SC}(G)).
-* **Convergence:** show non‑expansiveness of each sub‑operator and composition contractivity; derive (\gamma) bound as a function of critic reliabilities and decode constraints.
+* **Coherence:** formal inclusion–exclusion on detector error sets; homology‑based contradiction elimination proof via cycle cutting in $\mathsf{SC}(G)$.
+* **Convergence:** show non‑expansiveness of each sub‑operator and composition contractivity; derive $\gamma$ bound as a function of critic reliabilities and decode constraints.
 * **Information:** observed Fisher information additivity; natural‑gradient invariance.
 * **Bias bounds:** Lipschitz control with Bias Critic penalty; divergence term estimation with IPM (e.g., MMD).
 
 ### B. Algorithms (pseudocode)
 
-**CNS‑PAIR‑SELECT**: ANN pre‑filter on (H) → compute CScore & EScore → select top‑k.
-**CNS‑SYNTHESIZE**: Build constrained prompt → decode with evidence tags → verify→refine up to (m) iterations.
-**CNS‑EVAL**: Run critics → return (T) and explanations.
+**CNS‑PAIR‑SELECT**: ANN pre‑filter on $H$ → compute CScore & EScore → select top‑k.
+**CNS‑SYNTHESIZE**: Build constrained prompt → decode with evidence tags → verify→refine up to $m$ iterations.
+**CNS‑EVAL**: Run critics → return $T$ and explanations.
 
 ### C. Prompts & Constraints
 
@@ -305,7 +303,7 @@ CNS 3.0 converts the CNS vision into a **testable system** with concrete archi
 
 ### E. Ablation Plan Details
 
-* Threshold sweeps: (\lambda) (temporal decay), (c(s)) priors, critic weights.
+* Threshold sweeps: $\lambda$ (temporal decay), $c(s)$ priors, critic weights.
 * Template complexity vs outcome; constrained vs free decoding.
 
 ---
