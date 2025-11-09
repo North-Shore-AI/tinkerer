@@ -42,6 +42,12 @@ Future additions will include:
 - `tinker` and `tinker-cookbook` packages installed (see `tinker-docs/install.md`)
 - `TINKER_API_KEY` exported in your shell environment
 
+### Useful environment knobs
+
+- `CNS_CLAIM_C1_WEIGHT` (default `5.0`): multiplies the loss applied to the `CLAIM[c1]` tokens so the adapter memorizes the gold hypothesis.
+- `CNS_CLAIM_EVIDENCE_WEIGHT` (default `1.0`): multiplies the loss for every evidence line (`CLAIM[c2+]`). Increase this (e.g., `2.0`) if you want to penalize deviations from the gold evidence sentences more heavily.
+- `CNS_DEBUG_DATUM`: if set to a positive integer, dumps token/weight statistics for the first N training examples.
+
 ## Evaluation
 
 - Quick spot-check: `python scripts/eval_claim_extractor.py --adapter-name claim-extractor-scifact`

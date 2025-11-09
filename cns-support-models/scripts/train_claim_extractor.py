@@ -28,8 +28,11 @@ import yaml
 import tinker
 from tinker import types
 
+from claim_schema import CLAIM_LINE_RE, parse_claim_lines
+
 
 CLAIM_C1_WEIGHT = float(os.environ.get("CNS_CLAIM_C1_WEIGHT", "5.0"))
+CLAIM_EVIDENCE_WEIGHT = float(os.environ.get("CNS_CLAIM_EVIDENCE_WEIGHT", "1.0"))
 
 
 def sha256_file(path: Path) -> str:
@@ -60,6 +63,23 @@ class Example:
 def load_config(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as fh:
         return yaml.safe_load(fh)
+
+
+def _build_claim_labels(completion_text: str, tokenizer) -> List[str | None]:
+    """
+    Returns a list mapping each completion token (0-based) to the CLAIM id it belongs to.
+    """
+    labels: List[str | None] = []
+    lines = completion_text.splitlines()
+    for idx, raw_line in enumerate(lines):
+        fragment = raw_line
+        if idx > 0:
+            fragment = "\n" + fragment
+        tokens = tokenizer.encode(fragment, add_special_tokens=False)
+        match = CLAIM_LINE_RE.match(raw_line.strip())
+        claim_id = match.group("id").lower() if match else None
+        labels.extend([claim_id] * len(tokens))
+    return labels
 
 
 def load_examples(path: Path, limit: int | None = None) -> List[Example]:
@@ -112,6 +132,7 @@ def build_datum(example: Example, tokenizer) -> types.Datum:
     prompt_tokens = tokenizer.encode(example.prompt, add_special_tokens=True)
     completion_text = " " + example.completion
     completion_tokens = tokenizer.encode(completion_text, add_special_tokens=False)
+    claim_labels = _build_claim_labels(completion_text, tokenizer)
 
     first_break = example.completion.find("\n")
     if first_break == -1:
@@ -136,10 +157,16 @@ def build_datum(example: Example, tokenizer) -> types.Datum:
             weights.append(0.0)
             continue
         completion_rank = token_pos - prompt_len + 1  # 1-indexed within completion span
+        comp_idx = token_pos - prompt_len
+        label = claim_labels[comp_idx] if 0 <= comp_idx < len(claim_labels) else None
+        weight = 1.0
         if first_line_token_count and completion_rank <= first_line_token_count:
-            weights.append(CLAIM_C1_WEIGHT)
-        else:
-            weights.append(1.0)
+            weight = max(weight, CLAIM_C1_WEIGHT)
+        if label == "c1":
+            weight = max(weight, CLAIM_C1_WEIGHT)
+        elif label and CLAIM_EVIDENCE_WEIGHT != 1.0:
+            weight = max(weight, CLAIM_EVIDENCE_WEIGHT)
+        weights.append(weight)
 
     debug_limit = int(os.environ.get("CNS_DEBUG_DATUM", 0) or 0)
     if debug_limit:
