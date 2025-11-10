@@ -8,7 +8,7 @@ The `.gitignore` policy keeps sensitive or high-churn assets (e.g., `runs/`, `br
 
 | Category | Paths | Notes |
 | --- | --- | --- |
-| **Tracked** | `README.md`, `docs/`, `CNS_PROPOSAL.md`, `cns-support-models/`, `cns3/`, `cns2/`, `assets/`, `LICENSE`, `repomix.config.json` | These files comprise the formal research portfolio and implementation scaffold. |
+| **Tracked** | `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns-support-models/`, `cns3/`, `cns2/`, `assets/`, `LICENSE`, `repomix.config.json` | These files comprise the formal research portfolio and implementation scaffold. |
 | **Ignored / local only** | `runs/`, `brainstorm/`, `tinker-docs/`, `thinking-machines-labs/`, historical `cns/`, intermediate data directories (`data/`, `outputs/`, `figures/`, etc.) | Use for experiments, brainstorming, and proprietary data; do not rely on them for reproducible context. |
 
 ## 2. Directory & Artifact Guide
@@ -17,7 +17,7 @@ The `.gitignore` policy keeps sensitive or high-churn assets (e.g., `runs/`, `br
 | --- | --- | --- | --- |
 | `README.md` | High-level overview, quickstart, and collaboration guide | External reviewers & new collaborators | Revamped (Nov 2025) |
 | `docs/RESEARCH_PORTFOLIO.md` | Orientation, scope clarifications, enhancement log | Thinking Machines academic reviewers | New (Nov 2025) |
-| `CNS_PROPOSAL.md` | Concise executive & technical summary of CNS support models | Program committees, funding boards | Reformatted (Nov 2025) |
+| `docs/CNS_PROPOSAL.md` | Concise executive & technical summary of CNS support models | Program committees, funding boards | Reformatted (Nov 2025) |
 | `cns2/ChiralNarrativeSynthesis_20250617.tex` | CNS 2.0 foundational LaTeX specification | Researchers studying historical theory | Unmodified |
 | `cns3/` | CNS 3.0 theoretical documents (dialectical geometry, validation memos, research proposals) | Theory group & reviewers | Active development |
 | `cns-support-models/` | Practical implementation scaffold (configs, scripts, notes) | Engineering collaborators | Active development |
@@ -50,7 +50,6 @@ The `.gitignore` policy keeps sensitive or high-churn assets (e.g., `runs/`, `br
 | --- | --- | --- |
 | Complete | Documented public scope and repository orientation (`docs/RESEARCH_PORTFOLIO.md`) | Clarifies what reviewers can rely on and how ignored directories map to local workflows. |
 | Complete | Refreshed `README.md` with accurate layout, professional tone, and Thinking Machines engagement guidance | Reconciles quickstart instructions with existing files and links to orientation materials. |
-| Complete | Reformatted `CNS_PROPOSAL.md` for executive readability (headings, numbered sections, cross-references) | Aligns with grant/proposal conventions and surfaces key metrics. |
+| Complete | Reformatted `docs/CNS_PROPOSAL.md` for executive readability (headings, numbered sections, cross-references) | Aligns with grant/proposal conventions and surfaces key metrics. |
 | Planned | Add dependency manifest + reproducible environment recipe for `cns-support-models/` | Will enumerate Python packages and pin versions once upstream APIs are finalized. |
 | Planned | Expand automated validation (lint/tests) for schema parsers and evaluation scripts | Targeting lightweight pytest suite referencing `data/samples/`. |
-

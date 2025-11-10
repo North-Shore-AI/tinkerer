@@ -16,7 +16,7 @@ Exploratory **Chiral Narrative Synthesis (CNS)** program maintained for **Thinki
 
 ## Public Scope
 
-Git-tracked paths include `README.md`, `docs/`, `CNS_PROPOSAL.md`, `cns2/`, `cns3/`, `cns-support-models/`, `assets/`, `LICENSE`, and `repomix.config.json`. Local-only directories (`runs/`, `brainstorm/`, interim `data/` outputs, `tinker-docs/`, `thinking-machines-labs/`, legacy `cns/`) are ignored to keep the public presence sharply curated. When sharing findings, never assume ignored paths are available to reviewers—summaries and artifacts must live in the tracked structure above.
+Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`, `cns3/`, `cns-support-models/`, `assets/`, `LICENSE`, and `repomix.config.json`. Local-only directories (`runs/`, `brainstorm/`, interim `data/` outputs, `tinker-docs/`, `thinking-machines-labs/`, legacy `cns/`) are ignored to keep the public presence sharply curated. When sharing findings, never assume ignored paths are available to reviewers—summaries and artifacts must live in the tracked structure above.
 
 ## Repository Guide
 
@@ -24,7 +24,7 @@ Git-tracked paths include `README.md`, `docs/`, `CNS_PROPOSAL.md`, `cns2/`, `cns
 | --- | --- |
 | `README.md` | This overview plus operational guidance for reviewers and collaborators. |
 | `docs/RESEARCH_PORTFOLIO.md` | Orientation guide detailing artifacts, public-scope policy, and enhancement log. |
-| `CNS_PROPOSAL.md` | Executive summary for the CNS support-models plan with numbered sections for proposal committees. |
+| `docs/CNS_PROPOSAL.md` | Executive summary for the CNS support-models plan with numbered sections for proposal committees. |
 | `cns2/` | Historical CNS 2.0 LaTeX specification anchoring the theoretical lineage. |
 | `cns3/` | CNS 3.0 theoretical documents (geometry/topology framing, validation memos, revised proposals). |
 | `cns-support-models/` | Implementation scaffold: configs, scripts, Makefile, experiment logs (`notes/claim_extractor.md`). |
@@ -82,7 +82,7 @@ When requesting feedback or posting updates (e.g., Discord, review memos):
 - Reference the specific theoretical artifact (`cns3/...`) or implementation log entry that motivates the question.
 - Summarize new results in tracked notes before sharing (ignored directories are invisible to reviewers).
 - Report blockers with concrete metrics (e.g., "Semantic alignment 9% on SciFact dev despite enforced CLAIM[c1]").
-- Link to `CNS_PROPOSAL.md` for executive context when engaging program committees or funding partners.
+- Link to `docs/CNS_PROPOSAL.md` for executive context when engaging program committees or funding partners.
 
 ## License
 
