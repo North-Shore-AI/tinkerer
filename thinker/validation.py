@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
@@ -10,6 +12,9 @@ from typing import List, Optional
 import pytest
 
 from .config import DatasetValidationConfig, SchemaField, TestSuiteConfig
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+VALIDATOR_SCRIPT = REPO_ROOT / "cns-support-models" / "scripts" / "validate_dataset.py"
 
 
 @dataclass
@@ -71,7 +76,56 @@ class DatasetValidator:
                     continue
                 errors.extend(self._validate_payload(payload, idx))
 
+        if self.config.evidence_mode in ("exact", "embedding"):
+            errors.extend(self._run_external_validator())
+
         return DatasetValidationResult(path=path, total_examples=total, errors=errors)
+
+    def _run_external_validator(self) -> List[str]:
+        if not VALIDATOR_SCRIPT.exists():
+            return ["validate_dataset.py not found; cannot run external validation"]
+
+        if not self.config.claims_path:
+            return ["claims_json path required for external validation"]
+
+        cmd = [
+            sys.executable,
+            str(VALIDATOR_SCRIPT),
+            str(self.config.path),
+            "--claims-json",
+            str(self.config.claims_path),
+        ]
+        if self.config.max_examples:
+            cmd.extend(["--max-examples", str(self.config.max_examples)])
+
+        if self.config.evidence_mode == "embedding":
+            if not self.config.corpus_path:
+                return ["corpus_json path required for embedding validation"]
+            cmd.extend(
+                [
+                    "--corpus-json",
+                    str(self.config.corpus_path),
+                    "--evidence-mode",
+                    "embedding",
+                    "--embedding-model",
+                    self.config.embedding_model,
+                    "--similarity-threshold",
+                    str(self.config.similarity_threshold),
+                ]
+            )
+        else:
+            cmd.extend(["--evidence-mode", "exact"])
+
+        result = subprocess.run(
+            cmd,
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            message = result.stderr.strip() or result.stdout.strip() or "external validator failed"
+            return [message]
+        return []
 
     def _validate_payload(self, payload: dict, line_no: int) -> List[str]:
         issues: List[str] = []

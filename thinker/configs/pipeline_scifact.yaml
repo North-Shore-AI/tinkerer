@@ -1,12 +1,12 @@
 tests:
-  path: ../cns-support-models/tests
+  path: ../../cns-support-models/tests
   markers: "not slow"
   args:
     - -v
   enabled: true
 
 data_validation:
-  path: ../cns-support-models/data/processed/scifact_claim_extractor.jsonl
+  path: ../../cns-support-models/tests/fixtures/scifact_dataset_sample.jsonl
   max_examples: 1000
   schema:
     - name: prompt
@@ -17,17 +17,29 @@ data_validation:
       type: object
       required: false
       allow_empty: true
+  evidence_mode: schema
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  similarity_threshold: 0.75
+  claims_json: ../../cns-support-models/tests/fixtures/scifact_claims_sample.jsonl
+  corpus_json: ../../cns-support-models/tests/fixtures/scifact_corpus_sample.jsonl
 
 training:
   config_path: lora_config.yaml
   backend: hf_peft
   enabled: true
+  tinker_config_path: ../../cns-support-models/configs/claim_extractor_scifact.yaml
+  tinker_script: ../../cns-support-models/scripts/train_claim_extractor.py
+  log_dir: ../../runs
 
 evaluation:
+  backend: tinker
   base_model: "meta-llama/Llama-3.1-8B-Instruct"
-  checkpoint_dir: ../cns-support-models/checkpoints/claim-extractor-scifact
-  claims_file: ../cns-support-models/data/raw/scifact/claims_dev.jsonl
-  corpus_file: ../cns-support-models/data/raw/scifact/corpus.jsonl
+  checkpoint_dir:
+  claims_file: ../../cns-support-models/data/raw/scifact/claims_dev.jsonl
+  corpus_file: ../../cns-support-models/data/raw/scifact/corpus.jsonl
   output_path: ../../runs/thinker_eval/scifact_dev_eval.jsonl
   max_samples: 50
   enabled: true
+  tinker_manifest_path: ../../runs/latest_tinker_adapter.json
+  tinker_max_tokens: 256
+  tinker_temperature: 0.0

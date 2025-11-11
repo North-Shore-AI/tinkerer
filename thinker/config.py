@@ -61,6 +61,11 @@ class DatasetValidationConfig:
     schema: List[SchemaField]
     max_examples: Optional[int] = None
     enabled: bool = True
+    evidence_mode: str = "schema"
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    similarity_threshold: float = 0.75
+    claims_path: Optional[Path] = None
+    corpus_path: Optional[Path] = None
 
 
 @dataclass(frozen=True)
@@ -68,17 +73,26 @@ class LocalTrainingConfig:
     config_path: Path
     backend: str = "hf_peft"
     enabled: bool = True
+    tinker_config_path: Optional[Path] = None
+    tinker_script: Optional[Path] = None
+    log_dir: Optional[Path] = None
 
 
 @dataclass(frozen=True)
 class EvaluationConfig:
-    base_model: str
-    checkpoint_dir: Path
     claims_file: Path
     corpus_file: Path
+    backend: str = "hf_peft"
+    base_model: Optional[str] = None
+    checkpoint_dir: Optional[Path] = None
     max_samples: int = 50
     output_path: Path = Path("eval_results.jsonl")
     enabled: bool = True
+    tinker_manifest_path: Optional[Path] = None
+    tinker_adapter_name: Optional[str] = None
+    tinker_adapter_path: Optional[str] = None
+    tinker_max_tokens: int = 256
+    tinker_temperature: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -137,6 +151,13 @@ def load_pipeline_config(path: Path) -> PipelineConfig:
             schema=schema_fields,
             max_examples=val_raw.get("max_examples"),
             enabled=val_raw.get("enabled", True),
+            evidence_mode=val_raw.get("evidence_mode", "schema"),
+            embedding_model=val_raw.get(
+                "embedding_model", "sentence-transformers/all-MiniLM-L6-v2"
+            ),
+            similarity_threshold=val_raw.get("similarity_threshold", 0.75),
+            claims_path=_resolve_optional_path(base_dir, val_raw.get("claims_json")),
+            corpus_path=_resolve_optional_path(base_dir, val_raw.get("corpus_json")),
         )
 
     training_cfg = None
@@ -146,19 +167,28 @@ def load_pipeline_config(path: Path) -> PipelineConfig:
             config_path=_resolve_path(base_dir, train_raw["config_path"]),
             backend=train_raw.get("backend", "hf_peft"),
             enabled=train_raw.get("enabled", True),
+            tinker_config_path=_resolve_optional_path(base_dir, train_raw.get("tinker_config_path")),
+            tinker_script=_resolve_optional_path(base_dir, train_raw.get("tinker_script")),
+            log_dir=_resolve_optional_path(base_dir, train_raw.get("log_dir")),
         )
 
     eval_cfg = None
     if "evaluation" in raw and raw["evaluation"]:
         eval_raw = raw["evaluation"]
         eval_cfg = EvaluationConfig(
-            base_model=eval_raw.get("base_model", "meta-llama/Llama-3.1-8B-Instruct"),
-            checkpoint_dir=_resolve_path(base_dir, eval_raw["checkpoint_dir"]),
+            backend=eval_raw.get("backend", "hf_peft"),
+            base_model=eval_raw.get("base_model"),
+            checkpoint_dir=_resolve_optional_path(base_dir, eval_raw.get("checkpoint_dir")),
             claims_file=_resolve_path(base_dir, eval_raw["claims_file"]),
             corpus_file=_resolve_path(base_dir, eval_raw["corpus_file"]),
             max_samples=eval_raw.get("max_samples", 50),
             output_path=_resolve_path(base_dir, eval_raw.get("output_path", "eval_results.jsonl")),
             enabled=eval_raw.get("enabled", True),
+            tinker_manifest_path=_resolve_optional_path(base_dir, eval_raw.get("tinker_manifest_path")),
+            tinker_adapter_name=eval_raw.get("tinker_adapter_name"),
+            tinker_adapter_path=eval_raw.get("tinker_adapter_path"),
+            tinker_max_tokens=eval_raw.get("tinker_max_tokens", 256),
+            tinker_temperature=eval_raw.get("tinker_temperature", 0.0),
         )
 
     return PipelineConfig(
@@ -168,3 +198,7 @@ def load_pipeline_config(path: Path) -> PipelineConfig:
         training=training_cfg,
         evaluation=eval_cfg,
     )
+def _resolve_optional_path(base_dir: Path, raw: str | None) -> Path | None:
+    if raw is None:
+        return None
+    return _resolve_path(base_dir, raw)

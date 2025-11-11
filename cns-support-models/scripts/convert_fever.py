@@ -25,8 +25,7 @@ def load_wiki_sentences(wiki_dir: Path) -> Dict[Tuple[str, int], str]:
     """
     Build a lookup from (page_id, sentence_index) to sentence text.
 
-    FEVER wiki shards contain tab-separated rows:
-        page_id<TAB>sentence_index<TAB>sentence_text
+    Supports both legacy TSV format and the JSONL format provided via Zenodo.
     """
     mapping: Dict[Tuple[str, int], str] = {}
     files = sorted([p for p in wiki_dir.rglob("*") if p.is_file()])
@@ -35,16 +34,49 @@ def load_wiki_sentences(wiki_dir: Path) -> Dict[Tuple[str, int], str]:
 
     for file in files:
         with file.open("r", encoding="utf-8") as fh:
-            for line in fh:
-                parts = line.rstrip("\n").split("\t")
-                if len(parts) < 3:
-                    continue
-                page, idx, text = parts[0], parts[1], parts[2]
-                try:
-                    sent_idx = int(idx)
-                except ValueError:
-                    continue
-                mapping[(page, sent_idx)] = text.strip()
+            first = fh.readline()
+            fh.seek(0)
+            if not first:
+                continue
+            if first.lstrip().startswith("{"):
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    page = payload.get("id")
+                    lines_blob = payload.get("lines", "")
+                    if not page or not lines_blob:
+                        continue
+                    for row in lines_blob.split("\n"):
+                        if not row:
+                            continue
+                        parts = row.split("\t")
+                        if len(parts) < 2:
+                            continue
+                        idx_str, text = parts[0], parts[1]
+                        if not text:
+                            continue
+                        try:
+                            sent_idx = int(idx_str)
+                        except ValueError:
+                            continue
+                        mapping[(page, sent_idx)] = text.strip()
+            else:
+                for line in fh:
+                    parts = line.rstrip("\n").split("\t")
+                    if len(parts) < 3:
+                        continue
+                    page, idx, text = parts[0], parts[1], parts[2]
+                    try:
+                        sent_idx = int(idx)
+                    except ValueError:
+                        continue
+                    mapping[(page, sent_idx)] = text.strip()
+
     logging.info("Loaded %d wiki sentences from %d files", len(mapping), len(files))
     return mapping
 
@@ -55,7 +87,11 @@ def iter_claims(claims_path: Path) -> Iterable[dict]:
             line = line.strip()
             if not line:
                 continue
-            yield json.loads(line)
+            try:
+                yield json.loads(line)
+            except json.JSONDecodeError:
+                logging.warning("Skipping malformed claim line: %.50s", line)
+                continue
 
 
 def build_completion(claim: str, evidence_texts: List[str], label: str) -> str:
@@ -109,8 +145,8 @@ def main() -> None:
             completion = build_completion(entry["claim"], sentences, label)
             prompt = (
                 f"Passage (from {sentences[0][:32]}...):\n"
-                " ".join(sentences[:3])
-                + "\n\nTask: Extract atomic claims and relations.\n\n"
+                f"{' '.join(sentences[:3])}\n\n"
+                "Task: Extract atomic claims and relations.\n\n"
                 "Output format:\nCLAIM[c#]: <text>\nRELATION: <src_id> <supports|refutes> <dst_id>\n\n"
             )
             payload = {

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import Optional
 
 from .config import PipelineConfig
 from .evaluation import Evaluator
-from .training import create_training_backend
+from .training import TrainingReport, create_training_backend
 from .validation import DatasetValidator, TestSuiteRunner
 
 
@@ -15,6 +16,10 @@ from .validation import DatasetValidator, TestSuiteRunner
 class PipelineState:
     validation_ran: bool = False
     training_completed: bool = False
+    tinker_adapter_name: Optional[str] = None
+    tinker_adapter_path: Optional[str] = None
+    tinker_adapter_manifest: Optional[Path] = None
+    tinker_base_model: Optional[str] = None
 
 
 class ThinkerPipeline:
@@ -43,16 +48,20 @@ class ThinkerPipeline:
         if not train_cfg or not train_cfg.enabled:
             return
 
-        backend_name = backend or train_cfg.backend
         backend_cfg = train_cfg
-        backend_cfg = type(train_cfg)(
-            config_path=train_cfg.config_path,
-            backend=backend_name,
-            enabled=train_cfg.enabled,
-        )
+        if backend is not None and backend != train_cfg.backend:
+            backend_cfg = replace(train_cfg, backend=backend)
         trainer = create_training_backend(backend_cfg)
-        trainer.train()
+        report = trainer.train()
         self.state.training_completed = True
+        if isinstance(report, TrainingReport) and report.backend == "tinker":
+            self.state.tinker_adapter_name = report.metrics.get("adapter_name")
+            adapter_path = report.metrics.get("adapter_path")
+            self.state.tinker_adapter_path = adapter_path
+            manifest_path = report.metrics.get("manifest_path")
+            if manifest_path:
+                self.state.tinker_adapter_manifest = Path(manifest_path)
+            self.state.tinker_base_model = report.metrics.get("base_model")
 
     def evaluate(self, skip_validation: bool = False) -> dict:
         if not skip_validation:
@@ -60,7 +69,7 @@ class ThinkerPipeline:
         eval_cfg = self.config.evaluation
         if not eval_cfg or not eval_cfg.enabled:
             return {}
-        evaluator = Evaluator(eval_cfg)
+        evaluator = Evaluator(eval_cfg, state=self.state)
         return evaluator.run()
 
     def run(self, backend: Optional[str] = None) -> dict:

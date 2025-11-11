@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -11,13 +16,22 @@ from .config import LocalTrainingConfig
 class TrainingBackend:
     """Simple protocol describing a training backend."""
 
-    def train(self) -> None:
+    def train(self) -> TrainingReport:
         raise NotImplementedError
+
+
+@dataclass
+class TrainingReport:
+    checkpoint_dir: Path
+    metrics: Dict[str, float]
+    backend: str
 
 
 def create_training_backend(config: LocalTrainingConfig) -> TrainingBackend:
     if config.backend == "hf_peft":
         return LocalPEFTTrainer(config.config_path)
+    if config.backend == "tinker":
+        return TinkerScriptTrainer(config)
     raise ValueError(f"Unsupported training backend '{config.backend}'")
 
 
@@ -228,3 +242,57 @@ class LocalPEFTTrainer(TrainingBackend):
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
         model.save_pretrained(checkpoint_dir)
         tokenizer.save_pretrained(checkpoint_dir)
+        return TrainingReport(
+            checkpoint_dir=checkpoint_dir,
+            metrics={},
+            backend="hf_peft",
+        )
+
+
+class TinkerScriptTrainer(TrainingBackend):
+    """Runs the legacy Tinker training script via subprocess."""
+
+    def __init__(self, config: LocalTrainingConfig):
+        self.config = config
+
+    def train(self) -> TrainingReport:
+        if not os.environ.get("TINKER_API_KEY"):
+            raise RuntimeError("TINKER_API_KEY is not set; export it before running the Tinker backend.")
+        script = self.config.tinker_script or (
+            Path(__file__).resolve().parents[1] / "cns-support-models" / "scripts" / "train_claim_extractor.py"
+        )
+        script = script.resolve()
+        config_path = (
+            self.config.tinker_config_path or self.config.config_path
+        ).resolve()
+        cmd = [
+            sys.executable,
+            str(script),
+            "--config",
+            str(config_path),
+        ]
+        if self.config.log_dir:
+            cmd.extend(["--log-dir", str(self.config.log_dir.resolve())])
+        subprocess.run(cmd, cwd=script.parent, check=True)
+
+        adapter_metrics: Dict[str, Any] = {}
+        if self.config.log_dir:
+            manifest_path = self.config.log_dir / "latest_tinker_adapter.json"
+            if manifest_path.exists():
+                try:
+                    with manifest_path.open("r", encoding="utf-8") as fh:
+                        manifest = json.load(fh)
+                    adapter_metrics = {
+                        "adapter_name": manifest.get("adapter_name"),
+                        "adapter_path": manifest.get("adapter_path"),
+                        "manifest_path": str(manifest_path),
+                        "base_model": manifest.get("base_model"),
+                    }
+                except Exception as exc:  # noqa: BLE001
+                    adapter_metrics["manifest_error"] = str(exc)
+
+        return TrainingReport(
+            checkpoint_dir=Path(),
+            metrics=adapter_metrics,
+            backend="tinker",
+        )

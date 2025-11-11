@@ -1,0 +1,41 @@
+model:
+  name: "meta-llama/Llama-3.1-8B-Instruct"
+  quantization: "4bit"
+  device_map: "auto"
+
+lora:
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+  bias: "none"
+
+training:
+  per_device_batch_size: 1
+  gradient_accumulation_steps: 1
+  learning_rate: 1.0e-4
+  num_epochs: 1
+  warmup_steps: 10
+  max_seq_length: 512
+  optim: "adamw_torch"
+  weight_decay: 0.0
+  lr_scheduler_type: "linear"
+  fp16: true
+
+data:
+  train_file: ../../cns-support-models/tests/fixtures/scifact_dataset_sample.jsonl
+  validation_split: 0.5
+  shuffle: true
+  seed: 42
+
+output:
+  checkpoint_dir: ../../cns-support-models/checkpoints/debug-hf
+  logging_steps: 1
+  eval_steps: 1
+  save_steps: 5
+  save_total_limit: 1
+  report_to: "none"

@@ -191,7 +191,7 @@ output:
 - Streams JSONL file; optionally caps at `max_examples`.  
 - Applies schema checks (existence, type, emptiness).  
 - Aggregates errors with line numbers; returns `DatasetValidationResult`.  
-- CLI prints first N errors for readability; entire list available in result object.
+- When `evidence_mode` is `exact` or `embedding`, shells out to `cns-support-models/scripts/validate_dataset.py` using config-provided `claims_json` / `corpus_json` to enforce CLAIM[c1]/evidence parity.
 
 ### 6.4 Training Abstraction (`thinker.training`)
 
@@ -221,6 +221,12 @@ class TrainingReport:
 - Saves checkpoint + tokenizer to `output.checkpoint_dir`.  
 - Returns metrics summary (loss, eval_loss, etc.).
 
+#### 6.4.3 Tinker Backend
+- Wraps the existing `cns-support-models/scripts/train_claim_extractor.py`; Thinker spawns a subprocess with the specified YAML config (and optional `--log-dir`).  
+- Requires `TINKER_API_KEY` and `tinker` Python package in the environment (handled by the script).  
+- When `training.backend: tinker`, Thinker passes through `tinker_config_path`/`tinker_script` paths from the pipeline YAML.  
+- Future iteration: replace subprocess shim with direct `tinker.ServiceClient` integration (keeps CLI identical).
+
 #### 6.4.3 Future: Tinker Backend
 - Wrap existing `train_claim_extractor.py` logic but using Thinker config + run metadata.  
 - Extract dataset path, LoRA hyperparameters, loss weights from shared YAML.  
@@ -244,6 +250,8 @@ class TrainingReport:
 - Writes per-sample results JSONL (claim_id, prompt, completion).  
 - Returns metrics dict for CLI display + metadata.
 
+- **Data Bootstrap CLI:** `thinker data setup --dataset {scifact,fever}` automates data prep per dataset (SciFact: download+convert+optional validation; FEVER: convert after user supplies raw files).
+
 ### 6.6 CLI (`thinker.cli`)
 - Command: `thinker [--config pipeline.yaml] <subcommand>`.  
 - Subcommands:
@@ -251,6 +259,7 @@ class TrainingReport:
   2. `train [--backend ...] [--skip-validation]`.  
   3. `eval [--skip-validation]`.  
   4. `run [--backend ...]` – full pipeline (validate → train → eval).  
+  5. `data setup [--dataset {scifact,fever}] [--validation-mode ...]` – manage raw data and optional validation.  
 - Exit codes: 0 success; non-zero indicates failure stage.  
 - Logs errors with `[thinker] error: ...`.
 
@@ -310,6 +319,7 @@ class TrainingReport:
 3. **Backends:** Add new backend factories (e.g., `hf_accelerate`, `tinker_v2`, `elixir_orchestrator`).  
 4. **Metrics:** Evaluation stage can accept plugin registry to compute additional metrics (BLEU, BERTScore).  
 5. **Artifacts:** Run metadata writer can emit extra files (plots, confusion matrices).
+ - **Data Helpers:** `thinker data setup` automates dataset download/ conversion and can call validation in the same command.
 
 ---
 
@@ -341,4 +351,4 @@ class TrainingReport:
 - **Appendix A:** Pipeline config JSON schema (future).  
 - **Appendix B:** Example CLI sessions / expected output.  
 - **Appendix C:** Glossary (CLAIM[c1], SNO, QLoRA, etc.).
-
+- **Data Bootstrap CLI:** `thinker data setup` ensures SciFact raw/processed files exist (download + conversion) and can run validation immediately.

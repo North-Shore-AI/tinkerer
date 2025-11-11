@@ -1,0 +1,2 @@
+{"id": 1001, "claim": "Vitamin C supplementation reduces cold duration.", "label": "SUPPORTS", "evidence": {"1": [{"sentences": [0, 1], "label": "SUPPORTS"}]}}
+{"id": 2001, "claim": "Green tea cures influenza.", "label": "REFUTES", "evidence": {"2": [{"sentences": [0], "label": "REFUTES"}]}}

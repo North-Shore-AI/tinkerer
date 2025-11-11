@@ -23,7 +23,7 @@ We are starting with (1) because CNS §4.1 calls out Llama-3.1-8B as the preferr
 ## How to use the scaffold
 
 1. Drop domain-specific training data into `data/<dataset>/` (JSONL with `prompt`, `completion`, and optional metadata). A tiny example lives in `data/samples/claim_extractor.jsonl`.
-2. If you want ready-made corpora, run `make scifact` (see below) for SciFact. For FEVER, download the Zenodo files manually (see `data/fever/README.md`), run `python scripts/convert_fever.py`, then point at `configs/claim_extractor_fever.yaml`.
+2. If you want ready-made corpora, run `make scifact` (see below) for SciFact. For FEVER, run `python -m thinker.cli data setup --dataset fever --skip-validation` to fetch and convert automatically (raw files land in `data/raw/fever/`).
 3. Run `python scripts/train_claim_extractor.py --config configs/claim_extractor.yaml`. The script:
    - Loads the config and sample data schema
    - Creates a `tinker.ServiceClient` and `TrainingClient`

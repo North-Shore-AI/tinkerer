@@ -220,6 +220,7 @@ def main() -> None:
     training_client = service_client.create_lora_training_client(base_model=model_cfg["base_model"])
     print("[init] Training client ready.", flush=True)
     tokenizer = training_client.get_tokenizer()
+    inline_eval_supported = hasattr(training_client, "sample")
 
     steps_per_epoch = math.ceil(len(examples) / data_cfg["batch_size"])
     total_steps = steps_per_epoch * opt_cfg["epochs"]
@@ -230,6 +231,10 @@ def main() -> None:
     step = 0
     last_loss = None
     print("[init] Entering training loop...", flush=True)
+    warned_missing_inline_eval = False
+    run_tag = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S")
+    checkpoint_base = model_cfg["adapter_name"]
+    final_checkpoint_name = f"{checkpoint_base}-{run_tag}"
     for epoch in range(opt_cfg["epochs"]):
         random.shuffle(examples)
         for batch in chunk(examples, data_cfg["batch_size"]):
@@ -287,7 +292,7 @@ def main() -> None:
                 print(f"[train] epoch={epoch+1} step={step}/{total_steps} loss={loss:.4f}")
 
             eval_every = log_cfg.get("eval_every_steps")
-            if eval_every and step % eval_every == 0:
+            if eval_every and inline_eval_supported and step % eval_every == 0:
                 sample_future = training_client.sample(
                     prompt=types.ModelInput.from_ints(tokenizer.encode(batch[0].prompt)),
                     sampling_params=types.SamplingParams(max_tokens=128, temperature=0.0),
@@ -296,14 +301,28 @@ def main() -> None:
                 sample_result = sample_future.result()
                 decoded = tokenizer.decode(sample_result.sequences[0].tokens)
                 print(f"[eval] sample output (truncated): {decoded[:120]!r}")
+            elif eval_every and not inline_eval_supported and not warned_missing_inline_eval:
+                print(
+                    "[warn] Tinker training client does not expose sample(); skipping inline eval logging.",
+                    flush=True,
+                )
+                warned_missing_inline_eval = True
 
             save_every = log_cfg.get("save_every_steps")
             if save_every and step % save_every == 0:
-                training_client.save_weights(name=model_cfg["adapter_name"])
-                print(f"[checkpoint] Saved adapter snapshot at step {step}")
+                ckpt_name = f"{checkpoint_base}-{run_tag}-step{step}"
+                ckpt_resp = training_client.save_weights_for_sampler(name=ckpt_name).result()
+                print(
+                    f"[checkpoint] Saved adapter snapshot '{ckpt_name}' at step {step} ({ckpt_resp.path})",
+                    flush=True,
+                )
 
-    final_client = training_client.save_weights_and_get_sampling_client(name=model_cfg["adapter_name"])
-    print("[done] Saved adapter weights. Ready for offline evals via sampling.")
+    final_save = training_client.save_weights_for_sampler(name=final_checkpoint_name).result()
+    final_checkpoint_path = final_save.path
+    print(
+        f"[done] Saved adapter weights as '{final_checkpoint_name}' ({final_checkpoint_path}). Ready for offline evals.",
+        flush=True,
+    )
 
     if args.log_dir:
         args.log_dir.mkdir(parents=True, exist_ok=True)
@@ -313,6 +332,8 @@ def main() -> None:
             "config": str(config_path),
             "git_commit": git_commit(),
             "adapter_name": model_cfg["adapter_name"],
+            "adapter_checkpoint": final_checkpoint_name,
+            "adapter_checkpoint_path": final_checkpoint_path,
             "base_model": model_cfg["base_model"],
             "dataset": {
                 "train_path": str(train_path),
@@ -332,6 +353,18 @@ def main() -> None:
         with log_path.open("w", encoding="utf-8") as fh:
             json.dump(metadata, fh, indent=2)
         print(f"[log] wrote provenance metadata to {log_path}")
+
+        latest_manifest = {
+            "adapter_name": final_checkpoint_name,
+            "adapter_path": final_checkpoint_path,
+            "base_model": model_cfg["base_model"],
+            "config": str(config_path),
+            "timestamp": now_utc.isoformat().replace("+00:00", "Z"),
+        }
+        manifest_path = args.log_dir / "latest_tinker_adapter.json"
+        with manifest_path.open("w", encoding="utf-8") as fh:
+            json.dump(latest_manifest, fh, indent=2)
+        print(f"[log] updated latest adapter manifest at {manifest_path}")
 
 
 if __name__ == "__main__":
