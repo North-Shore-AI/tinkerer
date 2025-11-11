@@ -1,0 +1,33 @@
+tests:
+  path: ../cns-support-models/tests
+  markers: "not slow"
+  args:
+    - -v
+  enabled: true
+
+data_validation:
+  path: ../cns-support-models/data/processed/scifact_claim_extractor.jsonl
+  max_examples: 1000
+  schema:
+    - name: prompt
+      type: string
+    - name: completion
+      type: string
+    - name: metadata
+      type: object
+      required: false
+      allow_empty: true
+
+training:
+  config_path: lora_config.yaml
+  backend: hf_peft
+  enabled: true
+
+evaluation:
+  base_model: "meta-llama/Llama-3.1-8B-Instruct"
+  checkpoint_dir: ../cns-support-models/checkpoints/claim-extractor-scifact
+  claims_file: ../cns-support-models/data/raw/scifact/claims_dev.jsonl
+  corpus_file: ../cns-support-models/data/raw/scifact/corpus.jsonl
+  output_path: ../../runs/thinker_eval/scifact_dev_eval.jsonl
+  max_samples: 50
+  enabled: true

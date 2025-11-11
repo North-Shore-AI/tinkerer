@@ -1,0 +1,2 @@
+{"prompt": "Given hypothesis: Vitamin C reduces colds.\nExtract claims:", "completion": "CLAIM[c1]: Vitamin C reduces colds.", "metadata": {"id": 1}}
+{"prompt": "Given hypothesis: Coffee improves focus.\nExtract claims:", "completion": "CLAIM[c1]: Coffee improves focus.", "metadata": {"id": 2}}

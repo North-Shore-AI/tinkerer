@@ -1,0 +1,48 @@
+# Model configuration
+model:
+  name: "meta-llama/Llama-3.1-8B-Instruct"
+  quantization: "4bit"
+  device_map: "auto"
+
+# LoRA hyperparameters
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+  bias: "none"
+
+# Training hyperparameters
+training:
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-4
+  num_epochs: 3
+  warmup_steps: 100
+  max_seq_length: 2048
+  claim_c1_weight: 5.0
+  evidence_weight: 2.0
+  optim: "adamw_torch"
+  weight_decay: 0.01
+  lr_scheduler_type: "cosine"
+  fp16: true
+
+# Data
+data:
+  train_file: ../../cns-support-models/data/processed/scifact_claim_extractor.jsonl
+  validation_split: 0.1
+  shuffle: true
+  seed: 42
+
+# Output
+output:
+  checkpoint_dir: ../../cns-support-models/checkpoints/claim-extractor-scifact
+  logging_steps: 10
+  eval_steps: 100
+  save_steps: 200
+  save_total_limit: 3
+  report_to: "none"
