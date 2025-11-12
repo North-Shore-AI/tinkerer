@@ -86,6 +86,76 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
 
 Use the `.gitignore`d `runs/` directory for local artifacts; only promote curated summaries into tracked notes or issues.
 
+## Evaluation: 4-Stage Semantic Validation (2025-11-11 Update)
+
+**⚠️ Breaking Change**: Evaluation now uses **semantic validation** instead of exact-match metrics.
+
+### Why This Change?
+
+LoRA models (rank=8-32, trained on 32-64 examples) learn **semantic patterns**, not verbatim text reproduction. Exact-match evaluation on held-out data is fundamentally incompatible with how these models work and was consistently showing 0% scores while hiding actual model behavior.
+
+Per **AGENTS.md Section 1.0**, exact-match has been retired in favor of **4-stage semantic validation**:
+
+### 4-Stage Validation Pipeline (AGENTS.md Section 4.1)
+
+1. **Citation Accuracy (Hard Gate)**
+   - Validates cited evidence IDs exist in corpus
+   - Binary pass/fail; short-circuits if failed
+
+2. **Entailment Score**
+   - Uses DeBERTa-v3-large NLI model
+   - Checks if evidence entails claim
+   - Threshold: ≥0.75
+
+3. **Semantic Similarity**
+   - Uses sentence-transformers (all-MiniLM-L6-v2)
+   - Cosine similarity between generated and gold claims
+   - Threshold: ≥0.70 (target: ≥60% pass rate)
+
+4. **Paraphrase Tolerance**
+   - Accepts valid rephrasings when stages 1-2 pass
+   - Allows semantic equivalence without exact wording
+
+### New Metrics (AGENTS.md Section 1.1 Compliant)
+
+```bash
+python -m thinker.cli eval
+```
+
+Reports:
+- **Schema Compliance Rate**: % with CLAIM[c*] structure (target: ≥95%)
+- **Citation Accuracy Rate**: % with valid evidence citations (hard gate)
+- **Mean Entailment Score**: Average DeBERTa NLI score (threshold: ≥0.75)
+- **Mean Semantic Similarity**: Average cosine similarity (threshold: ≥0.70)
+- **Overall Pass Rate**: % passing all 4 stages
+
+**Legacy exact-match metrics are retained for comparison only** (labeled `_LEGACY`).
+
+### Implementation
+
+- **Core validation**: `thinker/semantic_validation.py`
+- **Evaluation integration**: `thinker/evaluation.py`
+- **Comparison report**: `generate_comparison_report.py`
+- **Issue tracking**: `ISSUE_semantic_validation_emergency_fix.md`
+
+Dependencies (automatically installed):
+- `torch` (already present)
+- `sentence-transformers` (already present)
+- `transformers` (added for DeBERTa-v3)
+
+### Current Status (as of 2025-11-11)
+
+Semantic validation identified **critical issues** that exact-match hid:
+- **Schema compliance: 0%** - Model not producing CLAIM[c*] format consistently
+- **Citation accuracy: 3.3%** - Model not properly citing evidence documents
+
+These are **training prompt/data issues**, not evaluation issues. Next steps:
+1. Fix training prompts to enforce CLAIM[c*] schema
+2. Add explicit citation training examples
+3. Re-train and re-evaluate
+
+See `ISSUE_semantic_validation_emergency_fix.md` for full diagnostic report.
+
 ## Research Tracks & Status
 
 - **Theoretical track (`cns2/`, `cns3/`)** – Documents the evolution from CNS 2.0 to CNS 3.0, including the algebraic-topological framing (`CNS_3_0_A_DIALECTICAL_FRAMEWORK_FOR_AUTOMATED_KNOWLEDGE_DISCOVERY.md`), the CNS-TGM revision (2025‑11‑09 proposal), and independent validation memos. These serve as review packages for Thinking Machines academics.

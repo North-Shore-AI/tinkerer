@@ -1,4 +1,8 @@
-"""Evaluation harness for SciFact-style claim extraction."""
+"""Evaluation harness for SciFact-style claim extraction.
+
+Updated to use 4-stage semantic validation per AGENTS.md Section 4.1.
+Exact-match metrics are retained for legacy comparison only.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +13,7 @@ from typing import Callable, Dict, List, Optional, TYPE_CHECKING
 
 from .claim_schema import parse_claim_lines
 from .config import EvaluationConfig
+from .semantic_validation import SemanticValidator, ValidationResult
 
 if TYPE_CHECKING:
     from .pipeline import PipelineState
@@ -46,37 +51,108 @@ class Evaluator:
     def __init__(self, config: EvaluationConfig, state: Optional["PipelineState"] = None):
         self.config = config
         self.state = state
+        # Initialize semantic validator for 4-stage validation
+        self.semantic_validator = None  # Lazy init in run() to avoid loading models unnecessarily
 
     def run(self) -> Dict[str, float]:
+        # Initialize semantic validator (lazy load)
+        if self.semantic_validator is None:
+            self.semantic_validator = SemanticValidator()
+
         completion_fn = self._build_completion_provider()
         claims = _load_jsonl(Path(self.config.claims_file))[: self.config.max_samples]
         corpus = _load_corpus(Path(self.config.corpus_file))
 
+        # Initialize metrics tracking all 4 validation stages
         metrics = {
             "total": len(claims),
+            # Schema compliance (prerequisite check)
+            "schema_valid": 0,
+            # Stage 1: Citation Accuracy
+            "citation_valid": 0,
+            # Stage 2: Entailment
+            "entailment_scores": [],
+            "entailment_pass": 0,
+            # Stage 3: Semantic Similarity
+            "similarity_scores": [],
+            "similarity_pass": 0,
+            # Stage 4: Paraphrase Tolerance
+            "paraphrase_accepted": 0,
+            # Overall pass rate
+            "overall_pass": 0,
+            # Legacy exact-match metrics (for comparison only)
             "c1_exact_match": 0,
-            "evidence_semantic_match": [],
+            "evidence_exact_match": [],
         }
         results = []
 
         for claim in claims:
             prompt = self._build_prompt(claim, corpus)
             completion = completion_fn(prompt)
-            parsed = parse_claim_lines(line for line in completion.splitlines() if line.startswith("CLAIM["))
 
+            # Parse claims from output
+            parsed = parse_claim_lines(line for line in completion.splitlines() if line.startswith("CLAIM["))
             c1 = parsed.get("c1")
+            generated_claim_text = c1.text if c1 else ""
+
+            # Get gold evidence IDs
+            gold_evidence_ids = set(str(doc_id) for doc_id in claim.get("cited_doc_ids", []))
+
+            # Run 4-stage semantic validation
+            validation = self.semantic_validator.validate_claim(
+                generated_claim=generated_claim_text,
+                gold_claim=claim["claim"],
+                generated_full_output=completion,
+                evidence_corpus=corpus,
+                gold_evidence_ids=gold_evidence_ids,
+            )
+
+            # Track metrics from validation
+            if validation.schema_valid:
+                metrics["schema_valid"] += 1
+            if validation.citation_valid:
+                metrics["citation_valid"] += 1
+
+            metrics["entailment_scores"].append(validation.entailment_score)
+            if validation.entailment_pass:
+                metrics["entailment_pass"] += 1
+
+            metrics["similarity_scores"].append(validation.semantic_similarity)
+            if validation.similarity_pass:
+                metrics["similarity_pass"] += 1
+
+            if validation.paraphrase_accepted:
+                metrics["paraphrase_accepted"] += 1
+
+            if validation.overall_pass:
+                metrics["overall_pass"] += 1
+
+            # Legacy exact-match metrics (for comparison)
             if c1 and c1.text == claim["claim"]:
                 metrics["c1_exact_match"] += 1
 
             evidence_claims = [entry.text for key, entry in parsed.items() if key != "c1"]
             gold_sentences = self._gather_gold_sentences(claim, corpus)
-
             if evidence_claims and gold_sentences:
-                metrics["evidence_semantic_match"].append(
+                metrics["evidence_exact_match"].append(
                     evaluate_semantic_match(evidence_claims, gold_sentences)
                 )
 
-            results.append({"claim_id": claim["id"], "prompt": prompt, "completion": completion})
+            results.append({
+                "claim_id": claim["id"],
+                "prompt": prompt,
+                "completion": completion,
+                "validation": {
+                    "schema_valid": validation.schema_valid,
+                    "citation_valid": validation.citation_valid,
+                    "entailment_score": validation.entailment_score,
+                    "entailment_pass": validation.entailment_pass,
+                    "semantic_similarity": validation.semantic_similarity,
+                    "similarity_pass": validation.similarity_pass,
+                    "paraphrase_accepted": validation.paraphrase_accepted,
+                    "overall_pass": validation.overall_pass,
+                }
+            })
 
         self._write_results(results)
         print(
@@ -84,22 +160,51 @@ class Evaluator:
             flush=True,
         )
 
-        if metrics["evidence_semantic_match"]:
-            metrics["evidence_semantic_match_avg"] = sum(metrics["evidence_semantic_match"]) / len(
-                metrics["evidence_semantic_match"]
-            )
-        else:
-            metrics["evidence_semantic_match_avg"] = 0.0
-        metrics["c1_exact_match_rate"] = (
-            metrics["c1_exact_match"] / metrics["total"] if metrics["total"] else 0.0
+        # Compute aggregate metrics
+        total = metrics["total"] if metrics["total"] > 0 else 1  # Avoid division by zero
+
+        # AGENTS.md Section 1.1 compliant metrics
+        metrics["schema_compliance_rate"] = metrics["schema_valid"] / total
+        metrics["citation_accuracy_rate"] = metrics["citation_valid"] / total
+        metrics["mean_entailment_score"] = (
+            sum(metrics["entailment_scores"]) / len(metrics["entailment_scores"])
+            if metrics["entailment_scores"] else 0.0
         )
-        print(
-            "[eval] metrics: "
-            f"c1_exact_match_rate={metrics['c1_exact_match_rate']:.3f}, "
-            f"evidence_semantic_match_avg={metrics['evidence_semantic_match_avg']:.3f}, "
-            f"examples={metrics['total']}",
-            flush=True,
+        metrics["entailment_pass_rate"] = metrics["entailment_pass"] / total
+        metrics["mean_semantic_similarity"] = (
+            sum(metrics["similarity_scores"]) / len(metrics["similarity_scores"])
+            if metrics["similarity_scores"] else 0.0
         )
+        metrics["semantic_similarity_rate"] = metrics["similarity_pass"] / total
+        metrics["paraphrase_acceptance_rate"] = metrics["paraphrase_accepted"] / total
+        metrics["overall_pass_rate"] = metrics["overall_pass"] / total
+
+        # Legacy metrics (for comparison)
+        metrics["c1_exact_match_rate_LEGACY"] = metrics["c1_exact_match"] / total
+        metrics["evidence_exact_match_avg_LEGACY"] = (
+            sum(metrics["evidence_exact_match"]) / len(metrics["evidence_exact_match"])
+            if metrics["evidence_exact_match"] else 0.0
+        )
+
+        # Print metrics aligned with AGENTS.md Section 1.1
+        print("\n" + "=" * 80, flush=True)
+        print("[eval] 4-STAGE SEMANTIC VALIDATION METRICS (AGENTS.md Section 1.1)", flush=True)
+        print("=" * 80, flush=True)
+        print(f"Total examples: {metrics['total']}", flush=True)
+        print(f"\nSchema Compliance:     {metrics['schema_compliance_rate']:.1%} (target: ≥95%)", flush=True)
+        print(f"Citation Accuracy:     {metrics['citation_accuracy_rate']:.1%} (hard gate)", flush=True)
+        print(f"Mean Entailment Score: {metrics['mean_entailment_score']:.3f} (threshold: ≥0.75)", flush=True)
+        print(f"Entailment Pass Rate:  {metrics['entailment_pass_rate']:.1%}", flush=True)
+        print(f"Mean Similarity Score: {metrics['mean_semantic_similarity']:.3f} (threshold: ≥0.70)", flush=True)
+        print(f"Similarity Pass Rate:  {metrics['semantic_similarity_rate']:.1%} (target: ≥60%)", flush=True)
+        print(f"Paraphrase Accepted:   {metrics['paraphrase_acceptance_rate']:.1%}", flush=True)
+        print(f"\n🎯 OVERALL PASS RATE:   {metrics['overall_pass_rate']:.1%}", flush=True)
+        print("\n" + "-" * 80, flush=True)
+        print("LEGACY EXACT-MATCH METRICS (for comparison only, DO NOT optimize):", flush=True)
+        print(f"C1 Exact Match:        {metrics['c1_exact_match_rate_LEGACY']:.1%}", flush=True)
+        print(f"Evidence Exact Match:  {metrics['evidence_exact_match_avg_LEGACY']:.1%}", flush=True)
+        print("=" * 80 + "\n", flush=True)
+
         return metrics
 
     def _build_completion_provider(self) -> Callable[[str], str]:
@@ -233,15 +338,25 @@ class Evaluator:
         )
 
     def _build_prompt(self, claim: Dict, corpus: Dict[str, Dict]) -> str:
-        prompt = f"Given the following hypothesis, extract claims and relations:\n\n"
-        prompt += f"Hypothesis: {claim['claim']}\n\n"
+        # Match training prompt format exactly (from scifact_claim_extractor.jsonl)
+        prompt = "You are extracting atomic claims and their logical relations from scientific abstracts.\n\n"
+        prompt += "Passage:\n"
+
+        # Add document title and abstract (same format as training)
         for doc_id in claim.get("cited_doc_ids", []):
             doc = corpus.get(str(doc_id))
             if not doc:
                 continue
-            prompt += f"Document {doc_id}: {doc['title']}\n"
+            # Include Document ID so model knows which ID to cite
+            prompt += f"Document {doc_id}: {doc['title']}\n\n"
             prompt += " ".join(doc["abstract"]) + "\n\n"
-        prompt += "Extract claims and relations:"
+
+        # Add task instructions (same format as training)
+        prompt += "Task:\n"
+        prompt += "1. Restate the passage's central hypothesis verbatim (or with minimal edits) as CLAIM[c1].\n"
+        prompt += "2. Continue listing distinct factual claims as CLAIM[c#] (Document <doc_id>): <text> using precise language from the passage.\n"
+        prompt += "3. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.\n\n"
+
         return prompt
 
     def _gather_gold_sentences(self, claim: Dict, corpus: Dict[str, Dict]) -> List[str]:

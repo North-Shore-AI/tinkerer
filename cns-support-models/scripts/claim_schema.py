@@ -9,7 +9,7 @@ import re
 from typing import Dict, Iterable, List, Tuple
 
 
-CLAIM_LINE_RE = re.compile(r"^CLAIM\[(?P<id>[^\]]+)\]\s*:\s*(?P<body>.*)$", re.IGNORECASE)
+CLAIM_LINE_RE = re.compile(r"^CLAIM\[(?P<id>[^\]]+)\]\s*(?:\(Document\s+\d+\))?\s*:\s*(?P<body>.*)$", re.IGNORECASE)
 RELATION_LINE_RE = re.compile(
     r"^RELATION\s*[:\-]?\s*(?P<src>\S+)\s+(?P<label>supports|refutes|contrasts)\s+(?P<dst>\S+)",
     re.IGNORECASE,

@@ -44,7 +44,8 @@ def test_convert_scifact_cli_generates_expected_completion(tmp_path: Path, scifa
     assert "prompt" in first and "completion" in first
     completion_lines = first["completion"].splitlines()
     assert completion_lines[0] == "CLAIM[c1]: Vitamin C supplementation reduces cold duration."
-    assert completion_lines[1].startswith("CLAIM[c2]:")
+    # Updated to expect document citations in format: CLAIM[c2] (Document <id>): <text>
+    assert completion_lines[1].startswith("CLAIM[c2] (Document")
     assert "RELATION: c2 supports c1" in completion_lines[2]
 
     metadata = first["metadata"]

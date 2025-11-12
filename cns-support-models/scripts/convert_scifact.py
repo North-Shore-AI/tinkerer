@@ -36,11 +36,18 @@ def normalize_label(label: str | None) -> str:
 
 
 def build_passage(documents: List[dict]) -> str:
+    """Build passage with document IDs so model learns to cite sources."""
     blocks: List[str] = []
     for doc in documents:
+        doc_id = str(doc.get("doc_id") or doc.get("docid") or doc.get("id") or "unknown")
         title = doc.get("title")
+
+        # Label each document with its ID
         if title:
-            blocks.append(title.strip())
+            blocks.append(f"Document {doc_id}: {title.strip()}")
+        else:
+            blocks.append(f"Document {doc_id}:")
+
         abstract = doc.get("abstract") or doc.get("abstract_sentences") or doc.get("sentences")
         if isinstance(abstract, list):
             blocks.append(" ".join(sent.strip() for sent in abstract))
@@ -76,11 +83,12 @@ def gather_evidence(claim_entry: dict) -> Iterable[dict]:
 def build_claim_completion(claim_text: str, evidence_texts: List[Tuple[str, Sequence[str], str]]) -> str:
     lines = [f"CLAIM[c1]: {claim_text.strip()}"]
     claim_idx = 2
-    for _, sentences, label in evidence_texts:
+    for doc_id, sentences, label in evidence_texts:  # Use doc_id instead of discarding it
         if not sentences:
             continue
         cid = f"c{claim_idx}"
-        lines.append(f"CLAIM[{cid}]: {' '.join(sentences).strip()}")
+        # Include document citation in claim to teach model to reference sources
+        lines.append(f"CLAIM[{cid}] (Document {doc_id}): {' '.join(sentences).strip()}")
         relation = normalize_label(label)
         lines.append(f"RELATION: {cid} {relation} c1")
         claim_idx += 1
@@ -127,7 +135,7 @@ def main() -> None:
                 f"{build_passage(docs)}\n\n"
                 "Task:\n"
                 "1. Restate the passage's central hypothesis verbatim (or with minimal edits) as CLAIM[c1].\n"
-                "2. Continue listing distinct factual claims as CLAIM[c#]: <text> using precise language from the passage.\n"
+                "2. Continue listing distinct factual claims as CLAIM[c#] (Document <doc_id>): <text> using precise language from the passage.\n"
                 "3. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.\n\n"
             )
 

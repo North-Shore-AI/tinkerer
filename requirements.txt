@@ -3,5 +3,6 @@ pytest
 hypothesis
 torch==2.3.1
 sentence-transformers
+transformers
 tinker
 peft
