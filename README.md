@@ -42,6 +42,14 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    pip install sentence-transformers  # needed for embedding validation
    ```
    Export `TINKER_API_KEY=sk_live_xxx` before running any Tinker-backed commands.
+
+   **Helper CLI:** `./thinker.sh` bootstraps the virtualenv, installs `requirements.txt`, and exposes a menu for the common flows (data setup, validate, train, eval, run, debug) plus diagnostics like **Info** and **Manifest**. Run it from the repo root for a guided workflow.
+
+   **Diagnostics (standalone):**
+   ```bash
+   python -m thinker.cli info      # Show Thinker/Tinker versions + config summary
+   python -m thinker.cli manifest  # Print the latest Tinker adapter manifest metadata
+   ```
 2. **Data via Thinker helper**
    - **SciFact:**
      ```bash

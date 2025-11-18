@@ -57,6 +57,10 @@ Quick Start (Debug)
   - `python -m thinker.cli --config configs/pipeline_scifact_debug.yaml run`
 
 CLI Overview
+- `thinker info`
+  - Prints Thinker/Tinker versions, Python/platform info, and the active pipeline configuration (tests, validation, training, evaluation sections).
+- `thinker manifest [--path custom_manifest.json]`
+  - Shows adapter metadata (name, path, base model, timestamp) from the resolved manifest file (defaults to `evaluation.tinker_manifest_path` or `runs/latest_tinker_adapter.json`).
 - `thinker validate`
   - Runs pytest (if enabled in config) and dataset schema/semantic validation.
 - `thinker train [--backend hf_peft|tinker] [--skip-validation]`
@@ -67,6 +71,8 @@ CLI Overview
   - Convenience: validate → train → eval.
 - `thinker data setup [options]`
   - Prepares SciFact or FEVER data and (optionally) runs an external validator.
+
+Helper script: run `./thinker.sh` from the repo root to bootstrap the virtualenv, install dependencies, and access a menu for data setup, validation, training/evaluation (HF or Tinker), diagnostics (`info`, `manifest`), and debug runs.
 
 Data Setup
 - SciFact
@@ -169,4 +175,3 @@ File References
 
 License
 - Internal project; see repository root for licensing details.
-

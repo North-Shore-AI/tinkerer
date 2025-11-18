@@ -41,19 +41,23 @@ usage() {
   cat <<'HELP'
 Thinker Command Menu
 ====================
-Recommended flow (per run): 5 → 1 → 3 → 4 (data setup → validate → train → eval)
-Use options 8/9 for quick debug loops.
+Recommended flow (per run): 8 → 1 → 2/3 → 4 (data setup → validate → train → eval)
+Use options 11/12 for quick debug loops.
 
 1) Validate (SciFact config)
 2) Train (HF PEFT, full config)
 3) Train (Tinker backend, full config)
 4) Evaluate (SciFact config)
-5) Data setup – SciFact (with embedding validation)
-6) Data setup – FEVER
-7) Custom Thinker command
-8) Train HF (SciFact debug config: 32 samples, 1 epoch)
-9) Train Tinker (SciFact debug config: 32 samples, 1 epoch)
-10) Quit
+5) Run full pipeline (HF backend)
+6) Run full pipeline (Tinker backend)
+7) Show pipeline info
+8) Show latest Tinker manifest
+9) Data setup – SciFact (with embedding validation)
+10) Data setup – FEVER
+11) Custom Thinker command
+12) Train HF (SciFact debug config: 32 samples, 1 epoch)
+13) Train Tinker (SciFact debug config: 32 samples, 1 epoch)
+14) Quit
 HELP
 }
 
@@ -63,6 +67,10 @@ run_train_tinker() { run_cli --config "$DEFAULT_CONFIG" train --backend tinker; 
 run_eval() { run_cli --config "$DEFAULT_CONFIG" eval; }
 run_data_scifact() { run_cli data setup --dataset scifact --validation-mode embedding --similarity-threshold 0.7; }
 run_data_fever() { run_cli data setup --dataset fever --skip-validation; }
+run_pipeline_hf() { run_cli --config "$DEFAULT_CONFIG" run --backend hf_peft; }
+run_pipeline_tinker() { run_cli --config "$DEFAULT_CONFIG" run --backend tinker; }
+run_info() { run_cli --config "$DEFAULT_CONFIG" info; }
+run_manifest() { run_cli --config "$DEFAULT_CONFIG" manifest; }
 run_custom() {
   read -rp "Enter Thinker args (after 'python -m thinker.cli'): " line
   if [[ -n "$line" ]]; then
@@ -79,18 +87,22 @@ main() {
   source "$VENV_DIR/bin/activate"
   while true; do
     usage
-    read -rp "Select option [1-10]: " choice
+    read -rp "Select option [1-14]: " choice
     case "$choice" in
       1) run_validate ;;
       2) run_train_hf ;;
       3) run_train_tinker ;;
       4) run_eval ;;
-      5) run_data_scifact ;;
-      6) run_data_fever ;;
-      7) run_custom ;;
-      8) run_train_hf_debug ;;
-      9) run_train_tinker_debug ;;
-      10) echo "Goodbye."; exit 0 ;;
+      5) run_pipeline_hf ;;
+      6) run_pipeline_tinker ;;
+      7) run_info ;;
+      8) run_manifest ;;
+      9) run_data_scifact ;;
+      10) run_data_fever ;;
+      11) run_custom ;;
+      12) run_train_hf_debug ;;
+      13) run_train_tinker_debug ;;
+      14) echo "Goodbye."; exit 0 ;;
       *) echo "Invalid choice" ;;
     esac
     echo ""
