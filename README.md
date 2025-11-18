@@ -86,6 +86,14 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    python -m thinker.cli antagonist
    ```
    Consumes the latest evaluation JSONL (or `--input` override) and emits structured flags under `<input>_antagonist_flags.jsonl` using the chirality/entailment heuristics defined in `cns3/20251118_antagonist_mvp_rfc.md`. Thresholds (`--chirality-threshold`, etc.) are tweakable per run.
+
+   **Issue types detected:**
+   - `CITATION_INVALID` (HIGH severity): Model cited documents not in source corpus - **citation hallucination**
+   - `POLARITY_CONTRADICTION`: Chirality ≥0.55 indicates structural tension
+   - `POLARITY_CONFLICT`: Same claim receives both support and refutation
+   - `WEAK_ENTAILMENT`: Entailment score <0.5 indicates poor evidence grounding
+
+   See `docs/20251118/antagonist-mvp-review/` for comprehensive analysis and manual review of HIGH severity cases.
 7. **GPU options (why HF/PEFT exists)**
    - **Local smoke tests:** A single 24 GB GPU (e.g., RTX 3090/4090, RTX 6000, A5000) is enough for QLoRA. Renting one from a provider (RunPod, Lambda Labs, Vast.ai) costs ~$0.50–$1.50/hr—handy for config/dataset validation before you spend Tinker cycles.
    - **Fast iterations:** The HF/PEFT backend sticks around for cheap local debugging, but Tinker is now the default path for production training/eval. The workflow is still `thinker validate` → `thinker train --backend tinker` → `thinker eval`.

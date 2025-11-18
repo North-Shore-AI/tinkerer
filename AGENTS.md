@@ -64,15 +64,23 @@ This division of labor prevents the "everything is true" failure mode of naive R
 
 ### 1.2 Antagonist Agent
 
-- **Inputs:** Proposer SNOs, critic thresholds (target β₁, chirality score).  
-- **Outputs:** Counter-SNOs highlighting logical loops, unsupported claims, bias signatures, plus quantified β₁/chirality deltas (diagnostic, not rewarded).  
-- **Planned Mechanics:**  
-  - LLM prompting to "mirror" or negate hypotheses (per `cns3/20251109_revised_cns_proposal_for_thinking_machines.md`).  
-  - Retrieval of conflicting evidence; scoring via Logic + Bias critics.  
-- **Implementation TODOs:**  
-  1. Stand up heuristic passes (regex negation detection, embedding anti-neighbors, lightweight NLI contradiction filter).  
-  2. Record flagged issues in structured JSON (claim_id, issue_type, critic_score).  
-  3. Feed outputs into Thinker as optional pre-synthesis "stress tests." (`python -m thinker.cli antagonist` now wraps the MVP runner; see `cns3/20251118_antagonist_mvp_rfc.md`.)
+- **Inputs:** Proposer SNOs (from `runs/thinker_eval/*.jsonl`), critic thresholds (chirality, entailment, evidence overlap).
+- **Outputs:** Structured flags (JSONL) with `claim_id`, `severity` (LOW/MEDIUM/HIGH), `issues` (with type + details), and full metrics.
+- **Current Implementation (MVP as of 2025-11-18):**
+  - ✅ CLI integration: `python -m thinker.cli antagonist`
+  - ✅ Threshold-based heuristics (chirality ≥0.55, entailment <0.5, evidence overlap ≥0.2)
+  - ✅ 4 issue types detected:
+    - **`CITATION_INVALID`** (HIGH): Model cited documents not in source corpus (citation hallucination)
+    - **`POLARITY_CONTRADICTION`** (MEDIUM): Chirality ≥0.55 indicates structural tension
+    - **`POLARITY_CONFLICT`** (HIGH): Same claim receives both support and refutation
+    - **`WEAK_ENTAILMENT`** (MEDIUM): Entailment score <0.5 indicates poor evidence grounding
+  - ✅ Comprehensive test coverage: 22 tests in `thinker/tests/test_antagonist.py`
+  - ✅ Real-world validation: 92% flagging rate (46/50 samples), 2 HIGH severity cases correctly identified
+- **Next Steps:**
+  1. ⏳ Embedding anti-neighbor retrieval for counter-evidence generation
+  2. ⏳ DeBERTa contradiction scoring to upgrade POLARITY_CONTRADICTION detection
+  3. ⏳ Precision/recall instrumentation against 200-pair synthetic contradiction suite
+- **Documentation:** See `docs/20251118/antagonist-mvp-review/` for comprehensive analysis, flag review, and HIGH severity case studies.
 
 #### Antagonist Success Metrics
 
