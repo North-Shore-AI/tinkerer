@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 from . import __version__ as THINKER_VERSION
+from .antagonist import AntagonistConfig, AntagonistRunner
 from .config import PipelineConfig, load_pipeline_config
 from .pipeline import ThinkerPipeline
 from .data import run_data_setup
@@ -56,6 +57,44 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser = subparsers.add_parser("run", help="Validate, train, and evaluate.")
     run_parser.add_argument("--backend", default=None, help="Training backend override.")
 
+    antagonist_parser = subparsers.add_parser(
+        "antagonist", help="Run Antagonist heuristics on evaluation artifacts."
+    )
+    antagonist_parser.add_argument(
+        "--input",
+        type=Path,
+        help="Evaluation JSONL path (defaults to evaluation.output_path).",
+    )
+    antagonist_parser.add_argument(
+        "--output",
+        type=Path,
+        help="Flag JSONL path (defaults to <input>_antagonist_flags.jsonl).",
+    )
+    antagonist_parser.add_argument(
+        "--chirality-threshold",
+        type=float,
+        default=0.55,
+        help="Chirality score threshold for medium severity (default: 0.55).",
+    )
+    antagonist_parser.add_argument(
+        "--high-chirality-threshold",
+        type=float,
+        default=0.65,
+        help="Chirality score threshold for high severity (default: 0.65).",
+    )
+    antagonist_parser.add_argument(
+        "--entailment-threshold",
+        type=float,
+        default=0.5,
+        help="Entailment score threshold for weak-evidence flags (default: 0.5).",
+    )
+    antagonist_parser.add_argument(
+        "--evidence-overlap-threshold",
+        type=float,
+        default=0.2,
+        help="Evidence overlap threshold for severity escalation (default: 0.2).",
+    )
+
     data_parser = subparsers.add_parser(
         "data",
         help="Data utilities (download, convert, validate).",
@@ -86,6 +125,17 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("cns-support-models/data/processed/scifact_claim_extractor.jsonl"),
         help="Processed SciFact dataset path.",
+    )
+    data_setup.add_argument(
+        "--clean-output",
+        type=Path,
+        default=Path("cns-support-models/data/processed/scifact_claim_extractor_clean.jsonl"),
+        help="Validated+filtered SciFact dataset path (default: processed/_clean).",
+    )
+    data_setup.add_argument(
+        "--no-clean-output",
+        action="store_true",
+        help="Skip writing a cleaned dataset.",
     )
     data_setup.add_argument(
         "--fever-claims",
@@ -127,6 +177,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.75,
         help="Cosine similarity threshold for embedding validation.",
     )
+    data_setup.add_argument(
+        "--filter-invalid",
+        dest="filter_invalid",
+        action="store_true",
+        help="When writing --clean-output, drop invalid rows instead of failing.",
+    )
+    data_setup.add_argument(
+        "--no-filter-invalid",
+        dest="filter_invalid",
+        action="store_false",
+        help="Fail on validation errors even when --clean-output is provided.",
+    )
+    data_setup.set_defaults(filter_invalid=True)
 
     return parser
 
@@ -294,13 +357,37 @@ def main(argv: Optional[list[str]] = None) -> int:
         elif args.command == "run":
             metrics = pipeline.run(backend=args.backend)
             print(f"[thinker] run metrics: {metrics}")
+        elif args.command == "antagonist":
+            eval_cfg = pipeline.config.evaluation
+            input_path = args.input or (eval_cfg.output_path if eval_cfg else None)
+            if input_path is None:
+                parser.error("Evaluation output path unknown; provide --input.")
+            if args.output:
+                output_path = args.output
+            else:
+                default_output = Path(input_path)
+                output_path = default_output.with_name(default_output.stem + "_antagonist_flags.jsonl")
+            runner = AntagonistRunner(
+                AntagonistConfig(
+                    input_path=Path(input_path),
+                    output_path=Path(output_path),
+                    chirality_threshold=args.chirality_threshold,
+                    high_chirality_threshold=args.high_chirality_threshold,
+                    entailment_threshold=args.entailment_threshold,
+                    evidence_overlap_threshold=args.evidence_overlap_threshold,
+                )
+            )
+            runner.run()
         elif args.command == "data":
             if args.data_command == "setup":
+                clean_output = None if args.no_clean_output else args.clean_output
                 run_data_setup(
                     dataset=args.dataset,
                     claims_path=args.claims_json,
                     corpus_path=args.corpus_json,
                     output_path=args.output,
+                    clean_output=clean_output,
+                    filter_invalid=args.filter_invalid,
                     fever_claims=args.fever_claims,
                     fever_wiki_dir=args.fever_wiki_dir,
                     fever_output=args.fever_output,

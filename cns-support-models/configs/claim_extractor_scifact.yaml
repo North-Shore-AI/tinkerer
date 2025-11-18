@@ -1,7 +1,7 @@
 experiment_name: claim-extractor-scifact
 
 data:
-  train_path: data/processed/scifact_claim_extractor.jsonl
+  train_path: data/processed/scifact_claim_extractor_clean.jsonl
   eval_path: data/raw/scifact/claims_dev.jsonl
   max_samples: null
   shuffle: true

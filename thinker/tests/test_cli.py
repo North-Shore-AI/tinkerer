@@ -19,6 +19,8 @@ def test_data_setup_cli_invokes_helper(monkeypatch):
     assert called["dataset"] == "scifact"
     assert called["skip_validation"] is True
     assert called["validation_mode"] == "exact"
+    assert str(called["clean_output"]).endswith("scifact_claim_extractor_clean.jsonl")
+    assert called["filter_invalid"] is True
 
 
 def test_data_setup_cli_embedding(monkeypatch):
@@ -44,3 +46,5 @@ def test_data_setup_cli_embedding(monkeypatch):
     assert called["dataset"] == "fever"
     assert called["validation_mode"] == "embedding"
     assert called["similarity_threshold"] == 0.8
+    assert str(called["clean_output"]).endswith("scifact_claim_extractor_clean.jsonl")
+    assert called["filter_invalid"] is True

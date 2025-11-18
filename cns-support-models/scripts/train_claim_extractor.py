@@ -32,7 +32,7 @@ from claim_schema import CLAIM_LINE_RE, parse_claim_lines
 
 
 CLAIM_C1_WEIGHT = float(os.environ.get("CNS_CLAIM_C1_WEIGHT", "5.0"))
-CLAIM_EVIDENCE_WEIGHT = float(os.environ.get("CNS_CLAIM_EVIDENCE_WEIGHT", "1.0"))
+CLAIM_EVIDENCE_WEIGHT = float(os.environ.get("CNS_CLAIM_EVIDENCE_WEIGHT", "2.0"))
 
 
 def sha256_file(path: Path) -> str:

@@ -79,7 +79,14 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    python -m thinker.cli eval
    ```
    Evaluation now talks to Tinker directly: Thinker loads the tokenizer via the API, samples from the adapter recorded in `runs/latest_tinker_adapter.json`, and writes metrics/completions to `runs/thinker_eval/…`. No Hugging Face download is required as long as the manifest exists (created automatically by every Tinker training run). To override the adapter, set `evaluation.tinker_adapter_*` in the pipeline config or drop a custom manifest file in `runs/`.
-6. **GPU options (why HF/PEFT exists)**
+   - **Live progress:** per-sample logging now prints `sample N/50 | entailment | β₁ | chirality` so long evaluations show a visible heartbeat.
+   - **Latest snapshot (2025‑11‑18, adapter `claim-extractor-scifact-20251118T173307`):** schema 100%, citation 96%, mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%. Topology logging (from `logic/betti.py` + `metrics/chirality.py`) reported β₁=0 across 50 samples with mean chirality 0.561 and mean Fisher-Rao distance 16.75. Full artifacts live at `runs/thinker_eval/scifact_dev_eval.jsonl`.
+6. **Antagonist heuristics**
+   ```bash
+   python -m thinker.cli antagonist
+   ```
+   Consumes the latest evaluation JSONL (or `--input` override) and emits structured flags under `<input>_antagonist_flags.jsonl` using the chirality/entailment heuristics defined in `cns3/20251118_antagonist_mvp_rfc.md`. Thresholds (`--chirality-threshold`, etc.) are tweakable per run.
+7. **GPU options (why HF/PEFT exists)**
    - **Local smoke tests:** A single 24 GB GPU (e.g., RTX 3090/4090, RTX 6000, A5000) is enough for QLoRA. Renting one from a provider (RunPod, Lambda Labs, Vast.ai) costs ~$0.50–$1.50/hr—handy for config/dataset validation before you spend Tinker cycles.
    - **Fast iterations:** The HF/PEFT backend sticks around for cheap local debugging, but Tinker is now the default path for production training/eval. The workflow is still `thinker validate` → `thinker train --backend tinker` → `thinker eval`.
    - **Direct Tinker runs:** If you’d rather skip HF entirely, run the menu/CLI options that point at the Tinker backend; validation always happens locally first to keep remote jobs clean.

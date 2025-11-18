@@ -53,6 +53,12 @@ This division of labor prevents the "everything is true" failure mode of naive R
   1. Improve semantic grounding (contrastive loss, entailment critic-in-loop).  
   2. Broaden datasets (FEVER config/tests, temporal corpora).  
   3. Auto-generate SNO manifests (graph export + metadata hashes).
+ - **Latest Evaluation (2025-11-18, adapter `claim-extractor-scifact-20251118T173307`):**  
+   - Schema compliance 100%, citation accuracy 96% (hard gate).  
+   - Mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%.  
+   - β₁ = 0 across 50 SciFact dev samples (logic graphs are acyclic pre-Antagonist).  
+   - Mean chirality score 0.561, mean Fisher-Rao distance 16.75 (see `logic/betti.py`, `metrics/chirality.py` for instrumentation).  
+   - Raw outputs + per-sample topology/chirality payloads in `runs/thinker_eval/scifact_dev_eval.jsonl`.  
 
 ---
 
@@ -66,7 +72,7 @@ This division of labor prevents the "everything is true" failure mode of naive R
 - **Implementation TODOs:**  
   1. Stand up heuristic passes (regex negation detection, embedding anti-neighbors, lightweight NLI contradiction filter).  
   2. Record flagged issues in structured JSON (claim_id, issue_type, critic_score).  
-  3. Feed outputs into Thinker as optional pre-synthesis "stress tests."
+  3. Feed outputs into Thinker as optional pre-synthesis "stress tests." (`python -m thinker.cli antagonist` now wraps the MVP runner; see `cns3/20251118_antagonist_mvp_rfc.md`.)
 
 #### Antagonist Success Metrics
 
@@ -78,6 +84,8 @@ This division of labor prevents the "everything is true" failure mode of naive R
   - **Measurement:** Compare Antagonist's β₁ estimate to ground-truth Betti numbers on 50 manually constructed SNO graphs (validated by topologists).
 - **Actionable flag rate:** ≥80% of HIGH-severity flags lead to Proposer refinement or human escalation.
   - **Measurement:** Track disposition of HIGH flags over 30 days: (refined + escalated)/total_flags ≥ 0.8.
+- **Current tension profile (2025-11-18 Proposer eval):** β₁ already sits at 0 for 50/50 SciFact dev SNOs while mean chirality remains 0.561. Antagonist MVP should therefore prioritize polarity contradictions and evidence counterfactuals over cycle detection until Proposer loosens topology constraints.
+- **Reference RFC:** `cns3/20251118_antagonist_mvp_rfc.md` enumerates inputs, heuristics, telemetry, and the milestone plan derived from this profile.
 
 **Anti-pattern:** Rewarding "more issues found."  
 **Desired pattern:** Rewarding accurate issue detection that drives resolution.

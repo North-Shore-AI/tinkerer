@@ -1,0 +1,68 @@
+================================================================================
+ANTAGONIST FLAG ANALYSIS
+================================================================================
+
+Source: /home/home/p/g/North-Shore-AI/tinkerer/runs/thinker_eval/scifact_dev_eval_antagonist_flags.jsonl
+Total flags: 46
+
+--------------------------------------------------------------------------------
+ISSUE TYPE DISTRIBUTION
+--------------------------------------------------------------------------------
+  POLARITY_CONTRADICTION           39 ( 84.8%)
+  WEAK_ENTAILMENT                  28 ( 60.9%)
+
+--------------------------------------------------------------------------------
+SEVERITY DISTRIBUTION
+--------------------------------------------------------------------------------
+  MEDIUM       44 ( 95.7%)
+  HIGH          2 (  4.3%)
+
+--------------------------------------------------------------------------------
+HIGH SEVERITY FLAGS (MANUAL REVIEW REQUIRED)
+--------------------------------------------------------------------------------
+  Found 2 HIGH severity flags:
+    claim_id: 133
+      - POLARITY_CONTRADICTION: {'chirality_score': 0.6546184715884249, 'fisher_rao_distance': 22.639238357543945, 'evidence_overlap': 0.6}
+      - WEAK_ENTAILMENT: {'entailment_score': 0.0}
+    claim_id: 179
+      - POLARITY_CONTRADICTION: {'chirality_score': 0.6542023154434672, 'fisher_rao_distance': 12.101099014282227, 'evidence_overlap': 0.5}
+      - WEAK_ENTAILMENT: {'entailment_score': 0.0}
+
+--------------------------------------------------------------------------------
+METRIC STATISTICS
+--------------------------------------------------------------------------------
+  Entailment scores (n=46):
+    min:  0.0000
+    max:  0.9997
+    mean: 0.4093
+    <0.5 (weak): 28 (60.9%)
+
+  Chirality scores (n=46):
+    min:  0.4067
+    max:  0.6546
+    mean: 0.5635
+    ≥0.55 (trigger): 39 (84.8%)
+    ≥0.65 (high):    2 (4.3%)
+
+  Fisher-Rao distances (n=46):
+    min:  2.1044
+    max:  26.3053
+    mean: 17.5168
+
+--------------------------------------------------------------------------------
+CLAIMS WITH MULTIPLE ISSUES
+--------------------------------------------------------------------------------
+  Claims with >1 issue: 21 (45.7%)
+  Most common combinations:
+    POLARITY_CONTRADICTION + WEAK_ENTAILMENT                      21
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+  ⚠️  CRITICAL: 60.9% of flags have weak entailment (<0.5)
+      → This confirms the Proposer semantic quality issue
+      → Priority: Fix Proposer training (increase CNS_CLAIM_EVIDENCE_WEIGHT to 2.0+)
+
+================================================================================
+END OF ANALYSIS
+================================================================================

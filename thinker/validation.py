@@ -11,6 +11,7 @@ from typing import List, Optional
 
 import pytest
 
+from .claim_schema import parse_relation_line
 from .config import DatasetValidationConfig, SchemaField, TestSuiteConfig
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -133,4 +134,31 @@ class DatasetValidator:
             ok, message = field.validate(payload)
             if not ok and message:
                 issues.append(f"line {line_no}: {message}")
+        if self.config.require_relations:
+            issues.extend(self._validate_relations(payload, line_no))
+        return issues
+
+    def _validate_relations(self, payload: dict, line_no: int) -> List[str]:
+        """Ensure completions include well-formed RELATION lines."""
+        field = self.config.relation_field
+        if not field:
+            return [f"line {line_no}: relation_field not configured but require_relations is true"]
+        value = payload.get(field)
+        if not isinstance(value, str) or not value.strip():
+            return [f"line {line_no}: field '{field}' required for relation validation"]
+
+        issues: List[str] = []
+        relation_lines = [
+            raw
+            for raw in value.splitlines()
+            if raw.strip().upper().startswith("RELATION")
+        ]
+        if not relation_lines:
+            issues.append(f"line {line_no}: completion missing RELATION entries")
+            return issues
+
+        for rel in relation_lines:
+            parsed = parse_relation_line(rel)
+            if not parsed:
+                issues.append(f"line {line_no}: invalid RELATION syntax -> {rel.strip()}")
         return issues

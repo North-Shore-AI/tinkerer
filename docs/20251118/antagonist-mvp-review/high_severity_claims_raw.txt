@@ -1,0 +1,118 @@
+HIGH severity claim IDs: [133, 179]
+
+================================================================================
+CLAIM ID: 133
+================================================================================
+
+--- PROMPT (truncated) ---
+You are extracting atomic claims and their logical relations from scientific abstracts.
+
+Passage:
+Document 38485364: The adaptor protein Tks5/Fish is required for podosome formation and function, and for the protease-driven invasion of cancer cells.
+
+Tks5/Fish is a scaffolding protein with five SH3 domains and one PX domain. In Src-transformed cells, Tks5/Fish localizes to podosomes, discrete protrusions of the ventral membrane. We generated Src-transformed cells with reduced Tks5/Fish levels. They no longer formed podosomes, did not degrade gelatin, and were poorly invasive. We detected Tks5/Fish expression in podosomes in invasive cancer cells, as well as in human breast cancer and melanoma samples. Tks5/Fish expression was also required for protease-driven matrigel invasion in human cancer cells. Finally, coexpression of Tks5/Fish and Src in epithelial cells resulted in the appearance of podosomes. Thus, Tks5/Fish appears to be required for podosome formation, for degradation of the extracellular matrix, and for invasion of some cancer cells.
+
+Document 6969753: Dynamic interactions of cortactin and membrane type 1 matrix metalloproteinase at invadopodia: defining the stages of invadopodia formation and function.
+
+Metastatic tumor cells that actively migrate and invade surrounding tissues rely on invadopodia to degrade extracellular matrix (ECM) barriers. Invadopodia are membrane protrusions that localize enzymes required for ECM degradation. Little is known about the formation, function, and regulation of invadopodia. Here, we show that invadopodia have two distinct aspects: (a) structural for organizing the cellular actin cytoskeleton to form membrane protrusions and (b) functional for using proteolytic enzyme(s) for ECM degradation. Small interfering RNA (siRNA) inhibition established that organization of invadopodia structure requires cortactin, whereas protease inhibitor studies identified membrane type 1 matrix metalloproteinase (MT1-MMP) as the key invadopodial enzyme responsible for gelatin matrix degradation in the breast carcinoma cell line MDA-MB-231. The inhibition of invadopodial structure assembly by cortactin depletion resulted in a block of matrix degradation due to failure of invadopodia formation. Either protease inhibition or MT1-MMP siRNA depletion moderately decreased the formation of invadopodial structures that were identified as actin-cortactin accumulations at the ventral cell membrane adherent to matrix. The invadopodia that were able to form upon MT1-MMP inhibition or depletion retained actin-cortactin accumulations but were unable to degrade matrix. Examination of cells at different time points as well as live-cell imaging revealed four distinct invadopodial stages: membrane cortactin aggregation at membranes adherent to matrix, MT1-MMP accumulation at the region of cortactin accumulation, matrix degradation at the invadopodia region, and subsequent cortactin dissociation from the area of continued MT1-MMP accumulation associated with foci of degraded matrix. Based on these results, we propose a stepwise model of invadopodia formation and function.
+
+Document 17934082: Membrane lipids in invadopodia and podosomes: Key structures for cancer invasion and metastasis
+
+Invadopodia are extracellular matrix (ECM)-degrading protrusions formed by invasive cancer cells. Podosomes are structures functionally similar to invadopodia that are found in oncogene-transformed fibroblasts and monocyte-derived cells, including macrophages and osteoclasts. These structures are thought to play important roles in the pericellular remodeling of ECM during cancer invasion and metastasis. Much effort has been directed toward identification of the molecular components and regulators of invadopodia/podosomes, which could be therapeutic targets in the treatment of malignant cancers. However, it remains largely unknown how these components are assembled into invadopodia/podosomes and how the assembly process is spatially and temporally regulated. This review will summarize recent progress on the molecular mechanisms of invadopodia/podosome formation, with strong emphasis on the roles of lipid rafts and phosphoinositides.
+
+
+... [9 lines omitted] ...
+
+1. Restate the passage's central hypothesis verbatim (or with minimal edits) as CLAIM[c1].
+2. Continue listing distinct factual claims as CLAIM[c#] (Document <doc_id>): <text> using precise language from the passage.
+3. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.
+
+
+
+--- COMPLETION ---
+CLAIM[c1]: The Arp2/3 complex is involved in the formation of podosomes.
+CLAIM[c2] (Document 16280642): Further, it was found that N-WASP bound all SH3 domains of Tks5/FISH, which facilitated circular podosome formation.
+RELATION: c2 supports c1
+CLAIM[c3] (Document 12640810): In particular, cortactin phosphorylation was found to regulate cofilin and Arp2/3 complex-dependent actin polymerization.
+RELATION: c3 supports c1
+CLAIM[c4] (Document 12640810): Cortactin directly binds cofilin and inhibits its severing activity. Cortactin phosphorylation is required to release this inhibition so cofilin can sever actin filaments to create barbed ends at invadopodia to support Arp2/3-dependent actin polymerization.
+RELATION: c4 supports c1
+CLAIM[c5] (Document 6969753): Small interfering RNA (siRNA) inhibition established that organization of invadopodia structure requires cortactin, whereas protease inhibitor studies identified membrane type 1 matrix metalloproteinase (MT1-MMP) as the key invadop
+
+--- VALIDATION RESULTS ---
+  Schema valid:        True
+  Citation valid:      False
+  Entailment score:    0.0000
+  Entailment pass:     False
+  Semantic similarity: 0.0000
+  Similarity pass:     False
+  Overall pass:        False
+
+--- TOPOLOGY METRICS ---
+  β₁ (Betti):          0
+  Cycles:              []
+
+--- CHIRALITY METRICS ---
+  Chirality score:     0.6546
+  Fisher-Rao distance: 22.6392
+  Evidence overlap:    0.6000
+  Polarity conflict:   False
+
+
+================================================================================
+CLAIM ID: 179
+================================================================================
+
+--- PROMPT (truncated) ---
+You are extracting atomic claims and their logical relations from scientific abstracts.
+
+Passage:
+Document 16322674: Birth Size and Breast Cancer Risk: Re-analysis of Individual Participant Data from 32 Studies
+
+BACKGROUND Birth size, perhaps a proxy for prenatal environment, might be a correlate of subsequent breast cancer risk, but findings from epidemiological studies have been inconsistent. We re-analysed individual participant data from published and unpublished studies to obtain more precise estimates of the magnitude and shape of the birth size-breast cancer association.   
+ METHODS AND FINDINGS Studies were identified through computer-assisted and manual searches, and personal communication with investigators. Individual participant data from 32 studies, comprising 22,058 breast cancer cases, were obtained. Random effect models were used, if appropriate, to combine study-specific estimates of effect. Birth weight was positively associated with breast cancer risk in studies based on birth records (pooled relative risk [RR] per one standard deviation [SD] [= 0.5 kg] increment in birth weight: 1.06; 95% confidence interval [CI] 1.02-1.09) and parental recall when the participants were children (1.02; 95% CI 0.99-1.05), but not in those based on adult self-reports, or maternal recall during the woman's adulthood (0.98; 95% CI 0.95-1.01) (p for heterogeneity between data sources = 0.003). Relative to women who weighed 3.000-3.499 kg, the risk was 0.96 (CI 0.80-1.16) in those who weighed < 2.500 kg, and 1.12 (95% CI 1.00-1.25) in those who weighed > or = 4.000 kg (p for linear trend = 0.001) in birth record data. Birth length and head circumference from birth records were also positively associated with breast cancer risk (pooled RR per one SD increment: 1.06 [95% CI 1.03-1.10] and 1.09 [95% CI 1.03-1.15], respectively). Simultaneous adjustment for these three birth size variables showed that length was the strongest independent predictor of risk. The birth size effects did not appear to be confounded or mediated by established breast cancer risk factors and were not modified by age or menopausal status. The cumulative incidence of breast cancer per 100 women by age 80 y in the study populations was estimated to be 10.0, 10.0, 10.4, and 11.5 in those who were, respectively, in the bottom, second, third, and top fourths of the birth length distribution.   
+ CONCLUSIONS This pooled analysis of individual participant data is consistent with birth size, and in particular birth length, being an independent correlate of breast cancer risk in adulthood.
+
+Document 27123743: Role of birthweight in the etiology of breast cancer.
+
+Breast cancer may originate in utero. We reviewed the available evidence on the association between birthweight and the risk of breast cancer. To date, 26 research papers addressing this issue have been published. The majority of studies identified a positive link between birthweight and premenopausal, but not postmenopausal, breast cancer. The relative risk estimate for breast cancer comparing women with high birthweight to women with low birthweight combining all studies including both pre- and postmenopausal breast cancer was 1.23 (95% confidence interval 1.13-1.34). The mechanisms underlying this association likely include elevated levels of growth factors that may increase the number of susceptible stem cells in the mammary gland or initiate tumors through DNA mutations. Loss of imprinting (LOI) of growth hormone genes relevant for intrauterine growth, such as insulin-like growth factor 2 (IGF2), leads to abnormally high levels of these hormones evidenced by high birthweight. LOI of IGF2 has also been found in mammary tumor tissue. The role of environmental factors that stimulate such epigenetic regulation of gene expression remains to be elucidated.
+
+Document 23557241: Intrauterine factors and risk of breast cancer: a systematic review and meta-analysis of current evidence.
+
+
+... [13 lines omitted] ...
+
+1. Restate the passage's central hypothesis verbatim (or with minimal edits) as CLAIM[c1].
+2. Continue listing distinct factual claims as CLAIM[c#] (Document <doc_id>): <text> using precise language from the passage.
+3. Use RELATION: <source_id> <supports|refutes> <target_id> to link evidence claims to the main hypothesis.
+
+
+
+--- COMPLETION ---
+CLAIM[c1]: Women with a lower birth weight are more likely to develop breast cancer later in life.
+CLAIM[c2] (Document 17450673): We found that heavier birth weights were associated with increased breast cancer risk, with studies involving five categories of birth weight identifying odds ratios (ORs) of 1.24 (95% confidence interval [CI] 1.04 to 1.48) for 4,000 g or more and 1.15 (95% CI 1.04 to 1.26) for 3,500 g to 3,999 g, relative to a birth weight of 2,500 to 2,599 g. These studies provided no support for a J-shaped relationship of birthweight to risk.
+RELATION: c2 refutes c1
+CLAIM[c3] (Document 17450673): CONCLUSION Our findings provide some support for the hypothesis that in utero exposures reflective of higher endogenous hormone levels could affect risk for development of breast cancer in adulthood.
+RELATION: c3 refutes c1
+CLAIM[c4] (Document 23557241): Increased risk of breast cancer was noted with increased birthweight (relative risk [RR] 1.15 [95%
+
+--- VALIDATION RESULTS ---
+  Schema valid:        True
+  Citation valid:      False
+  Entailment score:    0.0000
+  Entailment pass:     False
+  Semantic similarity: 0.0000
+  Similarity pass:     False
+  Overall pass:        False
+
+--- TOPOLOGY METRICS ---
+  β₁ (Betti):          0
+  Cycles:              []
+
+--- CHIRALITY METRICS ---
+  Chirality score:     0.6542
+  Fisher-Rao distance: 12.1011
+  Evidence overlap:    0.5000
+  Polarity conflict:   False
+
+

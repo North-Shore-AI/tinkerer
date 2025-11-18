@@ -252,7 +252,21 @@ def main() -> int:
         help="Cosine similarity threshold for embedding matches",
     )
     parser.add_argument("--max-examples", type=int, default=None, help="Limit rows to inspect")
+    parser.add_argument(
+        "--write-clean",
+        type=Path,
+        help="Optional JSONL path for rows that pass validation (pre-filtering).",
+    )
+    parser.add_argument(
+        "--filter-invalid",
+        action="store_true",
+        help="If set with --write-clean, drop invalid rows into the clean file instead of failing.",
+    )
     args = parser.parse_args()
+
+    if args.filter_invalid and not args.write_clean:
+        print("--filter-invalid requires --write-clean", file=sys.stderr)
+        return 1
 
     try:
         dataset_path = ensure_readable(args.dataset, "Dataset JSONL")
@@ -276,6 +290,13 @@ def main() -> int:
             print("Install sentence-transformers or choose --evidence-mode exact.", file=sys.stderr)
             return 1
 
+    clean_path = args.write_clean.resolve() if args.write_clean else None
+    clean_file = None
+    kept_rows = 0
+    if clean_path:
+        clean_path.parent.mkdir(parents=True, exist_ok=True)
+        clean_file = clean_path.open("w", encoding="utf-8")
+
     errors = []
     for idx, row in iter_dataset(dataset_path, args.max_examples):
         row_errors = validate_row(
@@ -289,15 +310,32 @@ def main() -> int:
         if row_errors:
             for err in row_errors:
                 errors.append(f"line {idx}: {err}")
+            continue
+        if clean_file:
+            clean_file.write(json.dumps(row, ensure_ascii=False) + "\n")
+            kept_rows += 1
 
-    if errors:
+    if clean_file:
+        clean_file.close()
+
+    if errors and not (args.filter_invalid and clean_path):
         print("Dataset validation failed:")
         for err in errors[:50]:
             print(f"  - {err}")
         print(f"(showing {min(len(errors), 50)} of {len(errors)} errors)")
         return 1
 
-    print(f"{args.dataset} passed validation ({args.max_examples or 'all'} examples checked)")
+    if errors:
+        print(
+            f"Dataset validation found {len(errors)} errors, "
+            f"but filtered output saved to {clean_path} ({kept_rows} rows)."
+        )
+    else:
+        print(f"{args.dataset} passed validation ({args.max_examples or 'all'} examples checked)")
+
+    if clean_path:
+        print(f"Wrote {kept_rows} validated rows to {clean_path}")
+
     return 0
 
 

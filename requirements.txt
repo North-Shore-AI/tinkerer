@@ -6,3 +6,4 @@ sentence-transformers
 transformers
 tinker
 peft
+networkx

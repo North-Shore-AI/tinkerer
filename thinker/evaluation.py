@@ -11,8 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, TYPE_CHECKING
 
-from .claim_schema import parse_claim_lines
+from .claim_schema import parse_claim_lines, parse_relation_line
 from .config import EvaluationConfig
+from .logic import compute_graph_stats
+from .metrics import ChiralityAnalyzer, build_fisher_rao_stats
 from .semantic_validation import SemanticValidator, ValidationResult
 
 if TYPE_CHECKING:
@@ -63,6 +65,15 @@ class Evaluator:
         claims = _load_jsonl(Path(self.config.claims_file))[: self.config.max_samples]
         corpus = _load_corpus(Path(self.config.corpus_file))
 
+        chirality_analyzer: Optional[ChiralityAnalyzer] = None
+        if claims:
+            gold_texts = [entry["claim"] for entry in claims]
+            gold_vectors = self.semantic_validator.embedding_model.encode(
+                gold_texts, convert_to_numpy=True
+            )
+            fr_stats = build_fisher_rao_stats(gold_vectors)
+            chirality_analyzer = ChiralityAnalyzer(self.semantic_validator.embedding_model, fr_stats)
+
         # Initialize metrics tracking all 4 validation stages
         metrics = {
             "total": len(claims),
@@ -80,18 +91,27 @@ class Evaluator:
             "paraphrase_accepted": 0,
             # Overall pass rate
             "overall_pass": 0,
+            # Graph / topology metrics
+            "beta1_values": [],
+            "beta1_nonzero": 0,
+            # Chirality metrics
+            "chirality_scores": [],
+            "fisher_rao_distances": [],
             # Legacy exact-match metrics (for comparison only)
             "c1_exact_match": 0,
             "evidence_exact_match": [],
         }
         results = []
 
-        for claim in claims:
+        total_samples = len(claims)
+        for idx, claim in enumerate(claims, start=1):
+            print(f"[eval] sample {idx}/{total_samples} claim_id={claim.get('id')}", flush=True)
             prompt = self._build_prompt(claim, corpus)
             completion = completion_fn(prompt)
 
             # Parse claims from output
-            parsed = parse_claim_lines(line for line in completion.splitlines() if line.startswith("CLAIM["))
+            claim_lines = [line for line in completion.splitlines() if line.strip().upper().startswith("CLAIM[")]
+            parsed = parse_claim_lines(claim_lines)
             c1 = parsed.get("c1")
             generated_claim_text = c1.text if c1 else ""
 
@@ -106,6 +126,34 @@ class Evaluator:
                 evidence_corpus=corpus,
                 gold_evidence_ids=gold_evidence_ids,
             )
+
+            # Graph topology
+            relations = [
+                relation
+                for relation in (parse_relation_line(line) for line in completion.splitlines())
+                if relation is not None
+            ]
+            graph_stats = compute_graph_stats(parsed.keys(), relations)
+            metrics["beta1_values"].append(graph_stats.beta1)
+            if graph_stats.beta1 > 0:
+                metrics["beta1_nonzero"] += 1
+
+            pred_evidence_ids = self.semantic_validator._extract_citation_ids(completion)
+            evidence_overlap = (
+                len(pred_evidence_ids & gold_evidence_ids) / max(len(gold_evidence_ids) or 1, 1)
+                if gold_evidence_ids
+                else 0.0
+            )
+            chirality = None
+            if chirality_analyzer:
+                chirality = chirality_analyzer.compare(
+                    generated_claim_text,
+                    claim["claim"],
+                    evidence_overlap=evidence_overlap,
+                    polarity_conflict=graph_stats.polarity_conflict,
+                )
+                metrics["chirality_scores"].append(chirality.chirality_score)
+                metrics["fisher_rao_distances"].append(chirality.fisher_rao_distance)
 
             # Track metrics from validation
             if validation.schema_valid:
@@ -138,7 +186,7 @@ class Evaluator:
                     evaluate_semantic_match(evidence_claims, gold_sentences)
                 )
 
-            results.append({
+            record = {
                 "claim_id": claim["id"],
                 "prompt": prompt,
                 "completion": completion,
@@ -151,8 +199,26 @@ class Evaluator:
                     "similarity_pass": validation.similarity_pass,
                     "paraphrase_accepted": validation.paraphrase_accepted,
                     "overall_pass": validation.overall_pass,
+                },
+                "beta1": graph_stats.beta1,
+                "cycles": graph_stats.cycles,
+            }
+            if chirality:
+                record["chirality"] = {
+                    "score": chirality.chirality_score,
+                    "fisher_rao_distance": chirality.fisher_rao_distance,
+                    "evidence_overlap": chirality.evidence_overlap,
+                    "polarity_conflict": chirality.polarity_conflict,
                 }
-            })
+            results.append(record)
+            chirality_score = chirality.chirality_score if chirality else 0.0
+            print(
+                f"[eval]   finished sample {idx}/{total_samples} "
+                f"| entailment={validation.entailment_score:.3f} "
+                f"| beta1={graph_stats.beta1} "
+                f"| chirality={chirality_score:.3f}",
+                flush=True,
+            )
 
         self._write_results(results)
         print(
@@ -186,6 +252,21 @@ class Evaluator:
             if metrics["evidence_exact_match"] else 0.0
         )
 
+        metrics["mean_beta1"] = (
+            sum(metrics["beta1_values"]) / len(metrics["beta1_values"]) if metrics["beta1_values"] else 0.0
+        )
+        metrics["beta1_nonzero_rate"] = (
+            metrics["beta1_nonzero"] / len(metrics["beta1_values"]) if metrics["beta1_values"] else 0.0
+        )
+        metrics["mean_chirality_score"] = (
+            sum(metrics["chirality_scores"]) / len(metrics["chirality_scores"])
+            if metrics["chirality_scores"] else 0.0
+        )
+        metrics["mean_fisher_rao_distance"] = (
+            sum(metrics["fisher_rao_distances"]) / len(metrics["fisher_rao_distances"])
+            if metrics["fisher_rao_distances"] else 0.0
+        )
+
         # Print metrics aligned with AGENTS.md Section 1.1
         print("\n" + "=" * 80, flush=True)
         print("[eval] 4-STAGE SEMANTIC VALIDATION METRICS (AGENTS.md Section 1.1)", flush=True)
@@ -199,6 +280,11 @@ class Evaluator:
         print(f"Similarity Pass Rate:  {metrics['semantic_similarity_rate']:.1%} (target: ≥60%)", flush=True)
         print(f"Paraphrase Accepted:   {metrics['paraphrase_acceptance_rate']:.1%}", flush=True)
         print(f"\n🎯 OVERALL PASS RATE:   {metrics['overall_pass_rate']:.1%}", flush=True)
+        print("\nTopology / Chirality diagnostics:", flush=True)
+        print(f"Mean β₁:               {metrics['mean_beta1']:.2f}", flush=True)
+        print(f"β₁ > 0 rate:          {metrics['beta1_nonzero_rate']:.1%}", flush=True)
+        print(f"Mean chirality score:  {metrics['mean_chirality_score']:.3f}", flush=True)
+        print(f"Mean Fisher-Rao dist.: {metrics['mean_fisher_rao_distance']:.3f}", flush=True)
         print("\n" + "-" * 80, flush=True)
         print("LEGACY EXACT-MATCH METRICS (for comparison only, DO NOT optimize):", flush=True)
         print(f"C1 Exact Match:        {metrics['c1_exact_match_rate_LEGACY']:.1%}", flush=True)

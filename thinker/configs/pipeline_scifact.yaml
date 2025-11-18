@@ -17,11 +17,13 @@ data_validation:
       type: object
       required: false
       allow_empty: true
-  evidence_mode: schema
+  evidence_mode: exact
   embedding_model: sentence-transformers/all-MiniLM-L6-v2
   similarity_threshold: 0.75
   claims_json: ../../cns-support-models/tests/fixtures/scifact_claims_sample.jsonl
   corpus_json: ../../cns-support-models/tests/fixtures/scifact_corpus_sample.jsonl
+  relation_field: completion
+  require_relations: true
 
 training:
   config_path: lora_config.yaml

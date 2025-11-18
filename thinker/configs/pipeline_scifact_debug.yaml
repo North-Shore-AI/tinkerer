@@ -13,7 +13,11 @@ data_validation:
       type: string
     - name: completion
       type: string
-  evidence_mode: schema
+  evidence_mode: exact
+  claims_json: ../../cns-support-models/tests/fixtures/scifact_claims_sample.jsonl
+  corpus_json: ../../cns-support-models/tests/fixtures/scifact_corpus_sample.jsonl
+  relation_field: completion
+  require_relations: true
 
 training:
   config_path: lora_config_debug.yaml

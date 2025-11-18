@@ -16,6 +16,9 @@ FEVER_RAW_DIR = REPO_ROOT / "cns-support-models" / "data" / "raw" / "fever"
 SCIFACT_PROCESSED_DATASET = (
     REPO_ROOT / "cns-support-models" / "data" / "processed" / "scifact_claim_extractor.jsonl"
 )
+SCIFACT_CLEAN_DATASET = (
+    REPO_ROOT / "cns-support-models" / "data" / "processed" / "scifact_claim_extractor_clean.jsonl"
+)
 
 
 def run(
@@ -35,6 +38,8 @@ def run_data_setup(
     claims_path: Path,
     corpus_path: Path,
     output_path: Path,
+    clean_output: Path | None,
+    filter_invalid: bool,
     fever_claims: Path,
     fever_wiki_dir: Path,
     fever_output: Path,
@@ -49,6 +54,8 @@ def run_data_setup(
             claims_path=claims_path,
             corpus_path=corpus_path,
             output_path=output_path,
+            clean_output=clean_output,
+            filter_invalid=filter_invalid,
             skip_validation=skip_validation,
             validation_mode=validation_mode,
             similarity_threshold=similarity_threshold,
@@ -69,6 +76,8 @@ def _setup_scifact(
     claims_path: Path,
     corpus_path: Path,
     output_path: Path,
+    clean_output: Path | None,
+    filter_invalid: bool,
     skip_validation: bool,
     validation_mode: str,
     similarity_threshold: float,
@@ -90,7 +99,8 @@ def _setup_scifact(
     else:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if skip_validation:
+    clean_output = clean_output.resolve() if clean_output else None
+    if skip_validation and clean_output is None:
         return
     validator = SCRIPTS_ROOT / "validate_dataset.py"
     cmd = [
@@ -113,6 +123,11 @@ def _setup_scifact(
         )
     else:
         cmd.extend(["--evidence-mode", "exact"])
+    if clean_output:
+        clean_output.parent.mkdir(parents=True, exist_ok=True)
+        cmd.extend(["--write-clean", str(clean_output)])
+        if filter_invalid:
+            cmd.append("--filter-invalid")
     run(cmd, cwd=REPO_ROOT)
 
 

@@ -80,7 +80,12 @@ This specification defines pipeline stages, component responsibilities, interfac
    - Tinker path (future): replicates `train_claim_extractor.py` functionality behind interface.  
 4. **Evaluation Stage**
    - Loads checkpoint (HF `save_pretrained` or Tinker adapter) and SciFact dev files.  
-   - Computes metrics (CLAIM[c1] exact match, evidence semantic match, relation stats), writes JSONL of predictions, emits summary to stdout.  
+   - Runs the SemanticValidator (citation → entailment → similarity → paraphrase) plus topology hooks (`logic/betti.py`, `metrics/chirality.py`). Each sample emits `[eval] sample i/N …` logs with entailment, β₁, and chirality to keep long jobs observable.  
+   - Writes JSONL rows containing completions, validation payloads, β₁/cycle lists, Fisher-Rao distances, and chirality scores, then prints the aggregated AGENTS.md Section 1.1 metrics + topology summary.  
+5. **Antagonist Stage (MVP)**  
+   - CLI: `python -m thinker.cli antagonist [--input ...] [--output ...] [threshold overrides]`.  
+   - Consumes the latest evaluation JSONL, applies polarity/entailment heuristics per `cns3/20251118_antagonist_mvp_rfc.md`, and writes `*_antagonist_flags.jsonl` with structured issues + severity.  
+   - Shares the same config file as the rest of the pipeline; defaults read `evaluation.output_path` so the workflow stays `validate → train → eval → antagonist`.
 5. **Run Metadata**
    - Collects: config path, git commit (if available), dataset SHA256, backend, training args digest, metric summary, timestamps.  
    - Writes to `runs/thinker/<timestamp>.json`.

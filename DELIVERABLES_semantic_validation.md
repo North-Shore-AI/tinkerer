@@ -14,6 +14,20 @@ Successfully implemented **4-stage semantic validation** to replace exact-match 
 
 ---
 
+## 2025-11-18 Update — Topology Instrumentation + Fresh Eval
+
+- **New instrumentation:**
+  - `thinker/logic/betti.py` (β₁ / cycle detection) and `thinker/metrics/chirality.py` (Fisher-Rao-based chirality) now run on every evaluation sample. Results are embedded in `runs/thinker_eval/*.jsonl`.
+  - `thinker/evaluation.py` streams per-sample logs (`[eval] sample N/50 …`) so long jobs have visible progress and report entailment, β₁, and chirality for each SNO.
+  - Dataset utilities now emit a cleaned SciFact JSONL (`scifact_claim_extractor_clean.jsonl`) and training scripts default to `CNS_CLAIM_EVIDENCE_WEIGHT=2.0` to prioritize evidence copying before reasoning.
+- **Latest evaluation (SciFact dev, adapter `claim-extractor-scifact-20251118T173307`, Tinker backend):**
+  - Schema 100%, citation 96%, mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%.
+  - β₁ = 0 for all 50 samples, indicating reasoning graphs are acyclic before Antagonist processing.
+  - Mean chirality score 0.561 and mean Fisher-Rao distance 16.75 quantify thesis/antithesis tension for downstream critics.
+  - Full artifact: `runs/thinker_eval/scifact_dev_eval.jsonl`.
+
+---
+
 ## Deliverable 1: Updated evaluation.py ✅
 
 **File:** `thinker/evaluation.py`

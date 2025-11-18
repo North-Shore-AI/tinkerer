@@ -33,7 +33,7 @@ training:
 
 # Data
 data:
-  train_file: ../../cns-support-models/data/processed/scifact_claim_extractor.jsonl
+  train_file: ../../cns-support-models/data/processed/scifact_claim_extractor_clean.jsonl
   validation_split: 0.1
   shuffle: true
   seed: 42

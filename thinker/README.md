@@ -77,7 +77,7 @@ Helper script: run `./thinker.sh` from the repo root to bootstrap the virtualenv
 Data Setup
 - SciFact
   - `python -m thinker.cli data setup --dataset scifact [--validation-mode exact|embedding] [--skip-validation]`
-  - Uses `make scifact` in `../cns-support-models`, copies `data/processed/scifact_claim_extractor.jsonl`, and (unless skipped) runs `scripts/validate_dataset.py` in exact or embedding mode.
+  - Uses `make scifact` in `../cns-support-models`, copies `data/processed/scifact_claim_extractor.jsonl`, and (unless skipped) runs `scripts/validate_dataset.py` (exact or embedding) which also writes a filtered `data/processed/scifact_claim_extractor_clean.jsonl`.
 - FEVER
   - `python -m thinker.cli data setup --dataset fever [--fever-include-nei]`
   - Downloads raw FEVER (uses `scripts/download_fever.sh`) or expects you to place files under `cns-support-models/data/raw/fever`, then converts via `scripts/convert_fever.py`.
@@ -86,7 +86,7 @@ Data Setup
 Configuration
 - Pipeline YAML (`configs/pipeline_scifact.yaml` and `configs/pipeline_scifact_debug.yaml`)
   - `tests`: pytest location, markers, extra args, `enabled` flag.
-  - `data_validation`: JSONL path, schema (`prompt`, `completion`, optional `metadata`), `max_examples`, `evidence_mode` (`schema|exact|embedding`), embedding model and similarity threshold, and optional `claims_json`/`corpus_json` for external validation.
+  - `data_validation`: JSONL path, schema (`prompt`, `completion`, optional `metadata`), `max_examples`, `evidence_mode` (`schema|exact|embedding`), embedding model and similarity threshold, optional `claims_json`/`corpus_json` for external validation, and relation gating (`relation_field`, `require_relations`).
   - `training`: `config_path` for LoRA YAML, backend (`hf_peft` or `tinker`), optional Tinker script/config path and log dir.
   - `evaluation`: backend (`hf_peft` or `tinker`), `base_model`, `checkpoint_dir` (HF), or Tinker adapter info (`tinker_manifest_path`, `tinker_adapter_*`), output path, sampling params.
 - LoRA YAML (`configs/lora_config.yaml`, `configs/lora_config_debug.yaml`)
@@ -103,6 +103,7 @@ Evaluation and Metrics
   - Stage 2 — Entailment: DeBERTa‑v3 NLI entailment score ≥ 0.75 between cited evidence (premise) and the generated claim (hypothesis).
   - Stage 3 — Semantic Similarity: sentence‑transformers cosine similarity ≥ 0.7 to the gold claim.
   - Stage 4 — Paraphrase Tolerance: if 1–2 pass, near‑misses in 3 can still be accepted.
+- Topology + Chirality diagnostics log β₁, detected cycles, Fisher‑Rao distance, and chirality scores for each evaluation row (`logic/betti.py`, `metrics/chirality.py`).
 - Outputs
   - Per‑example validation results are written to `evaluation.output_path` (JSONL), and aggregate metrics are printed to stdout.
   - Legacy exact‑match metrics are retained for side‑by‑side comparison.
@@ -122,6 +123,7 @@ Schema: CLAIM and RELATION
   - `CLAIM[c#] (Document <doc_id>): <supporting/refuting claim>`
   - `RELATION: <source_id> <supports|refutes|contrasts> <target_id>`
 - Parsers live in `claim_schema.py` and are used during evaluation to extract `CLAIM[c1]` and referenced evidence.
+- Graph debugging helper: `python scripts/build_graph.py --dataset <jsonl> --line 1` prints nodes, β₁, and detected cycles for a sample completion.
 
 Typical Workflows
 - “Validate then train” (recommended)

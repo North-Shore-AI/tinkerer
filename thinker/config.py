@@ -66,6 +66,8 @@ class DatasetValidationConfig:
     similarity_threshold: float = 0.75
     claims_path: Optional[Path] = None
     corpus_path: Optional[Path] = None
+    relation_field: Optional[str] = None
+    require_relations: bool = False
 
 
 @dataclass(frozen=True)
@@ -158,6 +160,8 @@ def load_pipeline_config(path: Path) -> PipelineConfig:
             similarity_threshold=val_raw.get("similarity_threshold", 0.75),
             claims_path=_resolve_optional_path(base_dir, val_raw.get("claims_json")),
             corpus_path=_resolve_optional_path(base_dir, val_raw.get("corpus_json")),
+            relation_field=val_raw.get("relation_field"),
+            require_relations=val_raw.get("require_relations", False),
         )
 
     training_cfg = None
