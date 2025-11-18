@@ -272,15 +272,17 @@ def main() -> None:
                         f"sum={sum(weights_list)} first={weights_list[:10]}",
                         flush=True,
                     )
-            print(f"[debug] submitting batch of {len(datums)} examples to forward_backward", flush=True)
+            import time
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: Submitting batch of {len(datums)} examples to forward_backward", flush=True)
             fwdbwd_future = training_client.forward_backward(datums, loss_fn="cross_entropy")
-            print("[debug] submitting optim_step", flush=True)
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: forward_backward submitted, now submitting optim_step", flush=True)
             optim_future = training_client.optim_step(
                 types.AdamParams(learning_rate=opt_cfg["learning_rate"])
             )
 
-            print("[debug] waiting for forward_backward result...", flush=True)
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: Both futures submitted, waiting for forward_backward result...", flush=True)
             fwdbwd_result = fwdbwd_future.result()
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: ✓ forward_backward completed", flush=True)
             if step == 0:
                 first_output = fwdbwd_result.loss_fn_outputs[0]
                 print(
@@ -295,9 +297,9 @@ def main() -> None:
                     f"[debug] metrics={fwdbwd_result.metrics}",
                     flush=True,
                 )
-            print("[debug] waiting for optim_step result...", flush=True)
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: Waiting for optim_step result...", flush=True)
             optim_future.result()
-            print("[debug] batch completed", flush=True)
+            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Step {step+1}: ✓ optim_step completed - BATCH DONE", flush=True)
 
             loss = fwdbwd_result.metrics.get("loss:mean")
             if loss is None and "loss:sum" in fwdbwd_result.metrics:
