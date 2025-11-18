@@ -26,7 +26,7 @@ data_validation:
   require_relations: true
 
 training:
-  config_path: lora_config.yaml
+  config_path: lora_config_cpu.yaml  # CPU-friendly config for local iteration
   backend: hf_peft
   enabled: true
   tinker_config_path: ../../cns-support-models/configs/claim_extractor_scifact.yaml

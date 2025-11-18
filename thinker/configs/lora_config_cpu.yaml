@@ -1,0 +1,54 @@
+# CPU-friendly configuration for local training without GPU
+# Model configuration
+model:
+  name: "meta-llama/Llama-3.1-8B-Instruct"
+  quantization: null  # Disable quantization for CPU
+  device_map: "cpu"
+
+# LoRA hyperparameters
+lora:
+  r: 8  # Smaller rank for faster CPU training
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+  bias: "none"
+
+# Training hyperparameters
+training:
+  per_device_batch_size: 1  # Smaller batch for CPU
+  gradient_accumulation_steps: 16  # Maintain effective batch size
+  learning_rate: 2.0e-4
+  num_epochs: 2  # Fewer epochs for quick iteration
+  warmup_steps: 50
+  max_seq_length: 1024  # Shorter sequences for CPU
+  claim_c1_weight: 5.0
+  evidence_weight: 2.0
+  optim: "adamw_torch"
+  weight_decay: 0.01
+  lr_scheduler_type: "cosine"
+  fp16: false  # Disable fp16 for CPU
+  gradient_checkpointing: false
+
+  # Citation hallucination fix (2025-11-18)
+  # See: docs/20251118/antagonist-mvp-review/HIGH_SEVERITY_REVIEW.md
+  validate_citations_during_training: true  # Enable citation validation
+  citation_validity_weight: 2.0              # Penalty for hallucinated citations
+  cns_claim_evidence_weight: 3.0             # Evidence grounding weight
+
+# Data
+data:
+  train_file: ../../cns-support-models/data/processed/scifact_claim_extractor_clean.jsonl
+  validation_split: 0.1
+  shuffle: true
+  seed: 42
+
+# Output
+output:
+  checkpoint_dir: ../../cns-support-models/checkpoints/claim-extractor-scifact-cpu
+  logging_steps: 5   # Granular logging for citation_loss monitoring
+  eval_steps: 25     # More frequent evaluation for quick iteration
+  save_steps: 100
+  save_total_limit: 2
+  report_to: "none"
