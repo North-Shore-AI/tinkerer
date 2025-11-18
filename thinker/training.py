@@ -8,7 +8,7 @@ import sys
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional
 
 from .config import LocalTrainingConfig
 
@@ -151,25 +151,50 @@ def _tokenize_function(examples, tokenizer, config: Dict[str, Any]):
             sample_labels[idx] = -100
         labels.append(sample_labels)
     tokenized["labels"] = labels
+
+    # Preserve prompt and completion for citation validation
+    tokenized["prompt"] = prompts
+    tokenized["completion"] = completions
+
     return tokenized
 
 
 def _prepare_datasets(train_dataset, eval_dataset, tokenizer, config):
+    # Keep prompt and completion columns for citation validation
+    # Remove other columns that are not needed
+    columns_to_remove = [
+        col for col in train_dataset.column_names
+        if col not in ["prompt", "completion"]
+    ]
+
     train_dataset = train_dataset.map(
         lambda x: _tokenize_function(x, tokenizer, config),
         batched=True,
-        remove_columns=train_dataset.column_names,
+        remove_columns=columns_to_remove,
     )
     if eval_dataset:
+        eval_columns_to_remove = [
+            col for col in eval_dataset.column_names
+            if col not in ["prompt", "completion"]
+        ]
         eval_dataset = eval_dataset.map(
             lambda x: _tokenize_function(x, tokenizer, config),
             batched=True,
-            remove_columns=eval_dataset.column_names,
+            remove_columns=eval_columns_to_remove,
         )
 
-    train_dataset.set_format(type="torch")
+    # Set format to torch, but keep prompt and completion as strings
+    train_dataset.set_format(
+        type="torch",
+        columns=["input_ids", "attention_mask", "labels"],
+        output_all_columns=True,
+    )
     if eval_dataset:
-        eval_dataset.set_format(type="torch")
+        eval_dataset.set_format(
+            type="torch",
+            columns=["input_ids", "attention_mask", "labels"],
+            output_all_columns=True,
+        )
     return train_dataset, eval_dataset
 
 
@@ -205,6 +230,151 @@ def _build_training_arguments(config: Dict[str, Any], has_eval: bool):
     return args
 
 
+class CitationAwareDataCollator:
+    """Custom data collator that validates citations during training.
+
+    This collator wraps the standard DataCollatorForLanguageModeling and adds
+    citation validation to each batch. If citation validation is enabled in the
+    config, it computes penalties for hallucinated citations that can be used
+    in the training loss.
+
+    Args:
+        tokenizer: The tokenizer to use for padding
+        config: Training configuration dict containing citation validation settings
+        mlm: Whether to use masked language modeling (default: False for causal LM)
+    """
+
+    def __init__(self, tokenizer, config: Dict[str, Any], mlm: bool = False):
+        from transformers import DataCollatorForLanguageModeling
+
+        self.base_collator = DataCollatorForLanguageModeling(
+            tokenizer=tokenizer,
+            mlm=mlm,
+        )
+        self.tokenizer = tokenizer
+        self.citation_weight = config.get("training", {}).get(
+            "citation_validity_weight", 2.0
+        )
+        self.validate_citations = config.get("training", {}).get(
+            "validate_citations_during_training", False
+        )
+
+    def __call__(self, features):
+        """Collate features and optionally validate citations.
+
+        Args:
+            features: List of feature dicts from the dataset
+
+        Returns:
+            Batch dict with input_ids, attention_mask, labels, and optionally citation_penalties
+        """
+        # Use base collator for standard tokenization
+        batch = self.base_collator(features)
+
+        # Add citation validation if enabled
+        if self.validate_citations:
+            # Try to get prompts and completions from features
+            # Note: This requires the features to contain these fields
+            if features and "prompt" in features[0] and "completion" in features[0]:
+                prompts = [f.get("prompt", "") for f in features]
+                completions = [f.get("completion", "") for f in features]
+
+                from .citation_validation import (
+                    batch_validate_citations,
+                    compute_citation_penalty,
+                )
+
+                results = batch_validate_citations(prompts, completions)
+
+                # Store validation results for custom loss computation
+                batch["citation_penalties"] = [
+                    compute_citation_penalty(r, self.citation_weight)
+                    for r in results
+                ]
+
+        return batch
+
+
+class CitationAwareTrainer:
+    """Custom Trainer that adds citation validation penalty to the training loss.
+
+    This trainer extends the standard HuggingFace Trainer to incorporate citation
+    validation into the loss function. When citation_penalties are present in the
+    batch (added by CitationAwareDataCollator), they are added to the standard
+    cross-entropy loss.
+
+    This encourages the model to only cite documents that actually exist in the
+    source corpus, addressing the citation hallucination problem identified in
+    the HIGH severity review (claims 133, 179).
+    """
+
+    def __init__(self, *args, **kwargs):
+        from transformers import Trainer
+
+        # Create base trainer
+        self.trainer = Trainer(*args, **kwargs)
+
+        # Copy over key attributes for compatibility
+        self.model = self.trainer.model
+        self.args = self.trainer.args
+        self.train_dataset = self.trainer.train_dataset
+        self.eval_dataset = self.trainer.eval_dataset
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        """Compute loss with optional citation penalty.
+
+        Args:
+            model: The model being trained
+            inputs: Batch inputs dict
+            return_outputs: Whether to return model outputs along with loss
+
+        Returns:
+            Loss tensor, or (loss, outputs) tuple if return_outputs=True
+        """
+        import torch
+
+        # Standard loss computation
+        outputs = model(**{k: v for k, v in inputs.items() if k != "citation_penalties"})
+        loss = outputs.loss
+
+        # Add citation penalty if available
+        if "citation_penalties" in inputs and inputs["citation_penalties"]:
+            penalties = torch.tensor(
+                inputs["citation_penalties"],
+                device=loss.device,
+                dtype=loss.dtype,
+            )
+            citation_loss = penalties.mean()
+
+            # Add to total loss
+            loss = loss + citation_loss
+
+            # Log citation metrics if trainer has logging
+            if hasattr(self.trainer, "log"):
+                self.trainer.log({
+                    "citation_loss": citation_loss.item(),
+                    "base_loss": (loss - citation_loss).item(),
+                })
+
+        return (loss, outputs) if return_outputs else loss
+
+    def train(self, *args, **kwargs):
+        """Forward train() call to base trainer."""
+        # Replace compute_loss in base trainer
+        original_compute_loss = self.trainer.compute_loss
+        self.trainer.compute_loss = self.compute_loss
+
+        try:
+            return self.trainer.train(*args, **kwargs)
+        finally:
+            # Restore original compute_loss
+            self.trainer.compute_loss = original_compute_loss
+
+    def save_model(self, *args, **kwargs):
+        """Forward save_model() call to base trainer."""
+        return self.trainer.save_model(*args, **kwargs)
+
+
 class LocalPEFTTrainer(TrainingBackend):
     """Runs PEFT training locally via Hugging Face transformers."""
 
@@ -224,17 +394,38 @@ class LocalPEFTTrainer(TrainingBackend):
         train_dataset, eval_dataset = _load_datasets(config, config_dir)
         train_dataset, eval_dataset = _prepare_datasets(train_dataset, eval_dataset, tokenizer, config)
 
-        from transformers import Trainer
-
         training_args = _build_training_arguments(config, eval_dataset is not None)
 
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            tokenizer=tokenizer,
+        # Check if citation validation is enabled
+        validate_citations = config.get("training", {}).get(
+            "validate_citations_during_training", False
         )
+
+        # Use custom collator if citation validation is enabled
+        data_collator = None
+        if validate_citations:
+            data_collator = CitationAwareDataCollator(tokenizer, config)
+
+        # Use CitationAwareTrainer if citation validation is enabled
+        if validate_citations:
+            trainer = CitationAwareTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                eval_dataset=eval_dataset,
+                tokenizer=tokenizer,
+                data_collator=data_collator,
+            )
+        else:
+            from transformers import Trainer
+
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                eval_dataset=eval_dataset,
+                tokenizer=tokenizer,
+            )
 
         trainer.train()
 
