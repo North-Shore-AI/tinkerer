@@ -30,9 +30,15 @@ from tinker import types
 
 from claim_schema import CLAIM_LINE_RE, parse_claim_lines
 
+# Add citation validation import (relative to cns-support-models/scripts)
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1].parent / "thinker"))
+from citation_validation import validate_citations
+
 
 CLAIM_C1_WEIGHT = float(os.environ.get("CNS_CLAIM_C1_WEIGHT", "5.0"))
 CLAIM_EVIDENCE_WEIGHT = float(os.environ.get("CNS_CLAIM_EVIDENCE_WEIGHT", "2.0"))
+CITATION_VALIDITY_WEIGHT = float(os.environ.get("CITATION_VALIDITY_WEIGHT", "2.0"))
 
 
 def sha256_file(path: Path) -> str:
@@ -128,7 +134,7 @@ def _scalar(value):
         return 0.0
 
 
-def build_datum(example: Example, tokenizer) -> types.Datum:
+def build_datum(example: Example, tokenizer, citation_penalty_multiplier: float = 1.0) -> types.Datum:
     prompt_tokens = tokenizer.encode(example.prompt, add_special_tokens=True)
     completion_text = " " + example.completion
     completion_tokens = tokenizer.encode(completion_text, add_special_tokens=False)
@@ -166,6 +172,8 @@ def build_datum(example: Example, tokenizer) -> types.Datum:
             weight = max(weight, CLAIM_C1_WEIGHT)
         elif label and CLAIM_EVIDENCE_WEIGHT != 1.0:
             weight = max(weight, CLAIM_EVIDENCE_WEIGHT)
+        # Apply citation penalty multiplier for hallucinated citations
+        weight *= citation_penalty_multiplier
         weights.append(weight)
 
     debug_limit = int(os.environ.get("CNS_DEBUG_DATUM", 0) or 0)
@@ -230,7 +238,10 @@ def main() -> None:
 
     step = 0
     last_loss = None
+    total_citations_validated = 0
+    total_citations_invalid = 0
     print("[init] Entering training loop...", flush=True)
+    print(f"[init] Citation validation enabled with penalty weight={CITATION_VALIDITY_WEIGHT}", flush=True)
     warned_missing_inline_eval = False
     run_tag = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S")
     checkpoint_base = model_cfg["adapter_name"]
@@ -238,7 +249,17 @@ def main() -> None:
     for epoch in range(opt_cfg["epochs"]):
         random.shuffle(examples)
         for batch in chunk(examples, data_cfg["batch_size"]):
-            datums = [build_datum(ex, tokenizer) for ex in batch]
+            # Validate citations for each example in batch
+            datums = []
+            for ex in batch:
+                validation_result = validate_citations(ex.prompt, ex.completion)
+                total_citations_validated += 1
+                if not validation_result.is_valid:
+                    total_citations_invalid += 1
+                # Apply penalty multiplier: 1.0 if valid, (1.0 + weight) if invalid
+                citation_penalty = 1.0 if validation_result.is_valid else (1.0 + CITATION_VALIDITY_WEIGHT)
+                datum = build_datum(ex, tokenizer, citation_penalty_multiplier=citation_penalty)
+                datums.append(datum)
             if os.environ.get("CNS_DEBUG_DATUM"):
                 for idx, datum in enumerate(datums[:1]):
                     weights_arr = datum.loss_fn_inputs["weights"]
@@ -289,7 +310,12 @@ def main() -> None:
 
             step += 1
             if step % 10 == 0 or step == 1:
-                print(f"[train] epoch={epoch+1} step={step}/{total_steps} loss={loss:.4f}")
+                citation_invalid_rate = total_citations_invalid / max(total_citations_validated, 1)
+                print(
+                    f"[train] epoch={epoch+1} step={step}/{total_steps} "
+                    f"loss={loss:.4f} citation_invalid_rate={citation_invalid_rate:.3f} "
+                    f"({total_citations_invalid}/{total_citations_validated})"
+                )
 
             eval_every = log_cfg.get("eval_every_steps")
             if eval_every and inline_eval_supported and step % eval_every == 0:
@@ -348,6 +374,12 @@ def main() -> None:
             "logging_notes": log_cfg.get("notes"),
             "total_steps": total_steps,
             "final_loss": last_loss,
+            "citation_validation": {
+                "total_validated": total_citations_validated,
+                "total_invalid": total_citations_invalid,
+                "invalid_rate": total_citations_invalid / max(total_citations_validated, 1),
+                "penalty_weight": CITATION_VALIDITY_WEIGHT,
+            },
         }
         log_path = args.log_dir / f"train_{model_cfg['adapter_name']}_{now_utc.strftime('%Y%m%dT%H%M%SZ')}.json"
         with log_path.open("w", encoding="utf-8") as fh:
