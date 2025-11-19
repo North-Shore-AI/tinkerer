@@ -1,0 +1,396 @@
+{
+  "payload": {
+    "backend": "tinker",
+    "checkpoint_dir": ".",
+    "config_file": "thinker/configs/pipeline_scifact_micro.yaml",
+    "config_path": "/home/home/p/g/North-Shore-AI/tinkerer/thinker/configs/lora_config_cpu.yaml",
+    "configured_backend": "hf_peft",
+    "metrics": {
+      "adapter_name": "claim-extractor-scifact-micro-20251119T023422",
+      "adapter_path": "tinker://b484da35-1b57-5519-8e20-74ac4ec6776f:train:0/sampler_weights/claim-extractor-scifact-micro-20251119T023422",
+      "base_model": "meta-llama/Llama-3.1-8B-Instruct",
+      "final_loss": 369.38075256347656,
+      "manifest_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/latest_tinker_adapter.json",
+      "step_metrics": [
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 1,
+          "global_step": 1,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 1483.7768249511719,
+          "num_tokens": null,
+          "step": 1,
+          "timestamp": "2025-11-19T02:34:23.756155Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798015.0,
+            "loss_sum": 1483.7768249511719
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 5,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 1,
+          "global_step": 2,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 1542.2747192382812,
+          "num_tokens": null,
+          "step": 2,
+          "timestamp": "2025-11-19T02:34:25.515434Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798017.0,
+            "loss_sum": 1542.2747192382812
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 10,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 1,
+          "global_step": 3,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 1482.5674743652344,
+          "num_tokens": null,
+          "step": 3,
+          "timestamp": "2025-11-19T02:34:27.627692Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798019.0,
+            "loss_sum": 1482.5674743652344
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 15,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 2,
+          "global_step": 4,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 882.9386291503906,
+          "num_tokens": null,
+          "step": 4,
+          "timestamp": "2025-11-19T02:34:29.350991Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798021.0,
+            "loss_sum": 882.9386291503906
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 20,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 2,
+          "global_step": 5,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 963.1843566894531,
+          "num_tokens": null,
+          "step": 5,
+          "timestamp": "2025-11-19T02:34:31.212093Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798023.0,
+            "loss_sum": 963.1843566894531
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 25,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 2,
+          "global_step": 6,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 835.9709625244141,
+          "num_tokens": null,
+          "step": 6,
+          "timestamp": "2025-11-19T02:34:33.299470Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798025.0,
+            "loss_sum": 835.9709625244141
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 30,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 3,
+          "global_step": 7,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 613.1362686157227,
+          "num_tokens": null,
+          "step": 7,
+          "timestamp": "2025-11-19T02:34:35.793872Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798027.0,
+            "loss_sum": 613.1362686157227
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 35,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 3,
+          "global_step": 8,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 579.8954391479492,
+          "num_tokens": null,
+          "step": 8,
+          "timestamp": "2025-11-19T02:34:39.732600Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798029.0,
+            "loss_sum": 579.8954391479492
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 40,
+          "total_steps": 9
+        },
+        {
+          "batch_size": 5,
+          "citation_invalid_rate": 0.0,
+          "epoch": 3,
+          "global_step": 9,
+          "gradient_norm": null,
+          "learning_rate": 0.0002,
+          "loss": 369.38075256347656,
+          "num_tokens": null,
+          "step": 9,
+          "timestamp": "2025-11-19T02:34:41.661695Z",
+          "tinker_metrics": {
+            "clock_cycle_unique": 4798031.0,
+            "loss_sum": 369.38075256347656
+          },
+          "total_citations_invalid": 0,
+          "total_citations_validated": 45,
+          "total_steps": 9
+        }
+      ],
+      "training_report": {
+        "adapter_checkpoint": "claim-extractor-scifact-micro-20251119T023422",
+        "adapter_checkpoint_path": "tinker://b484da35-1b57-5519-8e20-74ac4ec6776f:train:0/sampler_weights/claim-extractor-scifact-micro-20251119T023422",
+        "adapter_name": "claim-extractor-scifact-micro",
+        "base_model": "meta-llama/Llama-3.1-8B-Instruct",
+        "citation_validation": {
+          "invalid_rate": 0.0,
+          "penalty_weight": 2.0,
+          "total_invalid": 0,
+          "total_validated": 45
+        },
+        "config": "/home/home/p/g/North-Shore-AI/tinkerer/cns-support-models/configs/claim_extractor_scifact_micro.yaml",
+        "dataset": {
+          "num_examples": 15,
+          "sha256": "87cf280dda0871b6a8cda57bde77b4b1411880018c5fc2aaf181fb91af5eb55b",
+          "train_path": "/home/home/p/g/North-Shore-AI/tinkerer/cns-support-models/data/processed/scifact_claim_extractor_clean.jsonl"
+        },
+        "final_loss": 369.38075256347656,
+        "git_commit": "b2559623f83e1f8d6b29e8ef5ad453e76e70f43c",
+        "logging_notes": "Micro training config (5 samples, 1 epoch) for rapid smoke tests.",
+        "optimization": {
+          "batch_size": 5,
+          "epochs": 3,
+          "learning_rate": 0.0002
+        },
+        "step_metrics": [
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 1,
+            "global_step": 1,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 1483.7768249511719,
+            "num_tokens": null,
+            "step": 1,
+            "timestamp": "2025-11-19T02:34:23.756155Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798015.0,
+              "loss_sum": 1483.7768249511719
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 5,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 1,
+            "global_step": 2,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 1542.2747192382812,
+            "num_tokens": null,
+            "step": 2,
+            "timestamp": "2025-11-19T02:34:25.515434Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798017.0,
+              "loss_sum": 1542.2747192382812
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 10,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 1,
+            "global_step": 3,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 1482.5674743652344,
+            "num_tokens": null,
+            "step": 3,
+            "timestamp": "2025-11-19T02:34:27.627692Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798019.0,
+              "loss_sum": 1482.5674743652344
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 15,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 2,
+            "global_step": 4,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 882.9386291503906,
+            "num_tokens": null,
+            "step": 4,
+            "timestamp": "2025-11-19T02:34:29.350991Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798021.0,
+              "loss_sum": 882.9386291503906
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 20,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 2,
+            "global_step": 5,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 963.1843566894531,
+            "num_tokens": null,
+            "step": 5,
+            "timestamp": "2025-11-19T02:34:31.212093Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798023.0,
+              "loss_sum": 963.1843566894531
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 25,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 2,
+            "global_step": 6,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 835.9709625244141,
+            "num_tokens": null,
+            "step": 6,
+            "timestamp": "2025-11-19T02:34:33.299470Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798025.0,
+              "loss_sum": 835.9709625244141
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 30,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 3,
+            "global_step": 7,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 613.1362686157227,
+            "num_tokens": null,
+            "step": 7,
+            "timestamp": "2025-11-19T02:34:35.793872Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798027.0,
+              "loss_sum": 613.1362686157227
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 35,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 3,
+            "global_step": 8,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 579.8954391479492,
+            "num_tokens": null,
+            "step": 8,
+            "timestamp": "2025-11-19T02:34:39.732600Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798029.0,
+              "loss_sum": 579.8954391479492
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 40,
+            "total_steps": 9
+          },
+          {
+            "batch_size": 5,
+            "citation_invalid_rate": 0.0,
+            "epoch": 3,
+            "global_step": 9,
+            "gradient_norm": null,
+            "learning_rate": 0.0002,
+            "loss": 369.38075256347656,
+            "num_tokens": null,
+            "step": 9,
+            "timestamp": "2025-11-19T02:34:41.661695Z",
+            "tinker_metrics": {
+              "clock_cycle_unique": 4798031.0,
+              "loss_sum": 369.38075256347656
+            },
+            "total_citations_invalid": 0,
+            "total_citations_validated": 45,
+            "total_steps": 9
+          }
+        ],
+        "timestamp": "2025-11-19T02:34:50.602679Z",
+        "total_steps": 9
+      },
+      "training_report_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/train_claim-extractor-scifact-micro_20251119T023450Z.json"
+    },
+    "requested_backend": "tinker",
+    "status": "completed"
+  },
+  "run_id": "train_20251119T023450.901865Z",
+  "stage": "train",
+  "timestamp": "2025-11-19T02:34:50.901865Z"
+}

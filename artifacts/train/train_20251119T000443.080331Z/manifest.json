@@ -1,0 +1,50 @@
+{
+  "payload": {
+    "backend": "tinker",
+    "checkpoint_dir": ".",
+    "config_file": "thinker/configs/pipeline_scifact_micro.yaml",
+    "config_path": "/home/home/p/g/North-Shore-AI/tinkerer/thinker/configs/lora_config_cpu.yaml",
+    "configured_backend": "hf_peft",
+    "metrics": {
+      "adapter_name": "claim-extractor-scifact-micro-20251119T000437",
+      "adapter_path": "tinker://d459b31c-3f66-59dd-8fbc-500f9570b022:train:0/sampler_weights/claim-extractor-scifact-micro-20251119T000437",
+      "base_model": "meta-llama/Llama-3.1-8B-Instruct",
+      "final_loss": 1625.0686645507812,
+      "manifest_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/latest_tinker_adapter.json",
+      "training_report": {
+        "adapter_checkpoint": "claim-extractor-scifact-micro-20251119T000437",
+        "adapter_checkpoint_path": "tinker://d459b31c-3f66-59dd-8fbc-500f9570b022:train:0/sampler_weights/claim-extractor-scifact-micro-20251119T000437",
+        "adapter_name": "claim-extractor-scifact-micro",
+        "base_model": "meta-llama/Llama-3.1-8B-Instruct",
+        "citation_validation": {
+          "invalid_rate": 0.0,
+          "penalty_weight": 2.0,
+          "total_invalid": 0,
+          "total_validated": 5
+        },
+        "config": "/home/home/p/g/North-Shore-AI/tinkerer/cns-support-models/configs/claim_extractor_scifact_micro.yaml",
+        "dataset": {
+          "num_examples": 5,
+          "sha256": "87cf280dda0871b6a8cda57bde77b4b1411880018c5fc2aaf181fb91af5eb55b",
+          "train_path": "/home/home/p/g/North-Shore-AI/tinkerer/cns-support-models/data/processed/scifact_claim_extractor_clean.jsonl"
+        },
+        "final_loss": 1625.0686645507812,
+        "git_commit": "b2559623f83e1f8d6b29e8ef5ad453e76e70f43c",
+        "logging_notes": "Micro training config (5 samples, 1 epoch) for rapid smoke tests.",
+        "optimization": {
+          "batch_size": 5,
+          "epochs": 1,
+          "learning_rate": 0.0002
+        },
+        "timestamp": "2025-11-19T00:04:42.418387Z",
+        "total_steps": 1
+      },
+      "training_report_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/train_claim-extractor-scifact-micro_20251119T000442Z.json"
+    },
+    "requested_backend": "tinker",
+    "status": "completed"
+  },
+  "run_id": "train_20251119T000443.080331Z",
+  "stage": "train",
+  "timestamp": "2025-11-19T00:04:43.080331Z"
+}

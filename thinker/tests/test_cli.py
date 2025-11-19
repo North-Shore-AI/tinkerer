@@ -7,6 +7,12 @@ import pytest
 from thinker import cli
 
 
+@pytest.fixture(autouse=True)
+def noop_metrics_emitter(monkeypatch):
+    monkeypatch.setattr(cli, "emit_metrics", lambda *args, **kwargs: None)
+    yield
+
+
 def test_data_setup_cli_invokes_helper(monkeypatch):
     called = {}
 

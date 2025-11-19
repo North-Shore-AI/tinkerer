@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -30,14 +31,31 @@ class AntagonistRunner:
         for entry in records:
             flag = self._evaluate_entry(entry)
             if flag:
+                flag["timestamp"] = self._iso_timestamp()
                 flags.append(flag)
 
         self._write_flags(flags)
+        severity_breakdown = self._summarize_severities(flags)
+        issue_breakdown = self._summarize_issue_types(flags)
+        flag_rate = (len(flags) / len(records)) if records else 0.0
         summary = {
             "input": str(self.config.input_path),
             "output": str(self.config.output_path),
             "total_records": len(records),
             "flagged_records": len(flags),
+            "flag_rate": flag_rate,
+            "severity_breakdown": severity_breakdown,
+            "issue_breakdown": issue_breakdown,
+            "flag_telemetry": [
+                {
+                    "claim_id": flag.get("claim_id"),
+                    "severity": flag.get("severity"),
+                    "timestamp": flag.get("timestamp"),
+                    "issues": flag.get("issues"),
+                    "metrics": flag.get("metrics"),
+                }
+                for flag in flags
+            ],
         }
         print(
             f"[antagonist] inspected {summary['total_records']} records "
@@ -144,3 +162,26 @@ class AntagonistRunner:
     def _severity_rank(value: str) -> int:
         ordering = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
         return ordering.get(value.upper(), 0)
+
+    @staticmethod
+    def _iso_timestamp() -> str:
+        return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    @staticmethod
+    def _summarize_severities(flags: List[Dict[str, Any]]) -> Dict[str, int]:
+        counts = {"LOW": 0, "MEDIUM": 0, "HIGH": 0}
+        for flag in flags:
+            severity = (flag.get("severity") or "LOW").upper()
+            counts[severity] = counts.get(severity, 0) + 1
+        return counts
+
+    @staticmethod
+    def _summarize_issue_types(flags: List[Dict[str, Any]]) -> Dict[str, int]:
+        issue_counts: Dict[str, int] = {}
+        for flag in flags:
+            for issue in flag.get("issues", []):
+                issue_type = issue.get("issue_type")
+                if not issue_type:
+                    continue
+                issue_counts[issue_type] = issue_counts.get(issue_type, 0) + 1
+        return issue_counts

@@ -1,0 +1,74 @@
+{
+  "payload": {
+    "backend": "tinker",
+    "config_file": "thinker/configs/pipeline_scifact_limited.yaml",
+    "metrics": {
+      "beta1_nonzero": 0,
+      "beta1_nonzero_rate": 0.0,
+      "beta1_values": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "c1_exact_match": 0,
+      "c1_exact_match_rate_LEGACY": 0.0,
+      "chirality_scores": [
+        0.5829918118984779,
+        0.5798890001859117,
+        0.5572473676521054,
+        0.580497806464476,
+        0.5749263867201978
+      ],
+      "citation_accuracy_rate": 1.0,
+      "citation_valid": 5,
+      "entailment_pass": 0,
+      "entailment_pass_rate": 0.0,
+      "entailment_scores": [
+        0.01215752400457859,
+        0.42464491724967957,
+        0.4971189796924591,
+        0.3734273612499237,
+        0.7114620804786682
+      ],
+      "evidence_exact_match": [
+        0.5,
+        0.25
+      ],
+      "evidence_exact_match_avg_LEGACY": 0.375,
+      "fisher_rao_distances": [
+        34.27712631225586,
+        28.83441925048828,
+        13.034223556518555,
+        29.765769958496094,
+        22.92953872680664
+      ],
+      "mean_beta1": 0.0,
+      "mean_chirality_score": 0.5751104745842338,
+      "mean_entailment_score": 0.40376217253506186,
+      "mean_fisher_rao_distance": 25.768215560913085,
+      "mean_semantic_similarity": 0.0,
+      "overall_pass": 0,
+      "overall_pass_rate": 0.0,
+      "paraphrase_acceptance_rate": 0.0,
+      "paraphrase_accepted": 0,
+      "schema_compliance_rate": 1.0,
+      "schema_valid": 5,
+      "semantic_similarity_rate": 0.0,
+      "similarity_pass": 0,
+      "similarity_scores": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total": 5
+    },
+    "output_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/thinker_eval/scifact_dev_eval_limited.jsonl"
+  },
+  "run_id": "eval_20251118T234858.414262Z",
+  "stage": "eval",
+  "timestamp": "2025-11-18T23:48:58.414262Z"
+}

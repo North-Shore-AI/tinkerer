@@ -8,14 +8,16 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, TYPE_CHECKING
+from statistics import pstdev
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
 from .claim_schema import parse_claim_lines, parse_relation_line
 from .config import EvaluationConfig
 from .logic import compute_graph_stats
 from .metrics import ChiralityAnalyzer, build_fisher_rao_stats
-from .semantic_validation import SemanticValidator, ValidationResult
+from .semantic_validation import SemanticValidator
 
 if TYPE_CHECKING:
     from .pipeline import PipelineState
@@ -47,6 +49,98 @@ def evaluate_semantic_match(predicted: List[str], gold_sentences: List[str]) -> 
                 matches += 1
                 break
     return matches / len(predicted) if predicted else 0.0
+
+
+def _iso_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _moving_average(values: List[float], window: int) -> List[float]:
+    if not values:
+        return []
+    result: List[float] = []
+    for idx in range(len(values)):
+        lo = max(0, idx - window + 1)
+        window_values = [v for v in values[lo : idx + 1] if v is not None]
+        if not window_values:
+            result.append(None)
+        else:
+            result.append(sum(window_values) / len(window_values))
+    return result
+
+
+def build_evaluation_series(samples: List[Dict[str, Any]], moving_avg_window: int = 5) -> Dict[str, Any]:
+    """Create cumulative + moving-average series for dashboard charting."""
+
+    if not samples:
+        return {
+            "indices": [],
+            "timestamps": [],
+            "cumulative_rates": {},
+            "value_series": {},
+            "moving_averages": {},
+        }
+
+    indices = [sample.get("index", idx + 1) for idx, sample in enumerate(samples)]
+    timestamps = [sample.get("timestamp") for sample in samples]
+
+    cumulative_keys = {
+        "schema_valid": "schema_valid",
+        "citation_valid": "citation_valid",
+        "entailment_pass": "entailment_pass",
+        "similarity_pass": "similarity_pass",
+        "paraphrase_accepted": "paraphrase_accepted",
+        "overall_pass": "overall_pass",
+    }
+    cumulative_counts = {key: 0 for key in cumulative_keys}
+    cumulative_rates: Dict[str, List[float]] = {key: [] for key in cumulative_keys}
+
+    numeric_series = {
+        "entailment_score": [],
+        "semantic_similarity": [],
+        "beta1": [],
+        "chirality_score": [],
+        "fisher_rao_distance": [],
+    }
+    binary_series = {
+        "citation_valid": [],
+        "schema_valid": [],
+        "overall_pass": [],
+    }
+
+    for idx, sample in enumerate(samples, start=1):
+        for key, sample_key in cumulative_keys.items():
+            value = sample.get(sample_key)
+            cumulative_counts[key] += 1 if value else 0
+            cumulative_rates[key].append(cumulative_counts[key] / idx)
+
+        numeric_series["entailment_score"].append(sample.get("entailment_score"))
+        numeric_series["semantic_similarity"].append(sample.get("semantic_similarity"))
+        numeric_series["beta1"].append(sample.get("beta1"))
+        numeric_series["chirality_score"].append(sample.get("chirality_score"))
+        numeric_series["fisher_rao_distance"].append(sample.get("fisher_rao_distance"))
+
+        binary_series["citation_valid"].append(1 if sample.get("citation_valid") else 0)
+        binary_series["schema_valid"].append(1 if sample.get("schema_valid") else 0)
+        binary_series["overall_pass"].append(1 if sample.get("overall_pass") else 0)
+
+    moving_keys = {
+        "entailment_score": numeric_series["entailment_score"],
+        "semantic_similarity": numeric_series["semantic_similarity"],
+        "chirality_score": numeric_series["chirality_score"],
+    }
+    moving_averages = {
+        key: _moving_average(values, moving_avg_window)
+        for key, values in moving_keys.items()
+    }
+
+    return {
+        "indices": indices,
+        "timestamps": timestamps,
+        "cumulative_rates": cumulative_rates,
+        "value_series": {**numeric_series, **binary_series},
+        "moving_averages": moving_averages,
+    }
 
 
 class Evaluator:
@@ -102,6 +196,7 @@ class Evaluator:
             "evidence_exact_match": [],
         }
         results = []
+        sample_metrics: List[Dict[str, Any]] = []
 
         total_samples = len(claims)
         for idx, claim in enumerate(claims, start=1):
@@ -211,6 +306,26 @@ class Evaluator:
                     "polarity_conflict": chirality.polarity_conflict,
                 }
             results.append(record)
+            sample_metrics.append(
+                {
+                    "claim_id": claim["id"],
+                    "index": idx,
+                    "timestamp": _iso_now(),
+                    "schema_valid": validation.schema_valid,
+                    "citation_valid": validation.citation_valid,
+                    "entailment_score": validation.entailment_score,
+                    "entailment_pass": validation.entailment_pass,
+                    "semantic_similarity": validation.semantic_similarity,
+                    "similarity_pass": validation.similarity_pass,
+                    "paraphrase_accepted": validation.paraphrase_accepted,
+                    "overall_pass": validation.overall_pass,
+                    "beta1": graph_stats.beta1,
+                    "chirality_score": chirality.chirality_score if chirality else None,
+                    "fisher_rao_distance": chirality.fisher_rao_distance if chirality else None,
+                    "evidence_overlap": chirality.evidence_overlap if chirality else evidence_overlap,
+                    "chirality_polarity_conflict": bool(graph_stats.polarity_conflict),
+                }
+            )
             chirality_score = chirality.chirality_score if chirality else 0.0
             print(
                 f"[eval]   finished sample {idx}/{total_samples} "
@@ -266,6 +381,10 @@ class Evaluator:
             sum(metrics["fisher_rao_distances"]) / len(metrics["fisher_rao_distances"])
             if metrics["fisher_rao_distances"] else 0.0
         )
+        metrics["std_entailment_score"] = pstdev(metrics["entailment_scores"]) if len(metrics["entailment_scores"]) >= 2 else 0.0
+        metrics["std_semantic_similarity"] = (
+            pstdev(metrics["similarity_scores"]) if len(metrics["similarity_scores"]) >= 2 else 0.0
+        )
 
         # Print metrics aligned with AGENTS.md Section 1.1
         print("\n" + "=" * 80, flush=True)
@@ -290,6 +409,9 @@ class Evaluator:
         print(f"C1 Exact Match:        {metrics['c1_exact_match_rate_LEGACY']:.1%}", flush=True)
         print(f"Evidence Exact Match:  {metrics['evidence_exact_match_avg_LEGACY']:.1%}", flush=True)
         print("=" * 80 + "\n", flush=True)
+
+        metrics["per_sample_metrics"] = sample_metrics
+        metrics["series"] = build_evaluation_series(sample_metrics)
 
         return metrics
 

@@ -534,6 +534,11 @@ class TestBatchProcessing:
 
         assert summary["total_records"] == 3
         assert summary["flagged_records"] == 2
+        assert summary["severity_breakdown"]["HIGH"] == 1
+        assert summary["severity_breakdown"]["MEDIUM"] == 1
+        assert summary["issue_breakdown"]["CITATION_INVALID"] == 1
+        # Two WEAK_ENTAILMENT issues: the citation-invalid flag also logs weak entailment, plus the standalone weak case.
+        assert summary["issue_breakdown"]["WEAK_ENTAILMENT"] == 2
 
         # Read all flags
         flags = []
@@ -591,6 +596,9 @@ class TestBatchProcessing:
 
         assert summary["total_records"] == 50
         assert summary["flagged_records"] == 46  # 92% flagging rate
+        assert summary["flag_rate"] == pytest.approx(46 / 50)
+        assert summary["severity_breakdown"]["HIGH"] == 2
+        assert summary["severity_breakdown"]["MEDIUM"] == 44
 
         # Count severities
         flags = []

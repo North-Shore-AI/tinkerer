@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "manifest_path": "artifacts/eval/eval_20251119T023617.442984Z/manifest.json",
+      "run_id": "eval_20251119T023617.442984Z",
+      "stage": "eval",
+      "timestamp": "2025-11-19T02:36:17.442984Z"
+    },
+    {
+      "manifest_path": "artifacts/train/train_20251119T023450.901865Z/manifest.json",
+      "run_id": "train_20251119T023450.901865Z",
+      "stage": "train",
+      "timestamp": "2025-11-19T02:34:50.901865Z"
+    },
+    {
+      "manifest_path": "artifacts/eval/eval_20251119T001046.626748Z/manifest.json",
+      "run_id": "eval_20251119T001046.626748Z",
+      "stage": "eval",
+      "timestamp": "2025-11-19T00:10:46.626748Z"
+    },
+    {
+      "manifest_path": "artifacts/train/train_20251119T000443.080331Z/manifest.json",
+      "run_id": "train_20251119T000443.080331Z",
+      "stage": "train",
+      "timestamp": "2025-11-19T00:04:43.080331Z"
+    },
+    {
+      "manifest_path": "artifacts/eval/eval_20251118T234858.414262Z/manifest.json",
+      "run_id": "eval_20251118T234858.414262Z",
+      "stage": "eval",
+      "timestamp": "2025-11-18T23:48:58.414262Z"
+    }
+  ]
+}

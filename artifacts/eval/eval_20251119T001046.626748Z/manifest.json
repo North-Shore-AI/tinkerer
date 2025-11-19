@@ -1,0 +1,73 @@
+{
+  "payload": {
+    "backend": "tinker",
+    "config_file": "thinker/configs/pipeline_scifact_limited.yaml",
+    "metrics": {
+      "beta1_nonzero": 1,
+      "beta1_nonzero_rate": 0.2,
+      "beta1_values": [
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "c1_exact_match": 0,
+      "c1_exact_match_rate_LEGACY": 0.0,
+      "chirality_scores": [
+        0.5840775181132627,
+        0.8252030592579886,
+        0.5766071569995527,
+        0.5826780163920001,
+        0.5772699105631653
+      ],
+      "citation_accuracy_rate": 1.0,
+      "citation_valid": 5,
+      "entailment_pass": 3,
+      "entailment_pass_rate": 0.6,
+      "entailment_scores": [
+        0.999599277973175,
+        0.09654898941516876,
+        0.0,
+        0.7707005143165588,
+        0.9812497496604919
+      ],
+      "evidence_exact_match": [
+        0.0
+      ],
+      "evidence_exact_match_avg_LEGACY": 0.0,
+      "fisher_rao_distances": [
+        36.68256759643555,
+        23.196533203125,
+        24.64887046813965,
+        33.638065338134766,
+        25.396728515625
+      ],
+      "mean_beta1": 0.4,
+      "mean_chirality_score": 0.6291671322651939,
+      "mean_entailment_score": 0.5696197062730789,
+      "mean_fisher_rao_distance": 28.712553024291992,
+      "mean_semantic_similarity": 0.2175607956945896,
+      "overall_pass": 3,
+      "overall_pass_rate": 0.6,
+      "paraphrase_acceptance_rate": 0.6,
+      "paraphrase_accepted": 3,
+      "schema_compliance_rate": 0.4,
+      "schema_valid": 2,
+      "semantic_similarity_rate": 0.0,
+      "similarity_pass": 0,
+      "similarity_scores": [
+        0.03750540688633919,
+        0.0,
+        0.0,
+        0.4576214551925659,
+        0.592677116394043
+      ],
+      "total": 5
+    },
+    "output_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/thinker_eval/scifact_dev_eval_limited.jsonl"
+  },
+  "run_id": "eval_20251119T001046.626748Z",
+  "stage": "eval",
+  "timestamp": "2025-11-19T00:10:46.626748Z"
+}

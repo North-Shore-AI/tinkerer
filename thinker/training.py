@@ -23,7 +23,7 @@ class TrainingBackend:
 @dataclass
 class TrainingReport:
     checkpoint_dir: Path
-    metrics: Dict[str, float]
+    metrics: Dict[str, Any]
     backend: str
 
 
@@ -482,8 +482,46 @@ class TinkerScriptTrainer(TrainingBackend):
                 except Exception as exc:  # noqa: BLE001
                     adapter_metrics["manifest_error"] = str(exc)
 
+        training_report = self._load_latest_training_report()
+        if training_report:
+            report_path = training_report.pop("__path__", None)
+            adapter_metrics["training_report"] = training_report
+            if report_path:
+                adapter_metrics["training_report_path"] = report_path
+            final_loss = training_report.get("final_loss")
+            if final_loss is not None:
+                adapter_metrics["final_loss"] = final_loss
+            step_metrics = training_report.get("step_metrics")
+            if step_metrics:
+                adapter_metrics["step_metrics"] = step_metrics
+
         return TrainingReport(
             checkpoint_dir=Path(),
             metrics=adapter_metrics,
             backend="tinker",
         )
+
+    def _load_latest_training_report(self) -> Dict[str, Any] | None:
+        log_dir = self.config.log_dir
+        if not log_dir:
+            return None
+        log_dir = log_dir.resolve()
+        if not log_dir.exists():
+            return None
+        try:
+            candidates = sorted(
+                log_dir.glob("train_*.json"),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+        except FileNotFoundError:
+            return None
+        for candidate in candidates:
+            try:
+                with candidate.open("r", encoding="utf-8") as fh:
+                    data = json.load(fh)
+                data["__path__"] = str(candidate)
+                return data
+            except Exception:  # noqa: BLE001
+                continue
+        return None

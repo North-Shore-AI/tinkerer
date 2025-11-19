@@ -1,0 +1,33 @@
+experiment_name: claim-extractor-scifact-micro
+
+data:
+  train_path: data/processed/scifact_claim_extractor_clean.jsonl
+  eval_path: data/raw/scifact/claims_dev.jsonl
+  max_samples: 15  # restrict to 15 examples for smoke testing
+  shuffle: false
+  batch_size: 5
+
+model:
+  base_model: "meta-llama/Llama-3.1-8B-Instruct"
+  adapter_name: "claim-extractor-scifact-micro"
+  lora:
+    r: 16
+    alpha: 32
+    dropout: 0.05
+
+optimization:
+  learning_rate: 2.0e-4
+  weight_decay: 0.0
+  gradient_clip: 1.0
+  epochs: 3
+
+training:
+  cns_claim_evidence_weight: 3.0
+  citation_validity_weight: 2.0
+  validate_citations_during_training: true
+
+logging:
+  eval_every_steps: 5
+  save_every_steps: 10
+  wandb_project: null
+  notes: "Micro training config (5 samples, 1 epoch) for rapid smoke tests."

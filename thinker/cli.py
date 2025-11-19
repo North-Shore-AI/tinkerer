@@ -13,12 +13,22 @@ from typing import Optional
 from . import __version__ as THINKER_VERSION
 from .antagonist import AntagonistConfig, AntagonistRunner
 from .config import PipelineConfig, load_pipeline_config
-from .pipeline import ThinkerPipeline
 from .data import run_data_setup
+from .metrics import emit as emit_metrics
+from .pipeline import ThinkerPipeline
 
 
 def _default_config_path() -> Path:
     return Path(__file__).resolve().parent / "configs" / "pipeline_scifact.yaml"
+
+
+def _resolve_repo_root(config_path: Path) -> Path:
+    resolved = config_path.resolve()
+    parents = resolved.parents
+    try:
+        return parents[2]
+    except IndexError:
+        return resolved.parent
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -340,6 +350,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     pipeline = _load_pipeline(args.config)
+    repo_root = _resolve_repo_root(args.config)
 
     try:
         if args.command == "info":
@@ -348,14 +359,89 @@ def main(argv: Optional[list[str]] = None) -> int:
             manifest_path = _resolve_manifest_path(args.config, pipeline.config, args.path)
             _print_manifest(manifest_path)
         elif args.command == "validate":
-            pipeline.validate()
+            summary = pipeline.validate()
+            emit_metrics(
+                stage="validate",
+                payload={
+                    "config_file": str(args.config),
+                    "result": summary,
+                },
+                project_root=repo_root,
+            )
         elif args.command == "train":
-            pipeline.train(backend=args.backend, skip_validation=args.skip_validation)
+            report = pipeline.train(backend=args.backend, skip_validation=args.skip_validation)
+            train_cfg = pipeline.config.training
+            payload = {
+                "config_file": str(args.config),
+                "requested_backend": args.backend,
+                "configured_backend": train_cfg.backend if train_cfg else None,
+                "config_path": str(train_cfg.config_path) if train_cfg else None,
+            }
+            if report:
+                payload.update(
+                    {
+                        "status": "completed",
+                        "backend": report.backend,
+                        "checkpoint_dir": str(report.checkpoint_dir),
+                        "metrics": report.metrics,
+                    }
+                )
+            else:
+                payload["status"] = "skipped"
+            emit_metrics(stage="train", payload=payload, project_root=repo_root)
         elif args.command == "eval":
             metrics = pipeline.evaluate(skip_validation=args.skip_validation)
+            eval_cfg = pipeline.config.evaluation
+            emit_metrics(
+                stage="eval",
+                payload={
+                    "config_file": str(args.config),
+                    "output_path": str(eval_cfg.output_path) if eval_cfg else None,
+                    "backend": eval_cfg.backend if eval_cfg else None,
+                    "metrics": metrics,
+                },
+                project_root=repo_root,
+            )
             print(f"[thinker] eval metrics: {metrics}")
         elif args.command == "run":
-            metrics = pipeline.run(backend=args.backend)
+            validate_result = pipeline.validate()
+            emit_metrics(
+                stage="validate",
+                payload={"config_file": str(args.config), "result": validate_result},
+                project_root=repo_root,
+            )
+            report = pipeline.train(backend=args.backend, skip_validation=True)
+            train_cfg = pipeline.config.training
+            run_train_payload = {
+                "config_file": str(args.config),
+                "requested_backend": args.backend,
+                "configured_backend": train_cfg.backend if train_cfg else None,
+                "config_path": str(train_cfg.config_path) if train_cfg else None,
+            }
+            if report:
+                run_train_payload.update(
+                    {
+                        "status": "completed",
+                        "backend": report.backend,
+                        "checkpoint_dir": str(report.checkpoint_dir),
+                        "metrics": report.metrics,
+                    }
+                )
+            else:
+                run_train_payload["status"] = "skipped"
+            emit_metrics(stage="train", payload=run_train_payload, project_root=repo_root)
+            metrics = pipeline.evaluate(skip_validation=True)
+            eval_cfg = pipeline.config.evaluation
+            emit_metrics(
+                stage="eval",
+                payload={
+                    "config_file": str(args.config),
+                    "output_path": str(eval_cfg.output_path) if eval_cfg else None,
+                    "backend": eval_cfg.backend if eval_cfg else None,
+                    "metrics": metrics,
+                },
+                project_root=repo_root,
+            )
             print(f"[thinker] run metrics: {metrics}")
         elif args.command == "antagonist":
             eval_cfg = pipeline.config.evaluation
@@ -377,11 +463,25 @@ def main(argv: Optional[list[str]] = None) -> int:
                     evidence_overlap_threshold=args.evidence_overlap_threshold,
                 )
             )
-            runner.run()
+            summary = runner.run()
+            emit_metrics(
+                stage="antagonist",
+                payload={
+                    "config_file": str(args.config),
+                    "summary": summary,
+                    "thresholds": {
+                        "chirality": args.chirality_threshold,
+                        "high_chirality": args.high_chirality_threshold,
+                        "entailment": args.entailment_threshold,
+                        "evidence_overlap": args.evidence_overlap_threshold,
+                    },
+                },
+                project_root=repo_root,
+            )
         elif args.command == "data":
             if args.data_command == "setup":
                 clean_output = None if args.no_clean_output else args.clean_output
-                run_data_setup(
+                summary = run_data_setup(
                     dataset=args.dataset,
                     claims_path=args.claims_json,
                     corpus_path=args.corpus_json,
@@ -395,6 +495,15 @@ def main(argv: Optional[list[str]] = None) -> int:
                     skip_validation=args.skip_validation,
                     validation_mode=args.validation_mode,
                     similarity_threshold=args.similarity_threshold,
+                )
+                emit_metrics(
+                    stage="data_setup",
+                    payload={
+                        "config_file": str(args.config),
+                        "dataset": args.dataset,
+                        "result": summary,
+                    },
+                    project_root=repo_root,
                 )
             else:
                 parser.error("Unknown data subcommand")

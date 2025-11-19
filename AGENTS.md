@@ -125,7 +125,7 @@ These agents ensure the core pipeline is reproducible and review-ready even befo
 
 - **Role:** Enforce ADR‑0002 "test-before-GPU" gate.  
 - **Mechanics:** Thinker CLI `validate` stage running CNS pytest suite + JSONL validator (`thinker/validation.py`).  
-- **Runbook:** `thinker.sh` recommends **5 (data setup) → 1 (validate)** prior to any training/eval.  
+- **Runbook:** `thinker.sh` recommends **10 (data setup) → 1 (validate) → 2/3/4 (train) → 5/6 (eval)** prior to any evaluation/antagonist run. Option 17 launches the dashboard server; option 18 opens the dashboard manager.
 - **KPIs:** Validation pass/fail, dataset SHA256 lineage, pytest coverage.
 
 ---
@@ -149,7 +149,7 @@ These agents ensure the core pipeline is reproducible and review-ready even befo
   - Calls Tinker sampling API using latest manifest.  
   - Parses CLAIM/RELATION outputs, enforces `CLAIM[c1]` canonicalization, computes fuzzy similarity + semantic evidence checks.  
   - Writes JSONL under `runs/thinker_eval/`.  
-- **Next Steps:** Plug in critic scores (Grounding/Logic/Novelty) once available, add exact-match vs. paraphrase dashboards, expose semantic similarity metrics to avoid over-reliance on strict string match.
+- **Next Steps:** Plug in critic scores (Grounding/Logic/Novelty) once available, expand the dashboard telemetry (training/eval detail charts, limited-run micro config), expose semantic similarity metrics to avoid over-reliance on strict string match.
 
 ---
 

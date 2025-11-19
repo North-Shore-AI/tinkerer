@@ -48,9 +48,9 @@ def run_data_setup(
     skip_validation: bool,
     validation_mode: str,
     similarity_threshold: float,
-) -> None:
+) -> dict:
     if dataset == "scifact":
-        _setup_scifact(
+        return _setup_scifact(
             claims_path=claims_path,
             corpus_path=corpus_path,
             output_path=output_path,
@@ -61,7 +61,7 @@ def run_data_setup(
             similarity_threshold=similarity_threshold,
         )
     elif dataset == "fever":
-        _setup_fever(
+        return _setup_fever(
             claims_path=fever_claims,
             wiki_dir=fever_wiki_dir,
             output_path=fever_output,
@@ -81,7 +81,7 @@ def _setup_scifact(
     skip_validation: bool,
     validation_mode: str,
     similarity_threshold: float,
-) -> None:
+) -> dict:
     claims_path = claims_path.resolve()
     corpus_path = corpus_path.resolve()
     output_path = output_path.resolve()
@@ -99,36 +99,48 @@ def _setup_scifact(
     else:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    clean_output = clean_output.resolve() if clean_output else None
-    if skip_validation and clean_output is None:
-        return
-    validator = SCRIPTS_ROOT / "validate_dataset.py"
-    cmd = [
+    clean_output_path = clean_output.resolve() if clean_output else None
+    validation_executed = not (skip_validation and clean_output_path is None)
+    if validation_executed:
+        validator = SCRIPTS_ROOT / "validate_dataset.py"
+        cmd = [
             sys.executable,
             str(validator),
             str(output_path),
             "--claims-json",
             str(claims_path),
         ]
-    if validation_mode == "embedding":
-        cmd.extend(
-            [
-                "--corpus-json",
-                str(corpus_path),
-                "--evidence-mode",
-                "embedding",
-                "--similarity-threshold",
-                str(similarity_threshold),
-            ]
-        )
-    else:
-        cmd.extend(["--evidence-mode", "exact"])
-    if clean_output:
-        clean_output.parent.mkdir(parents=True, exist_ok=True)
-        cmd.extend(["--write-clean", str(clean_output)])
-        if filter_invalid:
-            cmd.append("--filter-invalid")
-    run(cmd, cwd=REPO_ROOT)
+        if validation_mode == "embedding":
+            cmd.extend(
+                [
+                    "--corpus-json",
+                    str(corpus_path),
+                    "--evidence-mode",
+                    "embedding",
+                    "--similarity-threshold",
+                    str(similarity_threshold),
+                ]
+            )
+        else:
+            cmd.extend(["--evidence-mode", "exact"])
+        if clean_output_path:
+            clean_output_path.parent.mkdir(parents=True, exist_ok=True)
+            cmd.extend(["--write-clean", str(clean_output_path)])
+            if filter_invalid:
+                cmd.append("--filter-invalid")
+        run(cmd, cwd=REPO_ROOT)
+
+    return {
+        "dataset": "scifact",
+        "claims_path": str(claims_path),
+        "corpus_path": str(corpus_path),
+        "output_path": str(output_path),
+        "clean_output_path": str(clean_output_path) if clean_output_path else None,
+        "filter_invalid": filter_invalid,
+        "validation_mode": validation_mode,
+        "similarity_threshold": similarity_threshold,
+        "validation_executed": validation_executed,
+    }
 
 
 def _ensure_exists(path: Path, description: str) -> Path:
@@ -143,7 +155,7 @@ def _setup_fever(
     wiki_dir: Path,
     output_path: Path,
     include_nei: bool,
-) -> None:
+) -> dict:
     if not claims_path.exists() or not wiki_dir.exists():
         run_fever_download()
     claims_path = _ensure_exists(claims_path.resolve(), "FEVER claims file")
@@ -163,6 +175,13 @@ def _setup_fever(
     if include_nei:
         cmd.append("--include-nei")
     run(cmd, cwd=REPO_ROOT)
+    return {
+        "dataset": "fever",
+        "claims_path": str(claims_path),
+        "wiki_dir": str(wiki_dir),
+        "output_path": str(output_path),
+        "include_nei": include_nei,
+    }
 
 
 def run_fever_download() -> None:

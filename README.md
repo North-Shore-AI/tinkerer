@@ -43,7 +43,14 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    ```
    Export `TINKER_API_KEY=sk_live_xxx` before running any Tinker-backed commands.
 
-   **Helper CLI:** `./thinker.sh` bootstraps the virtualenv, installs `requirements.txt`, and exposes a menu for the common flows (data setup, validate, train, eval, run, debug) plus diagnostics like **Info** and **Manifest**. Run it from the repo root for a guided workflow.
+   **Helper CLI:** `./thinker.sh` bootstraps the virtualenv, installs `requirements.txt`, and exposes a menu for the common flows:
+   - 1: Validate – runs pytest + dataset validator (SciFact config)
+   - 2/3: Train – HF PEFT or full Tinker config
+   - 4: Train (micro Tinker config – 15 samples, 3 epochs for fast telemetry)
+   - 5/6: Evaluate – full or limited (5-sample) configs
+   - 8/9: Antagonist + combined pipeline shortcuts
+   - 16/17/18: Custom command, dashboard server launcher, dashboard manager
+   Run it from the repo root whenever you want an interactive workflow. Options print the exact commands they run in case you need to reproduce them manually.
 
    **Diagnostics (standalone):**
    ```bash
@@ -65,22 +72,30 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    python -m thinker.cli --config thinker/configs/pipeline_scifact.yaml validate
    ```
    This runs the CNS pytest suite plus dataset validation (exact or embedding based on the config).
-4. **Training**
+4. **Training (CLI or `thinker.sh`)**
    ```bash
    # Local smoke run (requires GPU on this machine or a cheap GPU VM)
    python -m thinker.cli train --backend hf_peft
 
    # Full remote run on Tinker (requires TINKER_API_KEY)
    python -m thinker.cli train --backend tinker
+
+   # Micro Tinker run (15 samples, 3 epochs) for fast telemetry smoke tests
+   python -m thinker.cli --config thinker/configs/pipeline_scifact_micro.yaml train --backend tinker
    ```
    Tinker runs log provenance JSON under `runs/` and refresh `runs/latest_tinker_adapter.json` with the newest adapter name/path so downstream commands know which checkpoint to sample.
-5. **Evaluation**
+5. **Evaluation (CLI or `thinker.sh`)**
    ```bash
    python -m thinker.cli eval
    ```
    Evaluation now talks to Tinker directly: Thinker loads the tokenizer via the API, samples from the adapter recorded in `runs/latest_tinker_adapter.json`, and writes metrics/completions to `runs/thinker_eval/…`. No Hugging Face download is required as long as the manifest exists (created automatically by every Tinker training run). To override the adapter, set `evaluation.tinker_adapter_*` in the pipeline config or drop a custom manifest file in `runs/`.
    - **Live progress:** per-sample logging now prints `sample N/50 | entailment | β₁ | chirality` so long evaluations show a visible heartbeat.
    - **Latest snapshot (2025‑11‑18, adapter `claim-extractor-scifact-20251118T173307`):** schema 100%, citation 96%, mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%. Topology logging (from `logic/betti.py` + `metrics/chirality.py`) reported β₁=0 across 50 samples with mean chirality 0.561 and mean Fisher-Rao distance 16.75. Full artifacts live at `runs/thinker_eval/scifact_dev_eval.jsonl`.
+   - **Need a 5-sample smoke test?** Use the lightweight config from [`docs/LIMITED_RUN.md`](docs/LIMITED_RUN.md):
+     ```bash
+     python -m thinker.cli eval --config thinker/configs/pipeline_scifact_limited.yaml --skip-validation
+     ```
+     This streams only five claims and writes outputs to `runs/thinker_eval/scifact_dev_eval_limited.jsonl` so full-length evaluation artifacts stay untouched.
 6. **Antagonist heuristics**
    ```bash
    python -m thinker.cli antagonist
@@ -108,6 +123,31 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    ```
 
 Use the `.gitignore`d `runs/` directory for local artifacts; only promote curated summaries into tracked notes or issues.
+
+8. **Ad-hoc dashboard server**
+   ```bash
+   python scripts/serve_dashboard.py --venv .venv --port 43117
+   ```
+   The helper prints the listening URL and launches the pure-Python HTTP server defined in `dashboard/server.py`. It serves the contents of `dashboard_data/index.json`, exposes raw manifests at `/manifest?run_id=<id>`, and now renders inline charts for **training**, **evaluation**, and **antagonist** telemetry:
+   - Multi-run overview charts blend final loss, citation invalid rate, semantic scores, and flag rates.
+   - Per-run detail views let you toggle per-step vs. cumulative training curves, choose evaluation metrics (entailment, similarity, chirality, etc.), and inspect antagonist severities plus a sortable flag table.
+   - Raw JSON snapshots sit behind a collapsible `<details>` element for quick debugging without leaving the page.
+
+   **Telemetry quickstart (micro pipeline):**
+   1. `./thinker.sh` → option **4** (micro Tinker train) — emits multi-step telemetry with timestamps, loss, and citation invalid rates each batch.
+   2. `./thinker.sh` → option **6** (micro eval) — writes per-sample semantic scores, β₁, chirality, and cumulative series into the evaluation manifest.
+   3. `python -m thinker.cli antagonist` — ingests the evaluation JSONL, emits flag telemetry (timestamps + metrics), and records severity/issue breakdowns.
+   4. `python scripts/serve_dashboard.py --venv .venv --port 43117` — refresh the dashboard to see the new run IDs listed. Use the dropdowns to inspect per-run curves.
+
+   All telemetry is written under `artifacts/<stage>/<run_id>/manifest.json` and indexed in `dashboard_data/index.json` so historical runs stay queryable even after you restart the server.
+
+   Need start/stop control and live logs from the same terminal? Launch the menu-driven wrapper:
+   ```bash
+   python scripts/dashboard_manager.py
+   ```
+   - Option 1: Start server (`scripts/serve_dashboard.py`) and stream logs inline.
+   - Options 2/3/4: Stop, restart, or kill the server without leaving the menu.
+   - Option 5: Status (PID + listening URL).
 
 ## Evaluation: 4-Stage Semantic Validation (2025-11-11 Update)
 

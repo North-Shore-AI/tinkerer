@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from .config import PipelineConfig
 from .evaluation import Evaluator
@@ -27,10 +27,23 @@ class ThinkerPipeline:
         self.config = config
         self.state = PipelineState()
 
-    def validate(self) -> None:
+    def validate(self) -> Dict[str, Any]:
+        summary: Dict[str, Any] = {"tests": None, "data_validation": None}
         tests_cfg = self.config.tests
         if tests_cfg and tests_cfg.enabled:
             TestSuiteRunner(tests_cfg).run()
+            summary["tests"] = {
+                "status": "passed",
+                "path": str(tests_cfg.path),
+                "markers": tests_cfg.markers,
+                "args": tests_cfg.args,
+            }
+        elif tests_cfg:
+            summary["tests"] = {
+                "status": "skipped",
+                "enabled": False,
+                "path": str(tests_cfg.path),
+            }
 
         validation_cfg = self.config.data_validation
         if validation_cfg and validation_cfg.enabled:
@@ -38,15 +51,31 @@ class ThinkerPipeline:
             if not result.is_valid:
                 errors = "\n".join(result.errors[:10])
                 raise ValueError(f"Dataset validation failed for {result.path}:\n{errors}")
+            summary["data_validation"] = {
+                "status": "passed",
+                "path": str(result.path),
+                "total_examples": result.total_examples,
+                "evidence_mode": validation_cfg.evidence_mode,
+                "similarity_threshold": validation_cfg.similarity_threshold,
+                "schema_fields": len(validation_cfg.schema),
+                "require_relations": validation_cfg.require_relations,
+            }
+        elif validation_cfg:
+            summary["data_validation"] = {
+                "status": "skipped",
+                "enabled": False,
+                "path": str(validation_cfg.path),
+            }
 
         self.state.validation_ran = True
+        return summary
 
-    def train(self, backend: Optional[str] = None, skip_validation: bool = False) -> None:
+    def train(self, backend: Optional[str] = None, skip_validation: bool = False) -> TrainingReport | None:
         if not skip_validation:
             self._ensure_validation()
         train_cfg = self.config.training
         if not train_cfg or not train_cfg.enabled:
-            return
+            return None
 
         backend_cfg = train_cfg
         if backend is not None and backend != train_cfg.backend:
@@ -62,6 +91,7 @@ class ThinkerPipeline:
             if manifest_path:
                 self.state.tinker_adapter_manifest = Path(manifest_path)
             self.state.tinker_base_model = report.metrics.get("base_model")
+        return report
 
     def evaluate(self, skip_validation: bool = False) -> dict:
         if not skip_validation:

@@ -240,6 +240,7 @@ def main() -> None:
     last_loss = None
     total_citations_validated = 0
     total_citations_invalid = 0
+    step_metrics: list[dict] = []
     print("[init] Entering training loop...", flush=True)
     print(f"[init] Citation validation enabled with penalty weight={CITATION_VALIDITY_WEIGHT}", flush=True)
     warned_missing_inline_eval = False
@@ -319,6 +320,38 @@ def main() -> None:
                     f"({total_citations_invalid}/{total_citations_validated})"
                 )
 
+            citation_invalid_rate = total_citations_invalid / max(total_citations_validated, 1)
+            sanitized_metrics: dict[str, float] = {}
+            for metric_key, metric_value in (fwdbwd_result.metrics or {}).items():
+                safe_key = metric_key.replace(":", "_")
+                sanitized_metrics[safe_key] = _scalar(metric_value)
+
+            num_tokens = sanitized_metrics.get("num_tokens") or sanitized_metrics.get("num_tokens_mean")
+            grad_norm = (
+                sanitized_metrics.get("grad_l2_norm")
+                or sanitized_metrics.get("grad_l2_norm_mean")
+                or sanitized_metrics.get("grad_norm")
+            )
+
+            step_metrics.append(
+                {
+                    "epoch": epoch + 1,
+                    "step": step,
+                    "global_step": step,
+                    "total_steps": total_steps,
+                    "loss": float(loss),
+                    "citation_invalid_rate": citation_invalid_rate,
+                    "total_citations_invalid": total_citations_invalid,
+                    "total_citations_validated": total_citations_validated,
+                    "batch_size": len(batch),
+                    "num_tokens": num_tokens,
+                    "gradient_norm": grad_norm,
+                    "learning_rate": opt_cfg["learning_rate"],
+                    "timestamp": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+                    "tinker_metrics": sanitized_metrics,
+                }
+            )
+
             eval_every = log_cfg.get("eval_every_steps")
             if eval_every and inline_eval_supported and step % eval_every == 0:
                 sample_future = training_client.sample(
@@ -382,6 +415,7 @@ def main() -> None:
                 "invalid_rate": total_citations_invalid / max(total_citations_validated, 1),
                 "penalty_weight": CITATION_VALIDITY_WEIGHT,
             },
+            "step_metrics": step_metrics,
         }
         log_path = args.log_dir / f"train_{model_cfg['adapter_name']}_{now_utc.strftime('%Y%m%dT%H%M%SZ')}.json"
         with log_path.open("w", encoding="utf-8") as fh:

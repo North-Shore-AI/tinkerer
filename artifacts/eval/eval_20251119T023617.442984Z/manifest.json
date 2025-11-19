@@ -1,0 +1,309 @@
+{
+  "payload": {
+    "backend": "tinker",
+    "config_file": "thinker/configs/pipeline_scifact_limited.yaml",
+    "metrics": {
+      "beta1_nonzero": 0,
+      "beta1_nonzero_rate": 0.0,
+      "beta1_values": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "c1_exact_match": 0,
+      "c1_exact_match_rate_LEGACY": 0.0,
+      "chirality_scores": [
+        0.8332160274440079,
+        0.5819712875092401,
+        0.5800518089044097,
+        0.8307022592516773,
+        0.5755769702125849
+      ],
+      "citation_accuracy_rate": 1.0,
+      "citation_valid": 5,
+      "entailment_pass": 3,
+      "entailment_pass_rate": 0.6,
+      "entailment_scores": [
+        0.002022581873461604,
+        0.9906007051467896,
+        0.6320532560348511,
+        0.9909181594848633,
+        0.9829577803611755
+      ],
+      "evidence_exact_match": [
+        0.5,
+        0.25
+      ],
+      "evidence_exact_match_avg_LEGACY": 0.375,
+      "fisher_rao_distances": [
+        34.748390197753906,
+        32.28024673461914,
+        29.07791519165039,
+        30.09172248840332,
+        23.56697654724121
+      ],
+      "mean_beta1": 0.0,
+      "mean_chirality_score": 0.680303670664384,
+      "mean_entailment_score": 0.7197104965802282,
+      "mean_fisher_rao_distance": 29.953050231933595,
+      "mean_semantic_similarity": 0.3282931387424469,
+      "overall_pass": 3,
+      "overall_pass_rate": 0.6,
+      "paraphrase_acceptance_rate": 0.6,
+      "paraphrase_accepted": 3,
+      "per_sample_metrics": [
+        {
+          "beta1": 0,
+          "chirality_polarity_conflict": true,
+          "chirality_score": 0.8332160274440079,
+          "citation_valid": true,
+          "claim_id": 1,
+          "entailment_pass": false,
+          "entailment_score": 0.002022581873461604,
+          "evidence_overlap": 1.0,
+          "fisher_rao_distance": 34.748390197753906,
+          "index": 1,
+          "overall_pass": false,
+          "paraphrase_accepted": false,
+          "schema_valid": true,
+          "semantic_similarity": 0.0,
+          "similarity_pass": false,
+          "timestamp": "2025-11-19T02:35:28.285873Z"
+        },
+        {
+          "beta1": 0,
+          "chirality_polarity_conflict": false,
+          "chirality_score": 0.5819712875092401,
+          "citation_valid": true,
+          "claim_id": 3,
+          "entailment_pass": true,
+          "entailment_score": 0.9906007051467896,
+          "evidence_overlap": 1.0,
+          "fisher_rao_distance": 32.28024673461914,
+          "index": 2,
+          "overall_pass": true,
+          "paraphrase_accepted": true,
+          "schema_valid": true,
+          "semantic_similarity": 0.4022550880908966,
+          "similarity_pass": false,
+          "timestamp": "2025-11-19T02:35:47.009143Z"
+        },
+        {
+          "beta1": 0,
+          "chirality_polarity_conflict": false,
+          "chirality_score": 0.5800518089044097,
+          "citation_valid": true,
+          "claim_id": 5,
+          "entailment_pass": false,
+          "entailment_score": 0.6320532560348511,
+          "evidence_overlap": 1.0,
+          "fisher_rao_distance": 29.07791519165039,
+          "index": 3,
+          "overall_pass": false,
+          "paraphrase_accepted": false,
+          "schema_valid": true,
+          "semantic_similarity": 0.0,
+          "similarity_pass": false,
+          "timestamp": "2025-11-19T02:35:56.739313Z"
+        },
+        {
+          "beta1": 0,
+          "chirality_polarity_conflict": true,
+          "chirality_score": 0.8307022592516773,
+          "citation_valid": true,
+          "claim_id": 13,
+          "entailment_pass": true,
+          "entailment_score": 0.9909181594848633,
+          "evidence_overlap": 1.0,
+          "fisher_rao_distance": 30.09172248840332,
+          "index": 4,
+          "overall_pass": true,
+          "paraphrase_accepted": true,
+          "schema_valid": true,
+          "semantic_similarity": 0.4903331995010376,
+          "similarity_pass": false,
+          "timestamp": "2025-11-19T02:36:07.132111Z"
+        },
+        {
+          "beta1": 0,
+          "chirality_polarity_conflict": false,
+          "chirality_score": 0.5755769702125849,
+          "citation_valid": true,
+          "claim_id": 36,
+          "entailment_pass": true,
+          "entailment_score": 0.9829577803611755,
+          "evidence_overlap": 1.0,
+          "fisher_rao_distance": 23.56697654724121,
+          "index": 5,
+          "overall_pass": true,
+          "paraphrase_accepted": true,
+          "schema_valid": true,
+          "semantic_similarity": 0.7488774061203003,
+          "similarity_pass": true,
+          "timestamp": "2025-11-19T02:36:17.388377Z"
+        }
+      ],
+      "schema_compliance_rate": 1.0,
+      "schema_valid": 5,
+      "semantic_similarity_rate": 0.2,
+      "series": {
+        "cumulative_rates": {
+          "citation_valid": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "entailment_pass": [
+            0.0,
+            0.5,
+            0.3333333333333333,
+            0.5,
+            0.6
+          ],
+          "overall_pass": [
+            0.0,
+            0.5,
+            0.3333333333333333,
+            0.5,
+            0.6
+          ],
+          "paraphrase_accepted": [
+            0.0,
+            0.5,
+            0.3333333333333333,
+            0.5,
+            0.6
+          ],
+          "schema_valid": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "similarity_pass": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.2
+          ]
+        },
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "moving_averages": {
+          "chirality_score": [
+            0.8332160274440079,
+            0.707593657476624,
+            0.6650797079525526,
+            0.7064853457773337,
+            0.680303670664384
+          ],
+          "entailment_score": [
+            0.002022581873461604,
+            0.4963116435101256,
+            0.541558847685034,
+            0.6538986756349914,
+            0.7197104965802282
+          ],
+          "semantic_similarity": [
+            0.0,
+            0.2011275440454483,
+            0.1340850293636322,
+            0.22314707189798355,
+            0.3282931387424469
+          ]
+        },
+        "timestamps": [
+          "2025-11-19T02:35:28.285873Z",
+          "2025-11-19T02:35:47.009143Z",
+          "2025-11-19T02:35:56.739313Z",
+          "2025-11-19T02:36:07.132111Z",
+          "2025-11-19T02:36:17.388377Z"
+        ],
+        "value_series": {
+          "beta1": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "chirality_score": [
+            0.8332160274440079,
+            0.5819712875092401,
+            0.5800518089044097,
+            0.8307022592516773,
+            0.5755769702125849
+          ],
+          "citation_valid": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "entailment_score": [
+            0.002022581873461604,
+            0.9906007051467896,
+            0.6320532560348511,
+            0.9909181594848633,
+            0.9829577803611755
+          ],
+          "fisher_rao_distance": [
+            34.748390197753906,
+            32.28024673461914,
+            29.07791519165039,
+            30.09172248840332,
+            23.56697654724121
+          ],
+          "overall_pass": [
+            0,
+            1,
+            0,
+            1,
+            1
+          ],
+          "schema_valid": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "semantic_similarity": [
+            0.0,
+            0.4022550880908966,
+            0.0,
+            0.4903331995010376,
+            0.7488774061203003
+          ]
+        }
+      },
+      "similarity_pass": 1,
+      "similarity_scores": [
+        0.0,
+        0.4022550880908966,
+        0.0,
+        0.4903331995010376,
+        0.7488774061203003
+      ],
+      "std_entailment_score": 0.38444608690157145,
+      "std_semantic_similarity": 0.29126319612974483,
+      "total": 5
+    },
+    "output_path": "/home/home/p/g/North-Shore-AI/tinkerer/runs/thinker_eval/scifact_dev_eval_limited.jsonl"
+  },
+  "run_id": "eval_20251119T023617.442984Z",
+  "stage": "eval",
+  "timestamp": "2025-11-19T02:36:17.442984Z"
+}
