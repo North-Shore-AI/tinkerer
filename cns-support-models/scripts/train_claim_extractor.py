@@ -38,7 +38,7 @@ from citation_validation import validate_citations
 
 CLAIM_C1_WEIGHT = float(os.environ.get("CNS_CLAIM_C1_WEIGHT", "5.0"))
 CLAIM_EVIDENCE_WEIGHT = float(os.environ.get("CNS_CLAIM_EVIDENCE_WEIGHT", "2.0"))
-CITATION_VALIDITY_WEIGHT = float(os.environ.get("CITATION_VALIDITY_WEIGHT", "2.0"))
+CITATION_VALIDITY_WEIGHT = float(os.environ.get("CITATION_VALIDITY_WEIGHT", "5.0"))
 
 
 def sha256_file(path: Path) -> str:
