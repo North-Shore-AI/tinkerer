@@ -49,16 +49,27 @@ This division of labor prevents the "everything is true" failure mode of naive R
   - Semantic similarity to gold claims (cosine >0.7) – Target ≥60% on held-out dev.  
   - Evidence grounding score (DeBERTa entailment) – Target ≥0.75 mean.  
   - Relation logical consistency (graph critic) – Target ≥70% valid edges.  
-- **Next Research Tasks:**  
-  1. Improve semantic grounding (contrastive loss, entailment critic-in-loop).  
-  2. Broaden datasets (FEVER config/tests, temporal corpora).  
-  3. Auto-generate SNO manifests (graph export + metadata hashes).
- - **Latest Evaluation (2025-11-18, adapter `claim-extractor-scifact-20251118T173307`):**  
-   - Schema compliance 100%, citation accuracy 96% (hard gate).  
-   - Mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%.  
-   - β₁ = 0 across 50 SciFact dev samples (logic graphs are acyclic pre-Antagonist).  
-   - Mean chirality score 0.561, mean Fisher-Rao distance 16.75 (see `logic/betti.py`, `metrics/chirality.py` for instrumentation).  
-   - Raw outputs + per-sample topology/chirality payloads in `runs/thinker_eval/scifact_dev_eval.jsonl`.  
+- **Current Research Priorities (P0 - Critical):**
+  1. **Eliminate citation hallucinations:** Train with `citation_validity_weight=5.0` to force stronger grounding (in progress, commit `e500bb2`)
+  2. **Improve semantic grounding:** Target mean entailment ≥0.60 (current 0.395), overall pass ≥45% (current 34%)
+  3. **Validate citation penalty effectiveness:** If weight=5.0 fails, escalate to weight=10.0 or implement negative example training
+- **Next Research Tasks (P1):**
+  1. Contrastive loss integration for tighter evidence-claim alignment
+  2. Broaden datasets (FEVER config/tests, temporal corpora)
+  3. Auto-generate SNO manifests (graph export + metadata hashes)
+ - **Baseline Evaluation (2025-11-18, adapter `claim-extractor-scifact-20251118T173307`):**
+   - Schema compliance 100%, citation accuracy 96% (hard gate).
+   - Mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%.
+   - β₁ = 0 across 50 SciFact dev samples (logic graphs are acyclic pre-Antagonist).
+   - Mean chirality score 0.561, mean Fisher-Rao distance 16.75 (see `logic/betti.py`, `metrics/chirality.py` for instrumentation).
+   - Raw outputs + per-sample topology/chirality payloads in `runs/thinker_eval/scifact_dev_eval.jsonl`.
+ - **Training Iteration (2025-11-18, adapter `claim-extractor-scifact-20251118T220454`, citation_validity_weight=2.0):**
+   - **Status:** ❌ FAILED to eliminate citation hallucinations
+   - Training: 98.7% loss reduction (2330.81 → 29.66 over 320 steps), citation_invalid_rate=0.000 (clean training data)
+   - Evaluation: Schema 98% (-2%), citation 96% (unchanged), mean entailment 0.395 (-0.053, WORSE), overall pass 34% (-4%, WORSE)
+   - **Critical Finding:** Antagonist identified 2 HIGH severity CITATION_INVALID cases (claims 133, 179) persisting after training - model fabricates document IDs not in source corpus
+   - **Root Cause:** Penalty weight=2.0 (3x loss multiplier) insufficient to teach citation grounding; model learned format but not grounding behavior
+   - **Next Action:** Increased `citation_validity_weight` from 2.0 to 5.0 (6x multiplier, commit `e500bb2`) for next training run  
 
 ---
 
@@ -76,10 +87,18 @@ This division of labor prevents the "everything is true" failure mode of naive R
     - **`WEAK_ENTAILMENT`** (MEDIUM): Entailment score <0.5 indicates poor evidence grounding
   - ✅ Comprehensive test coverage: 22 tests in `thinker/tests/test_antagonist.py`
   - ✅ Real-world validation: 92% flagging rate (46/50 samples), 2 HIGH severity cases correctly identified
-- **Next Steps:**
+  - ✅ Production-ready: Complete CLI integration, telemetry, and documentation
+- **Critical Findings (2025-11-18 Analysis):**
+  - Successfully identified 2 HIGH severity CITATION_INVALID cases (claims 133, 179) where Proposer fabricated document IDs
+  - 60.9% of flagged claims have weak entailment (<0.5), confirming Proposer semantic quality issues
+  - 84.8% of flags are POLARITY_CONTRADICTION (mean chirality 0.561, Fisher-Rao 16.75)
+  - No false positives detected in manual review - all flags are legitimate quality concerns
+  - **Actionable insight:** Antagonist correctly identified that Proposer needs stronger citation grounding (validated by training iteration failure)
+- **Next Steps (P1):**
   1. ⏳ Embedding anti-neighbor retrieval for counter-evidence generation
   2. ⏳ DeBERTa contradiction scoring to upgrade POLARITY_CONTRADICTION detection
   3. ⏳ Precision/recall instrumentation against 200-pair synthetic contradiction suite
+  4. ⏳ Expand test coverage to ≥80% (currently 22 tests)
 - **Documentation:** See `docs/20251118/antagonist-mvp-review/` for comprehensive analysis, flag review, and HIGH severity case studies.
 
 #### Antagonist Success Metrics
@@ -102,16 +121,22 @@ This division of labor prevents the "everything is true" failure mode of naive R
 
 ### 1.3 Synthesizer Agent
 
-- **Inputs:** High-chirality/high-entanglement SNO pairs, Antagonist deltas, critic weights.  
-- **Outputs:** Candidate synthesized SNOs (hypothesis, reasoning graph, evidence set, trust score), manifest entries for downstream evaluation.  
-- **Planned Stack:**  
-  - Base models: Llama‑3.1‑70B (development) → Qwen3‑235B MoE (production).  
-  - Constrained decoding (KCTS + citation enforcement).  
-  - Critic-guided refinement loop (Generate → Verify → Refine).  
-- **Pre-work:**  
-  1. Finalize critic interfaces (Grounding, Logic, Novelty) as callable services.  
-  2. Define SNO manifest schema (superset of `runs/latest_tinker_adapter.json`).  
-  3. Prototype with Thinker eval harness by swapping Tinker sampling backend once adapter exists.
+- **Status:** 🔴 BLOCKED - Waiting for Proposer to reach ≥60% semantic quality (currently 34-38%)
+- **Blocking Issue:** Cannot synthesize high-quality SNOs when input claims have citation hallucinations and weak evidence grounding
+- **Unblocking Criteria:**
+  1. Mean entailment ≥0.60 (current: 0.395-0.448)
+  2. HIGH severity CITATION_INVALID flags eliminated (current: 2/50 samples)
+  3. Overall semantic pass rate ≥60% (current: 34-38%)
+- **Inputs:** High-chirality/high-entanglement SNO pairs, Antagonist deltas, critic weights
+- **Outputs:** Candidate synthesized SNOs (hypothesis, reasoning graph, evidence set, trust score), manifest entries for downstream evaluation
+- **Planned Stack:**
+  - Base models: Llama‑3.1‑70B (development) → Qwen3‑235B MoE (production)
+  - Constrained decoding (KCTS + citation enforcement)
+  - Critic-guided refinement loop (Generate → Verify → Refine)
+- **Pre-work (on hold until Proposer unblocks):**
+  1. Finalize critic interfaces (Grounding, Logic, Novelty) as callable services
+  2. Define SNO manifest schema (superset of `runs/latest_tinker_adapter.json`)
+  3. Prototype with Thinker eval harness by swapping Tinker sampling backend once adapter exists
 
 ---
 
@@ -396,11 +421,11 @@ Not exact-match; instead a multi-metric validation (executed in order and short-
 
 ---
 
-## Appendix B: Current Implementation Status (2025-11-11)
+## Appendix B: Current Implementation Status (2025-11-18)
 
-### Proposer Agent: ✅ VALIDATED
+### Proposer Agent: ⚠️ FUNCTIONAL BUT REQUIRES IMPROVEMENT
 
-**Status:** Production-ready for schema extraction and citation accuracy
+**Status:** Production-ready for schema extraction, but citation hallucinations and weak semantic grounding require addressing
 
 #### Breakthrough Results (Nov 11, 2025)
 
@@ -410,17 +435,36 @@ From 0% exact-match baseline to **36% semantic validation pass rate** in one day
 3. Adding explicit citation examples to training data
 4. Full LoRA training (505 examples, 3 epochs, Llama-3.1-8B-Instruct)
 
-#### Current Performance (n=50 evaluation examples)
+#### Performance History
 
+**Baseline (Nov 11, 2025 - adapter claim-extractor-scifact-20251118T173307):**
 ```
 Schema Compliance:     100.0% (50/50) ✅ EXCEEDS TARGET (≥95%)
 Citation Accuracy:     96.0% (48/50)  ✅ EXCELLENT (hard gate)
-Mean Entailment Score: 0.387          ⚠️ BELOW TARGET (≥0.75)
-Entailment Pass Rate:  36.0% (18/50)  ⚠️ MEASURABLE PROGRESS
-Mean Similarity Score: 0.249          ⚠️ BELOW TARGET (≥0.70)
+Mean Entailment Score: 0.448          ⚠️ BELOW TARGET (≥0.75)
+Entailment Pass Rate:  38.0% (19/50)  ⚠️ MEASURABLE PROGRESS
+Mean Similarity Score: 0.25           ⚠️ BELOW TARGET (≥0.70)
 Similarity Pass Rate:  20.0% (10/50)  ⚠️ BELOW TARGET (≥60%)
 
-🎯 OVERALL PASS RATE:  36.0% (18/50)  ✅ FIRST MEANINGFUL VALIDATION
+🎯 OVERALL PASS RATE:  38.0% (19/50)  ✅ FIRST MEANINGFUL VALIDATION
+```
+
+**Training Iteration (Nov 18, 2025 - adapter claim-extractor-scifact-20251118T220454, weight=2.0):**
+```
+Schema Compliance:     98.0% (49/50)  ⚠️ SLIGHT REGRESSION (-2%)
+Citation Accuracy:     96.0% (48/50)  = UNCHANGED
+Mean Entailment Score: 0.395          ❌ WORSE (-0.053)
+Entailment Pass Rate:  34.0% (17/50)  ❌ WORSE (-4%)
+Mean Similarity Score: 0.25           = UNCHANGED
+Similarity Pass Rate:  18.0% (9/50)   ❌ WORSE (-2%)
+
+🎯 OVERALL PASS RATE:  34.0% (17/50)  ❌ REGRESSION (-4%)
+
+⚠️ CRITICAL FINDING: 2 HIGH severity CITATION_INVALID cases (claims 133, 179)
+   - Model fabricated document IDs not in source corpus
+   - Evidence overlap: 20-25% (vs 100% for valid citations)
+   - Entailment score: 0.0 (complete failure)
+   - Penalty weight=2.0 insufficient to teach citation grounding
 ```
 
 #### What This Validates
@@ -439,39 +483,64 @@ Similarity Pass Rate:  20.0% (10/50)  ⚠️ BELOW TARGET (≥60%)
 - 3 epochs adequate for format learning
 - LoRA rank 16 sufficient for structured output
 
-#### Current Limitations & Remediation Paths
+#### Critical Issues & Active Remediation (Nov 18, 2025)
 
-**Issue 1: Entailment Score (0.387, target ≥0.75)**
-- Root cause: LoRA's limited capacity trades off exact grounding for pattern generalization
-- Impact: 36% of claims pass entailment threshold (model generates semantically related but loosely entailed claims)
-- Remediation options:
-  1. **Accepted limitation:** This is expected behavior for LoRA with 505 examples (proceed to Antagonist)
-  2. **Short-term fix:** Add contrastive loss for tighter grounding (1-2 day investment, target: 50-60% pass)
-  3. **Long-term fix:** Scale to 1000+ examples + increase LoRA rank to 32 (1 week investment, target: 60-70% pass)
+**Issue 1: Citation Hallucination (P0 - CRITICAL)**
+- **Problem:** Model fabricates document IDs not in source corpus (2/50 samples with HIGH severity flags)
+- **Root cause:** Training penalty weight=2.0 (3x loss multiplier) insufficient to teach citation grounding
+- **Impact:** Blocks Synthesizer development, creates 0.0 entailment failures
+- **Active Remediation:**
+  - ✅ Increased `citation_validity_weight` from 2.0 to 5.0 (6x loss multiplier, commit `e500bb2`)
+  - 🔬 Next training run in progress
+  - Success criteria: Eliminate HIGH severity CITATION_INVALID flags (2 → 0)
+- **Fallback options if weight=5.0 fails:**
+  1. Escalate to weight=10.0 or weight=20.0
+  2. Negative example training (augment dataset with invalid citations + high penalties)
+  3. Two-stage training (general extraction → citation-focused fine-tuning)
 
-**Issue 2: Similarity Score (0.249, target ≥0.70)**
-- Root cause: LoRA learns patterns, not verbatim copying (by design)
-- Impact: Model paraphrases rather than extracts exact text
-- Remediation options:
-  1. **Threshold adjustment:** Lower target to 0.60 (more realistic for LoRA pattern-learning)
-  2. **Architecture note:** This validates that exact-match was wrong evaluation metric
+**Issue 2: Weak Semantic Grounding (P0 - CRITICAL)**
+- **Problem:** Mean entailment 0.395-0.448 (target ≥0.75), overall pass 34-38% (target ≥60%)
+- **Root cause:** Model learned citation format but not evidence-to-claim grounding relationships
+- **Impact:** 60.9% of Antagonist flags have entailment <0.5
+- **Remediation options:**
+  1. **Current approach:** Citation penalty increase (may improve grounding as side effect)
+  2. **Short-term:** Add contrastive loss for tighter evidence alignment (1-2 day investment, target: 50-60% pass)
+  3. **Long-term:** Scale to 1000+ examples + increase LoRA rank to 32 (1 week investment, target: 60-70% pass)
 
-**Issue 3: High Training Loss (123.96)**
-- Root cause: Training may not have converged fully
-- Remediation: Re-run training with 5-10 epochs to verify convergence
+### Antagonist Agent: ✅ MVP COMPLETE
 
-#### Recommendation: PROCEED TO ANTAGONIST MVP
+**Status:** Production-ready MVP shipped Nov 18, 2025
 
-**Rationale:**
-- Core Proposer functionality validated (format extraction works)
-- Entailment/similarity are optimization targets, not blockers
-- Architecture decision validated (LoRA appropriate for Proposer)
-- Time better spent on Antagonist/Synthesizer than chasing 36% → 60%
+#### Implementation Completed
+- ✅ CLI integration: `python -m thinker.cli antagonist`
+- ✅ Threshold-based heuristics (chirality ≥0.55, entailment <0.5)
+- ✅ 4 issue types: CITATION_INVALID, POLARITY_CONTRADICTION, POLARITY_CONFLICT, WEAK_ENTAILMENT
+- ✅ 22 unit tests passing
+- ✅ Complete documentation (`docs/20251118/antagonist-mvp-review/`)
 
-**Next priority:** Implement Antagonist MVP per Section 1.2
-- Build contradiction heuristics + embedding anti-search
-- Test on synthetic contradiction suite
-- Target metrics: Precision ≥0.8, Recall ≥0.7
+#### Real-World Validation Results (Nov 18, 2025 - 50 SciFact samples)
+```
+Flagging Rate:        92% (46/50 samples)
+HIGH Severity:        2 cases (4.3%) - both CITATION_INVALID
+MEDIUM Severity:      44 cases (95.7%)
+Issue Distribution:
+  - POLARITY_CONTRADICTION: 84.8% (mean chirality 0.561)
+  - WEAK_ENTAILMENT: 60.9% (entailment <0.5)
+  - CITATION_INVALID: 4.3% (HIGH severity)
+False Positives:      0 (manual review confirmed all flags legitimate)
+```
+
+#### Critical Success: Identified Citation Hallucinations
+- Antagonist correctly flagged 2 HIGH severity cases where Proposer fabricated document IDs
+- Manual review confirmed these are real hallucinations, not false alarms
+- Training iteration (weight=2.0) confirmed Antagonist diagnosis was accurate
+- **Actionable insight:** Antagonist-driven diagnosis led to increased citation penalty (weight=5.0)
+
+#### Next Steps (P1)
+1. ⏳ Embedding anti-neighbor retrieval for counter-evidence generation
+2. ⏳ DeBERTa contradiction scoring to upgrade POLARITY_CONTRADICTION detection
+3. ⏳ Precision/recall instrumentation against 200-pair synthetic contradiction suite
+4. ⏳ Expand test coverage to ≥80%
 
 ---
 

@@ -4,15 +4,44 @@ This roadmap details how the Thinker framework evolves from the current validati
 
 ---
 
-## Snapshot · Where We Stand Today
+## Snapshot · Where We Stand Today (Updated 2025-11-18)
 
-- **Thinker CLI** orchestrates validation (`thinker validate`), training (`thinker train`), evaluation (`thinker eval`), and dataset bootstrap (`thinker data setup`).
+### ✅ Completed Components
+
+- **Thinker CLI** - Full orchestration for validation, training, evaluation, antagonist analysis, and data setup
+- **Tinker Backend** - ✅ COMPLETE: Production-ready integration with citation validation, manifest generation, telemetry
+- **Antagonist MVP** - ✅ COMPLETE: 92% flagging rate, 4 issue types, 22 tests, comprehensive documentation
+- **4-Stage Semantic Validation** - ✅ OPERATIONAL: Citation → Entailment → Similarity → Paraphrase
+- **Topology Instrumentation** - ✅ WORKING: β₁ (Betti numbers), chirality, Fisher-Rao distance
+- **Dashboard & Telemetry** - ✅ COMPLETE: Multi-run visualization, training/eval/antagonist charts
 - **Datasets**:
-  - SciFact helper fully automated (download + convert + validation).
-  - FEVER helper now pulls from Zenodo mirrors; conversion script supports JSONL wiki shards.
-- **Validation/TDD**: `thinker validate` runs CNS pytest suite + dataset validator (schema or embedding mode).
-- **Training/Eval**: HF PEFT backend complete; Tinker backend stub pending. Evaluation script handles SciFact metrics.
-- **Docs**: README + `docs/thinker` describe the workflow; `CONTINUATION_PROMPT.md` and this roadmap track next steps.
+  - SciFact: Fully automated (download + convert + validation)
+  - FEVER: Helper pulls from Zenodo mirrors, conversion script supports JSONL wiki shards
+
+### ⚠️ Active Critical Work (P0)
+
+- **Citation Hallucination Fix** - Training with `citation_validity_weight=5.0` to eliminate HIGH severity CITATION_INVALID cases
+  - Status: Code committed (commit `e500bb2`), training run pending
+  - Previous attempt (weight=2.0) FAILED to eliminate hallucinations
+  - Success criteria: Eliminate 2 HIGH severity flags, mean entailment ≥0.50, overall pass ≥45%
+
+### 🔴 Blocked Components
+
+- **Synthesizer Agent** - Blocked until Proposer reaches ≥60% semantic quality (currently 34-38%)
+  - Blocking issues: Citation hallucinations, weak entailment (0.395-0.448)
+  - Unblocking criteria: Mean entailment ≥0.60, HIGH severity flags eliminated
+
+### 📊 Current Metrics (Baseline: claim-extractor-scifact-20251118T173307)
+
+```
+Schema Compliance:     100% ✅
+Citation Accuracy:     96% ✅
+Mean Entailment:       0.448 ⚠️ (target ≥0.75)
+Overall Semantic Pass: 38% ⚠️ (target ≥60%)
+Antagonist Flags:      46/50 (92%), 2 HIGH severity
+β₁ (cycles):           0 across all samples
+Mean Chirality:        0.561
+```
 
 ---
 
@@ -34,19 +63,28 @@ This roadmap details how the Thinker framework evolves from the current validati
 
 ---
 
-## Phase 2 · Tinker Backend Integration
+## Phase 2 · Tinker Backend Integration ✅ COMPLETE
 
-### 2.1 Implement Tinker Trainer
-- ✅ Current shim: Thinker now shells out to `cns-support-models/scripts/train_claim_extractor.py` when `--backend tinker` is specified (pass-through config + log dir).
-- Next iteration: replace the shim with a native `TinkerTrainingBackend` that talks to `tinker.ServiceClient` directly.
+### 2.1 Implement Tinker Trainer ✅ DONE
+- ✅ Tinker backend functional via shim to `cns-support-models/scripts/train_claim_extractor.py`
+- ✅ Citation validation integrated with configurable penalty weights
+- ✅ Manifest generation (`runs/latest_tinker_adapter.json`)
+- ✅ Provenance logging to `runs/train_*.json`
+- ✅ Telemetry: loss, citation_invalid_rate, timestamps at each step
+- Future enhancement (P2): Native `TinkerTrainingBackend` using `tinker.ServiceClient` directly
 
-### 2.2 Evaluation via Tinker Sampling
-- Optionally call Tinker sampling client when local checkpoints unavailable.
-- Mirror logging: job ID, sample prompts, completions, metrics.
+### 2.2 Evaluation via Tinker Sampling ✅ DONE
+- ✅ Tinker sampling client integrated in `thinker/evaluation.py`
+- ✅ Loads tokenizer via API, samples from adapter in manifest
+- ✅ Logs job ID, sample prompts, completions, metrics
+- ✅ Per-sample topology/chirality instrumentation
+- ✅ Live progress logging (`sample N/50 | entailment | β₁ | chirality`)
 
-### 2.3 Tests
-- Mock Tinker ServiceClient to ensure Thinker builds the correct API calls.
-- Add integration test (with fakes) verifying `thinker train --backend tinker` completes on a toy dataset.
+### 2.3 Tests ✅ PARTIALLY COMPLETE
+- ✅ 22 tests for Antagonist
+- ✅ Citation validation: 29 tests
+- ✅ Integration tested via real training runs
+- ⏳ Future: Mock Tinker ServiceClient for unit tests (P2)
 
 ---
 
@@ -90,8 +128,34 @@ This roadmap details how the Thinker framework evolves from the current validati
 
 ---
 
-## Immediate Next Steps
-1. **Clean FEVER data**: delete existing raw files, rerun helper, confirm processed dataset exists (update `CONTINUATION_PROMPT.md` once confirmed).
-2. **Add FEVER config + tests**: pipeline YAML, fixtures, pytest coverage.
-3. **Begin Tinker backend work**: design training client wrapper, plan tests.
-4. **Enhance documentation**: once FEVER config is in place, update README + DATA_PIPELINE again.
+## Immediate Next Steps (2025-11-18)
+
+### P0 - Critical (This Week)
+1. **✅ DONE: Documentation updates** - README.md, AGENTS.md, ROADMAP.md updated with latest status
+2. **🔬 IN PROGRESS: Training with weight=5.0** - Eliminate citation hallucinations
+   - Run: `python -m thinker.cli train --backend tinker`
+   - Expected duration: ~17 minutes (320 steps, 5 epochs)
+   - Success criteria: 2 HIGH severity flags → 0, mean entailment ≥0.50
+3. **⏳ NEXT: Evaluate training results** - Run full evaluation + antagonist analysis
+   - `python -m thinker.cli eval`
+   - `python -m thinker.cli antagonist`
+   - Compare metrics to baseline and weight=2.0 iteration
+4. **⏳ DECISION POINT: Weight=5.0 outcome**
+   - If SUCCESS: Document results, proceed to P1 priorities
+   - If FAILURE: Escalate to weight=10.0 or implement negative example training
+
+### P1 - High Priority (Next 1-2 Weeks)
+1. **Antagonist enhancements**:
+   - Embedding anti-neighbor retrieval for counter-evidence
+   - DeBERTa contradiction scoring for POLARITY_CONTRADICTION
+   - 200-pair synthetic contradiction test suite (precision/recall)
+2. **Proposer semantic grounding**:
+   - Contrastive loss integration (if weight=5.0 insufficient)
+   - Scale to 1000+ training examples
+   - Consider LoRA rank increase (16 → 32)
+3. **FEVER dataset**: Add fixtures, tests, pipeline config
+
+### P2 - Medium Priority (Next 2-4 Weeks)
+1. **Tinker backend native implementation**: Replace shim with `TinkerTrainingBackend` using `ServiceClient` directly
+2. **Enhanced validation options**: Regex checks, numeric bounds, per-dataset defaults
+3. **Synthesizer prep** (once Proposer unblocks): Critic interfaces, SNO manifest schema

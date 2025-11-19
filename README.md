@@ -90,7 +90,9 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    ```
    Evaluation now talks to Tinker directly: Thinker loads the tokenizer via the API, samples from the adapter recorded in `runs/latest_tinker_adapter.json`, and writes metrics/completions to `runs/thinker_eval/…`. No Hugging Face download is required as long as the manifest exists (created automatically by every Tinker training run). To override the adapter, set `evaluation.tinker_adapter_*` in the pipeline config or drop a custom manifest file in `runs/`.
    - **Live progress:** per-sample logging now prints `sample N/50 | entailment | β₁ | chirality` so long evaluations show a visible heartbeat.
-   - **Latest snapshot (2025‑11‑18, adapter `claim-extractor-scifact-20251118T173307`):** schema 100%, citation 96%, mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%. Topology logging (from `logic/betti.py` + `metrics/chirality.py`) reported β₁=0 across 50 samples with mean chirality 0.561 and mean Fisher-Rao distance 16.75. Full artifacts live at `runs/thinker_eval/scifact_dev_eval.jsonl`.
+   - **Baseline snapshot (2025‑11‑18, adapter `claim-extractor-scifact-20251118T173307`):** schema 100%, citation 96%, mean entailment 0.448 (38% ≥0.75), mean similarity 0.25 (20% ≥0.70), overall semantic pass 38%. Topology logging (from `logic/betti.py` + `metrics/chirality.py`) reported β₁=0 across 50 samples with mean chirality 0.561 and mean Fisher-Rao distance 16.75. Full artifacts live at `runs/thinker_eval/scifact_dev_eval.jsonl`.
+   - **⚠️ Training Iteration (2025-11-18, adapter `claim-extractor-scifact-20251118T220454`, weight=2.0):** FAILED to eliminate citation hallucinations. Schema 98% (-2%), citation 96% (unchanged), mean entailment 0.395 (-0.053, WORSE), overall pass 34% (-4%, WORSE). Antagonist detected 2 HIGH severity CITATION_INVALID cases (claims 133, 179) where model fabricated document IDs not in source corpus. Training completed successfully (98.7% loss reduction) but penalty weight was insufficient to teach citation grounding.
+   - **🔬 Current Configuration (2025-11-18):** Citation validity penalty weight increased from 2.0 to 5.0 (6x loss multiplier vs previous 3x). Next training run expected to eliminate citation hallucinations by making invalid citations significantly more expensive during training. See commit `e500bb2` for full analysis and rationale.
    - **Need a 5-sample smoke test?** Use the lightweight config from [`docs/LIMITED_RUN.md`](docs/LIMITED_RUN.md):
      ```bash
      python -m thinker.cli eval --config thinker/configs/pipeline_scifact_limited.yaml --skip-validation
@@ -102,11 +104,24 @@ Git-tracked paths include `README.md`, `docs/`, `docs/CNS_PROPOSAL.md`, `cns2/`,
    ```
    Consumes the latest evaluation JSONL (or `--input` override) and emits structured flags under `<input>_antagonist_flags.jsonl` using the chirality/entailment heuristics defined in `cns3/20251118_antagonist_mvp_rfc.md`. Thresholds (`--chirality-threshold`, etc.) are tweakable per run.
 
+   **Status:** ✅ MVP COMPLETE (2025-11-18)
+   - 92% flagging rate (46/50 samples)
+   - Correctly identified 2 HIGH severity citation hallucinations
+   - 22 unit tests passing
+   - Complete CLI integration and documentation
+
    **Issue types detected:**
    - `CITATION_INVALID` (HIGH severity): Model cited documents not in source corpus - **citation hallucination**
-   - `POLARITY_CONTRADICTION`: Chirality ≥0.55 indicates structural tension
-   - `POLARITY_CONFLICT`: Same claim receives both support and refutation
-   - `WEAK_ENTAILMENT`: Entailment score <0.5 indicates poor evidence grounding
+   - `POLARITY_CONTRADICTION` (MEDIUM): Chirality ≥0.55 indicates structural tension
+   - `POLARITY_CONFLICT` (HIGH): Same claim receives both support and refutation
+   - `WEAK_ENTAILMENT` (MEDIUM): Entailment score <0.5 indicates poor evidence grounding
+
+   **Analysis Results (2025-11-18 baseline):**
+   - Total flags: 46/50 (92%)
+   - HIGH severity: 2 (both CITATION_INVALID - claims 133, 179)
+   - MEDIUM severity: 44 (84.8% POLARITY_CONTRADICTION, 60.9% WEAK_ENTAILMENT)
+   - β₁: 0 across all samples (pre-Antagonist graphs are acyclic)
+   - Mean chirality: 0.561, mean Fisher-Rao distance: 16.75
 
    See `docs/20251118/antagonist-mvp-review/` for comprehensive analysis and manual review of HIGH severity cases.
 7. **GPU options (why HF/PEFT exists)**
@@ -206,18 +221,30 @@ Dependencies (automatically installed):
 - `sentence-transformers` (already present)
 - `transformers` (added for DeBERTa-v3)
 
-### Current Status (as of 2025-11-11)
+### Current Status (as of 2025-11-18)
 
-Semantic validation identified **critical issues** that exact-match hid:
-- **Schema compliance: 0%** - Model not producing CLAIM[c*] format consistently
-- **Citation accuracy: 3.3%** - Model not properly citing evidence documents
+**✅ Progress Made:**
+- Schema compliance: **0% → 100%** (FIXED via prompt engineering)
+- Citation accuracy: **3.3% → 96%** (MAJOR improvement)
+- Antagonist MVP: **COMPLETE** (92% flagging rate, 2 HIGH severity cases identified)
+- Topology instrumentation: **WORKING** (β₁, chirality, Fisher-Rao distance)
+- 4-stage semantic validation: **OPERATIONAL**
 
-These are **training prompt/data issues**, not evaluation issues. Next steps:
-1. Fix training prompts to enforce CLAIM[c*] schema
-2. Add explicit citation training examples
-3. Re-train and re-evaluate
+**⚠️ Critical Issues Identified:**
+- **Citation Hallucination (P0):** Model fabricates document IDs not in source corpus (claims 133, 179)
+  - Training with `citation_validity_weight=2.0` FAILED to eliminate these issues
+  - Weight increased to `5.0` (6x loss multiplier) to force stronger citation grounding
+- **Weak Semantic Grounding:** Mean entailment 0.448 (target ≥0.75), overall pass 38% (target ≥60%)
+  - 60.9% of Antagonist flags have entailment <0.5
+  - Model learned citation **format** but not evidence **grounding**
 
-See `ISSUE_semantic_validation_emergency_fix.md` for full diagnostic report.
+**🔬 Next Training Run:**
+- Configuration: `citation_validity_weight=5.0` (commit `e500bb2`)
+- Expected outcome: Eliminate HIGH severity CITATION_INVALID flags
+- Success criteria: Mean entailment ≥0.50, overall pass ≥45%
+- If weight=5.0 fails: Options include weight=10.0, negative examples, two-stage training
+
+**📊 Full Analysis:** See `docs/20251118/antagonist-mvp-review/` for comprehensive review, flag analysis, and manual HIGH severity case studies.
 
 ## Research Tracks & Status
 
