@@ -1,6 +1,12 @@
 {
   "runs": [
     {
+      "manifest_path": "artifacts/train/train_20251119T042505.873459Z/manifest.json",
+      "run_id": "train_20251119T042505.873459Z",
+      "stage": "train",
+      "timestamp": "2025-11-19T04:25:05.873459Z"
+    },
+    {
       "manifest_path": "artifacts/eval/eval_20251119T023617.442984Z/manifest.json",
       "run_id": "eval_20251119T023617.442984Z",
       "stage": "eval",
